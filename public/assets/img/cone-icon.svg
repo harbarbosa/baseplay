@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cone">
+  <defs>
+    <linearGradient id="coneBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8a3d"/>
+      <stop offset="1" stop-color="#e45b14"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 6L8 56h48L32 6z" fill="url(#coneBase)" stroke="#8f2e00" stroke-width="2"/>
+  <path d="M18 40h28l3 6H15l3-6z" fill="#ffffff"/>
+  <path d="M24 26h16l2 5H22l2-5z" fill="#ffffff"/>
+  <ellipse cx="32" cy="57" rx="25" ry="4" fill="#a33c06"/>
+</svg>
+

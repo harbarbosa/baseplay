@@ -1,0 +1,19 @@
+# CodeIgniter / PHP
+/vendor/
+/.env
+/writable/cache/*
+/writable/session/*
+/writable/logs/*
+/writable/debugbar/*
+/writable/uploads/*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temp / local artifacts
+/_ci_tmp/
+/tmp-tailadmin-main.zip
+/tailadmin-free-tailwind-dashboard-template-main/

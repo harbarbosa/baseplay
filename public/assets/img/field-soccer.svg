@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Campo de futebol">
+  <defs>
+    <pattern id="grass" patternUnits="userSpaceOnUse" width="80" height="80">
+      <rect width="80" height="80" fill="#1f9b59"/>
+      <rect width="40" height="80" fill="#229f5f"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#grass)"/>
+  <rect x="40" y="40" width="1520" height="920" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <line x1="800" y1="40" x2="800" y2="960" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="800" cy="500" r="120" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="800" cy="500" r="5" fill="#ffffff"/>
+
+  <rect x="40" y="280" width="220" height="440" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <rect x="40" y="380" width="80" height="240" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="260" cy="500" r="5" fill="#ffffff"/>
+  <path d="M260 380 A120 120 0 0 1 260 620" fill="none" stroke="#ffffff" stroke-width="8"/>
+
+  <rect x="1340" y="280" width="220" height="440" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <rect x="1480" y="380" width="80" height="240" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="1340" cy="500" r="5" fill="#ffffff"/>
+  <path d="M1340 380 A120 120 0 0 0 1340 620" fill="none" stroke="#ffffff" stroke-width="8"/>
+</svg>
+

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Meio campo vertical com gol em cima">
+  <defs>
+    <pattern id="grass-half-vu" patternUnits="userSpaceOnUse" width="80" height="80">
+      <rect width="80" height="80" fill="#1f9b59"/>
+      <rect width="40" height="80" fill="#229f5f"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#grass-half-vu)"/>
+  <rect x="40" y="40" width="1520" height="920" fill="none" stroke="#ffffff" stroke-width="8"/>
+
+  <!-- Area do gol em cima -->
+  <rect x="580" y="40" width="440" height="220" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <rect x="680" y="40" width="240" height="80" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="800" cy="260" r="5" fill="#ffffff"/>
+  <path d="M680 260 A120 120 0 0 0 920 260" fill="none" stroke="#ffffff" stroke-width="8"/>
+
+  <!-- Corte do meio campo embaixo -->
+  <line x1="40" y1="960" x2="1560" y2="960" stroke="#ffffff" stroke-width="8"/>
+  <path d="M680 960 A120 120 0 0 1 920 960" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="800" cy="960" r="5" fill="#ffffff"/>
+</svg>

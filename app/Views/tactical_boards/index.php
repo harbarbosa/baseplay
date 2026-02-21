@@ -1,4 +1,4 @@
-﻿<?= $this->extend('layouts/base') ?>
+<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <div class="card">

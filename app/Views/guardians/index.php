@@ -4,11 +4,11 @@
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-            <h1>ResponsÃ¡veis</h1>
-            <p style="color:var(--muted);">Cadastro de responsÃ¡veis.</p>
+            <h1>Responsáveis</h1>
+            <p style="color:var(--muted);">Cadastro de responsáveis.</p>
         </div>
         <?php if (has_permission('guardians.create')): ?>
-            <a href="<?= base_url('/guardians/create') ?>" class="button">Novo responsÃ¡vel</a>
+            <a href="<?= base_url('/guardians/create') ?>" class="button">Novo responsável</a>
         <?php endif; ?>
     </div>
 
@@ -31,7 +31,7 @@
                 <th>Telefone</th>
                 <th>E-mail</th>
                 <th>Status</th>
-                <th>AÃ§Ãµes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>

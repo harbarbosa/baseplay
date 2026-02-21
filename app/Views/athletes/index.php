@@ -5,7 +5,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
             <h1>Atletas</h1>
-            <p style="color:var(--muted);">Cadastro e gestÃƒÂ£o de atletas.</p>
+            <p style="color:var(--muted);">Cadastro e gestão de atletas.</p>
         </div>
         <?php if (has_permission('athletes.create')): ?>
             <a href="<?= base_url('/athletes/create') ?>" class="button">Novo atleta</a>
@@ -58,7 +58,7 @@
                     <th>Equipe</th>
                     <th>Categoria</th>
                     <th>Status</th>
-                    <th>AÃƒÂ§ÃƒÂµes</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>

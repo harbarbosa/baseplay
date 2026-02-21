@@ -24,12 +24,12 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Titulo</th>
+                <th>Título</th>
                 <th>Tipo</th>
                 <th>Severidade</th>
                 <th>Criado em</th>
                 <th>Status</th>
-                <th>Acoes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>

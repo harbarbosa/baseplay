@@ -88,7 +88,7 @@
     <form method="post" action="<?= base_url('/documents/export-pending') ?>" style="margin-top:16px;">
         <?= csrf_field() ?>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
-            <button type="submit" class="bp-btn-secondary">Exportar pendencias (CSV)</button>
+            <button type="submit" class="bp-btn-secondary">Exportar pendências (CSV)</button>
             <span style="color:var(--muted); font-size:12px;">Selecione documentos para exportar.</span>
         </div>
 
@@ -114,7 +114,7 @@
                         <th>Equipe</th>
                         <th>Validade</th>
                         <th>Status</th>
-                        <th>Acoes</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>

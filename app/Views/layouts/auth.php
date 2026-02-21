@@ -16,7 +16,7 @@
             <img src="<?= base_url('assets/images/baseplay-logo.png') ?>" alt="BasePlay" class="brand-logo">
             <div>
                 <strong>BasePlay</strong>
-                <span>MicroSaaS para gestao esportiva</span>
+                <span>MicroSaaS para gestão esportiva</span>
             </div>
         </div>
         <?= $this->include('partials/flash') ?>

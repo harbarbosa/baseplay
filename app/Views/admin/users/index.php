@@ -3,8 +3,8 @@
 <?= $this->section('content') ?>
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>UsuÃ¡rios</h1>
-        <a href="<?= base_url('/admin/users/create') ?>" class="button">Novo usuÃ¡rio</a>
+        <h1>Usuários</h1>
+        <a href="<?= base_url('/admin/users/create') ?>" class="button">Novo usuário</a>
     </div>
     <table class="table">
         <thead>

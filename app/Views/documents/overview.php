@@ -5,7 +5,7 @@
     <div class="bp-card-body" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
         <div>
             <h1 style="margin:0 0 6px;">Documentos - Visao geral</h1>
-            <p style="margin:0; color:var(--muted);">Pendencias, conformidade e acoes rapidas em um unico lugar.</p>
+            <p style="margin:0; color:var(--muted);">Pendências, conformidade e ações rapidas em um unico lugar.</p>
         </div>
         <?php if (has_permission('documents.upload')): ?>
             <a href="<?= base_url('/documents/create') ?>" class="bp-btn-primary">Novo documento</a>
@@ -63,11 +63,11 @@
                 <div style="font-size:26px; font-weight:700; color:var(--primary);"><?= esc($cards['expiring'] ?? 0) ?></div>
             </div>
             <div class="bp-card" style="padding:14px;">
-                <div style="color:var(--muted); font-size:12px;">Faltando obrigatorio</div>
+                <div style="color:var(--muted); font-size:12px;">Faltando obrigatório</div>
                 <div style="font-size:26px; font-weight:700; color:var(--primary);"><?= esc($cards['missing_required'] ?? 0) ?></div>
             </div>
             <div class="bp-card" style="padding:14px;">
-                <div style="color:var(--muted); font-size:12px;">Aguardando aprovacao</div>
+                <div style="color:var(--muted); font-size:12px;">Aguardando aprovação</div>
                 <div style="font-size:26px; font-weight:700; color:var(--primary);"><?= esc($cards['awaiting_approval'] ?? 0) ?></div>
             </div>
         </div>
@@ -117,8 +117,8 @@
     <div class="bp-card-body">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
             <div>
-                <h2 style="margin:0;">Pendencias criticas</h2>
-                <div style="color:var(--muted); font-size:12px;">Top 15 com vencimento ou pendencias obrigatorias.</div>
+                <h2 style="margin:0;">Pendências criticas</h2>
+                <div style="color:var(--muted); font-size:12px;">Top 15 com vencimento ou pendências obrigatorias.</div>
             </div>
             <a href="<?= base_url('/documents') ?>" class="bp-btn-secondary">Ver documentos</a>
         </div>
@@ -131,7 +131,7 @@
                         <th>Tipo doc</th>
                         <th>Status</th>
                         <th>Vencimento</th>
-                        <th>Acao</th>
+                        <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -4,8 +4,8 @@
 <div class="bp-card">
     <div class="bp-card-header" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
         <div>
-            <h1 style="margin:0;">Papeis</h1>
-            <div class="bp-text-muted">Gerencie papeis e suas permissoes.</div>
+            <h1 style="margin:0;">Papéis</h1>
+            <div class="bp-text-muted">Gerencie papéis e suas permissoes.</div>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <a href="<?= base_url('/admin/roles/create') ?>" class="bp-btn-primary">Novo papel</a>
@@ -17,8 +17,8 @@
                 <tr>
                     <th>ID</th>
                     <th>Nome</th>
-                    <th>Descricao</th>
-                    <th style="width:160px;">Acoes</th>
+                    <th>Descrição</th>
+                    <th style="width:160px;">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,7 +42,7 @@
                                 </form>
                             </div>
                         <?php else: ?>
-                            <span class="bp-text-muted">Sem acoes</span>
+                            <span class="bp-text-muted">Sem ações</span>
                         <?php endif; ?>
                     </td>
                 </tr>

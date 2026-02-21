@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 <h1 class="bp-auth-title">Entrar no BasePlay</h1>
-<p class="bp-auth-subtitle">Gestao de equipes esportivas de base.</p>
+<p class="bp-auth-subtitle">Gestão de equipes esportivas de base.</p>
 <form method="post" action="<?= base_url('login') ?>" autocomplete="off" class="bp-form">
     <?= csrf_field() ?>
     <div class="bp-form-group">

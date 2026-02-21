@@ -1,4 +1,4 @@
-﻿<?= $this->extend('layouts/base') ?>
+<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <?php
@@ -24,7 +24,7 @@ if (!is_array($decoded)) {
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <?php if ($canEdit): ?>
-                <button type="button" id="presentation-toggle" class="secondary">ApresentaÃ§Ã£o</button>
+                <button type="button" id="presentation-toggle" class="secondary">Apresentação</button>
                 <button type="button" id="export-image" class="secondary">Exportar imagem</button>
                 <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/duplicate') ?>" style="display:inline;">
                     <?= csrf_field() ?>
@@ -99,7 +99,7 @@ if (!is_array($decoded)) {
                     </div>
                 </div>
             </div>
-            <div id="tactical-field" class="tactical-field" aria-label="Campo tatico"></div>
+            <div id="tactical-field" class="tactical-field" aria-label="Campo tático"></div>
             <div class="viewer-controls">
                 <div class="viewer-nav">
                     <button type="button" id="viewer-prev" class="viewer-nav-btn" aria-label="Etapa anterior">&larr;</button>
@@ -148,7 +148,7 @@ if (!is_array($decoded)) {
             </div>
         </div>
         <div class="tactical-item-modal-footer">
-            <button type="button" id="m-save-item" <?= !$canEdit ? 'disabled' : '' ?>>Salvar alteracao</button>
+            <button type="button" id="m-save-item" <?= !$canEdit ? 'disabled' : '' ?>>Salvar alteração</button>
             <button type="button" id="m-remove-selected" <?= !$canEdit ? 'disabled' : '' ?>>Remover</button>
             <button type="button" id="m-reset-board" <?= !$canEdit ? 'disabled' : '' ?>>Resetar</button>
         </div>
@@ -379,7 +379,7 @@ if (!is_array($decoded)) {
 
         if (item.type === 'player') el.textContent = item.number ? String(item.number) : '';
         else if (item.type === 'cone') el.innerHTML = `<img src="${coneIconUrl}" alt="Cone">`;
-        else if (item.type === 'ball') el.innerHTML = 'âš½';
+        else if (item.type === 'ball') el.innerHTML = '⚽';
         else if (item.type === 'arrow') el.innerHTML = '<span class="arrow-shaft"></span><span class="arrow-head"></span>';
         else if (item.type === 'goal') el.innerHTML = '<span class="goal-net"></span>';
     }

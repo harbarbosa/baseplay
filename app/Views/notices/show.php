@@ -8,10 +8,10 @@
             <div style="color:var(--muted);">
                 <?= esc($notice['team_name'] ?? 'Geral') ?>
                 <?php if (!empty($notice['category_name'])): ?>
-                    â¢ <?= esc($notice['category_name']) ?>
+                    • <?= esc($notice['category_name']) ?>
                 <?php endif; ?>
-                â¢ <?= esc(ucfirst($notice['priority'])) ?>
-                â¢ <?= esc(enum_label($notice['status'], 'status')) ?>
+                • <?= esc(ucfirst($notice['priority'])) ?>
+                • <?= esc(enum_label($notice['status'], 'status')) ?>
             </div>
         </div>
         <div>
@@ -41,7 +41,7 @@
             <h3>Leituras</h3>
             <ul style="padding-left:18px;">
                 <?php foreach ($readers as $reader): ?>
-                    <li><?= esc($reader['user_name'] ?? 'UsuÃ¡rio') ?> - <?= esc(format_datetime_br($reader['read_at'])) ?></li>
+                    <li><?= esc($reader['user_name'] ?? 'Usuário') ?> - <?= esc(format_datetime_br($reader['read_at'])) ?></li>
                 <?php endforeach; ?>
             </ul>
         </div>
@@ -63,7 +63,7 @@
             <ul style="padding-left:18px;">
                 <?php foreach ($replies as $reply): ?>
                     <li>
-                        <strong><?= esc($reply['user_name'] ?? 'UsuÃ¡rio') ?>:</strong>
+                        <strong><?= esc($reply['user_name'] ?? 'Usuário') ?>:</strong>
                         <?= esc($reply['message']) ?>
                         <span style="color:var(--muted);">(<?= esc(format_datetime_br($reply['created_at'])) ?>)</span>
                     </li>

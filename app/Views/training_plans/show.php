@@ -45,10 +45,10 @@ $blockTypeLabels = [
                 <td><?= esc($block['duration_min']) ?> min</td>
                 <td><?= esc($block['exercise_id'] ?? '-') ?></td>
                 <td>
-                    <?php if (!empty($block['media_url'])): ?>
-                        <a href="<?= esc($block['media_url']) ?>" target="_blank" rel="noopener">Abrir URL</a>
-                    <?php elseif (!empty($block['media_path'])): ?>
-                        <a href="<?= base_url('/training-plan-blocks/' . $block['id'] . '/media') ?>">Baixar arquivo</a>
+                    <?php if (!empty($block['média_url'])): ?>
+                        <a href="<?= esc($block['média_url']) ?>" target="_blank" rel="noopener">Abrir URL</a>
+                    <?php elseif (!empty($block['média_path'])): ?>
+                        <a href="<?= base_url('/training-plan-blocks/' . $block['id'] . '/média') ?>">Baixar arquivo</a>
                     <?php else: ?>
                         -
                     <?php endif; ?>
@@ -85,8 +85,8 @@ $blockTypeLabels = [
                 </select>
                 <input type="number" name="order_index" placeholder="#">
                 <input type="text" name="instructions" placeholder="Instruções">
-                <input type="url" name="media_url" placeholder="URL do vídeo (opcional)" style="min-width:260px;">
-                <input type="file" name="media_file" accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.webm,.mov">
+                <input type="url" name="média_url" placeholder="URL do vídeo (opcional)" style="min-width:260px;">
+                <input type="file" name="média_file" accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.webm,.mov">
                 <button type="submit">Adicionar</button>
             </div>
             <small style="display:block; margin-top:8px; color:var(--muted);">

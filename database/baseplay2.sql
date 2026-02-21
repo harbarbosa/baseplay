@@ -1,0 +1,2134 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.2
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost:3306
+-- Generation Time: Feb 21, 2026 at 04:44 PM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.26
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `baseplay`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `athletes`
+--
+
+CREATE TABLE `athletes` (
+  `id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `first_name` varchar(80) COLLATE utf8mb4_general_ci NOT NULL,
+  `last_name` varchar(120) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `birth_date` date NOT NULL,
+  `document_id` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `position` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `dominant_foot` enum('right','left','both') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `height_cm` int DEFAULT NULL,
+  `weight_kg` decimal(5,2) DEFAULT NULL,
+  `medical_notes` text COLLATE utf8mb4_general_ci,
+  `internal_notes` text COLLATE utf8mb4_general_ci,
+  `status` enum('active','inactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `athletes`
+--
+
+INSERT INTO `athletes` (`id`, `category_id`, `first_name`, `last_name`, `birth_date`, `document_id`, `position`, `dominant_foot`, `height_cm`, `weight_kg`, `medical_notes`, `internal_notes`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Atleta', 'Sub-10', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(2, 2, 'Atleta', 'Sub-11', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(3, 3, 'Atleta', 'Sub-12', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(4, 4, 'Atleta', 'Sub-13', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(5, 5, 'Atleta', 'Sub-14', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(6, 6, 'Atleta', 'Sub-15', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(7, 7, 'Atleta', 'Sub-16', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(8, 8, 'Atleta', 'Sub-17', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(9, 9, 'Atleta', 'Sub-18', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(10, 10, 'Atleta', 'Sub-19', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(11, 11, 'Atleta', 'Sub-20', '2012-01-01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `athlete_guardians`
+--
+
+CREATE TABLE `athlete_guardians` (
+  `id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED NOT NULL,
+  `guardian_id` bigint UNSIGNED NOT NULL,
+  `is_primary` tinyint NOT NULL DEFAULT '0',
+  `notes` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `athlete_guardians`
+--
+
+INSERT INTO `athlete_guardians` (`id`, `athlete_id`, `guardian_id`, `is_primary`, `notes`, `created_at`) VALUES
+(1, 1, 1, 1, NULL, '2026-02-20 19:30:53'),
+(2, 1, 2, 0, NULL, '2026-02-20 19:30:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendance`
+--
+
+CREATE TABLE `attendance` (
+  `id` bigint UNSIGNED NOT NULL,
+  `event_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED NOT NULL,
+  `status` enum('present','late','absent','justified') COLLATE utf8mb4_general_ci NOT NULL,
+  `checkin_time` datetime DEFAULT NULL,
+  `notes` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `attendance`
+--
+
+INSERT INTO `attendance` (`id`, `event_id`, `athlete_id`, `status`, `checkin_time`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'present', '2026-02-20 19:30:53', NULL, '2026-02-20 19:30:53', '2026-02-20 19:30:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_logs`
+--
+
+CREATE TABLE `audit_logs` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `action` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `metadata` text COLLATE utf8mb4_general_ci,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `ip_address`, `user_agent`, `metadata`, `created_at`) VALUES
+(1, 1, 'login', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', NULL, '2026-02-20 19:32:31'),
+(2, 1, 'tactical_board_saved', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":1,\"state_id\":2}', '2026-02-20 20:36:39'),
+(3, 1, 'tactical_board_saved', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":1,\"state_id\":3}', '2026-02-20 20:38:29'),
+(4, 1, 'tactical_board_saved', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":1,\"state_id\":4}', '2026-02-20 20:40:27'),
+(5, 1, 'tactical_board_saved', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":1,\"state_id\":5}', '2026-02-20 20:58:26'),
+(6, 1, 'tactical_board_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":2}', '2026-02-20 21:03:17'),
+(7, 1, 'training_plan_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"training_plan_id\":1}', '2026-02-20 22:03:26'),
+(8, 1, 'exercise_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"exercise_id\":1}', '2026-02-20 22:03:49'),
+(9, 1, 'team_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 00:52:13'),
+(10, 1, 'team_admin_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"user_id\":2,\"team_id\":2}', '2026-02-21 00:52:13'),
+(11, 2, 'login', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', NULL, '2026-02-21 00:53:01'),
+(12, 2, 'category_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"category_id\":12}', '2026-02-21 00:55:22'),
+(13, 1, 'team_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 01:04:29'),
+(14, 1, 'team_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 01:04:58'),
+(15, 1, 'team_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 01:05:40'),
+(16, 1, 'team_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 01:09:53'),
+(17, 1, 'team_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 01:32:31'),
+(18, 1, 'team_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":2}', '2026-02-21 01:53:33'),
+(19, 1, 'team_deleted', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"team_id\":1}', '2026-02-21 01:58:32'),
+(20, 1, 'training_session_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"training_session_id\":1}', '2026-02-21 04:34:26'),
+(21, 1, 'training_session_updated', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"training_session_id\":1}', '2026-02-21 04:50:25'),
+(22, 1, 'tactical_board_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":3}', '2026-02-21 05:07:43'),
+(23, 1, 'tactical_board_deleted', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":3}', '2026-02-21 05:10:35'),
+(24, 1, 'tactical_board_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":4}', '2026-02-21 05:10:55'),
+(25, 1, 'tactical_board_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":5}', '2026-02-21 05:11:44'),
+(26, 1, 'login', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', NULL, '2026-02-21 15:58:36'),
+(27, 1, 'tactical_board_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":6}', '2026-02-21 15:59:25'),
+(28, 1, 'tactical_board_created', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '{\"tactical_board_id\":7}', '2026-02-21 16:00:23');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `categories`
+--
+
+CREATE TABLE `categories` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(80) COLLATE utf8mb4_general_ci NOT NULL,
+  `year_from` int DEFAULT NULL,
+  `year_to` int DEFAULT NULL,
+  `gender` enum('mixed','male','female') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'mixed',
+  `training_days` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('active','inactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `team_id`, `name`, `year_from`, `year_to`, `gender`, `training_days`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Sub-10', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(2, 1, 'Sub-11', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(3, 1, 'Sub-12', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(4, 1, 'Sub-13', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(5, 1, 'Sub-14', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(6, 1, 'Sub-15', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(7, 1, 'Sub-16', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(8, 1, 'Sub-17', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(9, 1, 'Sub-18', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(10, 1, 'Sub-19', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(11, 1, 'Sub-20', NULL, NULL, 'mixed', NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(12, 2, 'SUB10', 2015, 2015, 'male', '', 'active', '2026-02-21 00:55:22', '2026-02-21 00:55:22', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category_required_documents`
+--
+
+CREATE TABLE `category_required_documents` (
+  `id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `document_type_id` bigint UNSIGNED NOT NULL,
+  `is_required` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `documents`
+--
+
+CREATE TABLE `documents` (
+  `id` bigint UNSIGNED NOT NULL,
+  `document_type_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED DEFAULT NULL,
+  `team_id` bigint UNSIGNED DEFAULT NULL,
+  `guardian_id` bigint UNSIGNED DEFAULT NULL,
+  `file_path` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `original_name` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `mime_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `file_size` int DEFAULT NULL,
+  `issued_at` date DEFAULT NULL,
+  `expires_at` date DEFAULT NULL,
+  `uploaded_by` bigint UNSIGNED DEFAULT NULL,
+  `notes` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('active','expired','archived') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `documents`
+--
+
+INSERT INTO `documents` (`id`, `document_type_id`, `athlete_id`, `team_id`, `guardian_id`, `file_path`, `original_name`, `mime_type`, `file_size`, `issued_at`, `expires_at`, `uploaded_by`, `notes`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, NULL, NULL, 'documents/sample.pdf', 'documento-exemplo.pdf', 'application/pdf', 12345, '2026-02-20', NULL, 1, 'Documento de exemplo (arquivo não existe).', 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `document_alerts`
+--
+
+CREATE TABLE `document_alerts` (
+  `id` bigint UNSIGNED NOT NULL,
+  `document_id` bigint UNSIGNED NOT NULL,
+  `alert_date` date NOT NULL,
+  `sent_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `document_types`
+--
+
+CREATE TABLE `document_types` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(80) COLLATE utf8mb4_general_ci NOT NULL,
+  `requires_expiration` tinyint NOT NULL DEFAULT '0',
+  `default_valid_days` int DEFAULT NULL,
+  `status` enum('active','inactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `document_types`
+--
+
+INSERT INTO `document_types` (`id`, `name`, `requires_expiration`, `default_valid_days`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'RG', 0, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53'),
+(2, 'Certidão de nascimento', 0, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53'),
+(3, 'Atestado médico', 1, 365, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53'),
+(4, 'Autorização de viagem', 0, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53'),
+(5, 'Termo de imagem', 0, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
+
+CREATE TABLE `events` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `type` enum('TRAINING','MATCH','MEETING','EVALUATION','TRAVEL') COLLATE utf8mb4_general_ci NOT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  `location` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('scheduled','cancelled','completed') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'scheduled',
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `team_id`, `category_id`, `type`, `title`, `description`, `start_datetime`, `end_datetime`, `location`, `status`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'TRAINING', 'Treino Técnico', 'Treino de fundamentos e posse de bola.', '2026-02-21 18:00:00', '2026-02-21 19:30:00', 'Campo 1', 'scheduled', NULL, '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(2, 1, 1, 'TRAINING', 'Treino Tático', 'Treino de organização defensiva.', '2026-02-23 18:00:00', '2026-02-23 19:30:00', 'Campo 2', 'scheduled', NULL, '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(3, 1, 1, 'MATCH', 'Jogo Amistoso', 'Partida amistosa local.', '2026-02-25 09:00:00', '2026-02-25 11:00:00', 'Estádio Municipal', 'scheduled', NULL, '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `event_participants`
+--
+
+CREATE TABLE `event_participants` (
+  `id` bigint UNSIGNED NOT NULL,
+  `event_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED NOT NULL,
+  `invitation_status` enum('invited','confirmed','declined','pending') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'invited',
+  `notes` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `event_participants`
+--
+
+INSERT INTO `event_participants` (`id`, `event_id`, `athlete_id`, `invitation_status`, `notes`, `created_at`) VALUES
+(1, 1, 1, 'invited', NULL, '2026-02-20 19:30:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exercises`
+--
+
+CREATE TABLE `exercises` (
+  `id` bigint UNSIGNED NOT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `objective` varchar(80) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `age_group` enum('u10','u11','u12','u13','u14','u15','u16','u17','u18','u19','u20','all') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'all',
+  `intensity` enum('low','medium','high') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'medium',
+  `duration_min` int DEFAULT NULL,
+  `players_min` int DEFAULT NULL,
+  `players_max` int DEFAULT NULL,
+  `materials` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `video_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('active','inactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exercises`
+--
+
+INSERT INTO `exercises` (`id`, `title`, `objective`, `description`, `age_group`, `intensity`, `duration_min`, `players_min`, `players_max`, `materials`, `video_url`, `status`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'TESTE', 'TESTE', 'ASDASD', 'all', 'medium', NULL, NULL, NULL, '', '', 'active', 1, '2026-02-20 22:03:49', '2026-02-20 22:03:49', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exercise_tags`
+--
+
+CREATE TABLE `exercise_tags` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exercise_tag_links`
+--
+
+CREATE TABLE `exercise_tag_links` (
+  `id` bigint UNSIGNED NOT NULL,
+  `exercise_id` bigint UNSIGNED NOT NULL,
+  `tag_id` bigint UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `guardians`
+--
+
+CREATE TABLE `guardians` (
+  `id` bigint UNSIGNED NOT NULL,
+  `full_name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `relation_type` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `document_id` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `address` text COLLATE utf8mb4_general_ci,
+  `status` enum('active','inactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `guardians`
+--
+
+INSERT INTO `guardians` (`id`, `full_name`, `phone`, `email`, `relation_type`, `document_id`, `address`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'ResponsÃ¡vel Principal', '11 99999-0001', 'responsavel1@baseplay.local', 'Pai', NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(2, 'ResponsÃ¡vel SecundÃ¡rio', '11 99999-0002', 'responsavel2@baseplay.local', 'Mï¿½fÂ¯ï¿½,Â¿ï¿½,Â½e', NULL, NULL, 'active', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `matches`
+--
+
+CREATE TABLE `matches` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `event_id` bigint UNSIGNED DEFAULT NULL,
+  `opponent_name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `competition_name` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `round_name` varchar(80) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `match_date` date NOT NULL,
+  `start_time` time DEFAULT NULL,
+  `location` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `home_away` enum('home','away','neutral') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'neutral',
+  `status` enum('scheduled','completed','cancelled') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'scheduled',
+  `score_for` int DEFAULT NULL,
+  `score_against` int DEFAULT NULL,
+  `created_by` bigint UNSIGNED NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `match_attachments`
+--
+
+CREATE TABLE `match_attachments` (
+  `id` bigint UNSIGNED NOT NULL,
+  `match_id` bigint UNSIGNED NOT NULL,
+  `file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `original_name` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `type` enum('file','link') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'file',
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `match_callups`
+--
+
+CREATE TABLE `match_callups` (
+  `id` bigint UNSIGNED NOT NULL,
+  `match_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED NOT NULL,
+  `callup_status` enum('invited','confirmed','declined','pending') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'invited',
+  `is_starting` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `match_events`
+--
+
+CREATE TABLE `match_events` (
+  `id` bigint UNSIGNED NOT NULL,
+  `match_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED DEFAULT NULL,
+  `event_type` enum('goal','assist','yellow_card','red_card','sub_in','sub_out','injury','other') COLLATE utf8mb4_general_ci NOT NULL,
+  `minute` int DEFAULT NULL,
+  `related_athlete_id` bigint UNSIGNED DEFAULT NULL,
+  `notes` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `match_lineup_positions`
+--
+
+CREATE TABLE `match_lineup_positions` (
+  `id` bigint UNSIGNED NOT NULL,
+  `match_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED NOT NULL,
+  `lineup_role` enum('starting','bench') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'starting',
+  `position_code` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `shirt_number` int DEFAULT NULL,
+  `x` decimal(5,2) DEFAULT NULL,
+  `y` decimal(5,2) DEFAULT NULL,
+  `order_index` int NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `match_reports`
+--
+
+CREATE TABLE `match_reports` (
+  `id` bigint UNSIGNED NOT NULL,
+  `match_id` bigint UNSIGNED NOT NULL,
+  `summary` text COLLATE utf8mb4_general_ci,
+  `strengths` text COLLATE utf8mb4_general_ci,
+  `weaknesses` text COLLATE utf8mb4_general_ci,
+  `next_actions` text COLLATE utf8mb4_general_ci,
+  `coach_notes` text COLLATE utf8mb4_general_ci,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` bigint UNSIGNED NOT NULL,
+  `version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `class` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `group` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `namespace` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `time` int NOT NULL,
+  `batch` int UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES
+(1, '2026-02-08-000001', 'App\\Database\\Migrations\\CreateUsers', 'default', 'App', 1771615763, 1),
+(2, '2026-02-08-000002', 'App\\Database\\Migrations\\CreateRoles', 'default', 'App', 1771615763, 1),
+(3, '2026-02-08-000003', 'App\\Database\\Migrations\\CreatePermissions', 'default', 'App', 1771615763, 1),
+(4, '2026-02-08-000004', 'App\\Database\\Migrations\\CreateRolePermissions', 'default', 'App', 1771615763, 1),
+(5, '2026-02-08-000005', 'App\\Database\\Migrations\\CreateUserRoles', 'default', 'App', 1771615763, 1),
+(6, '2026-02-08-000006', 'App\\Database\\Migrations\\CreatePasswordResets', 'default', 'App', 1771615763, 1),
+(7, '2026-02-08-000007', 'App\\Database\\Migrations\\CreateAuditLogs', 'default', 'App', 1771615763, 1),
+(8, '2026-02-08-000008', 'App\\Database\\Migrations\\CreateTeams', 'default', 'App', 1771615763, 1),
+(9, '2026-02-08-000009', 'App\\Database\\Migrations\\CreateCategories', 'default', 'App', 1771615763, 1),
+(10, '2026-02-08-000010', 'App\\Database\\Migrations\\CreateUserTeamLinks', 'default', 'App', 1771615763, 1),
+(11, '2026-02-08-000011', 'App\\Database\\Migrations\\CreateAthletes', 'default', 'App', 1771615763, 1),
+(12, '2026-02-08-000012', 'App\\Database\\Migrations\\CreateGuardians', 'default', 'App', 1771615763, 1),
+(13, '2026-02-08-000013', 'App\\Database\\Migrations\\CreateAthleteGuardians', 'default', 'App', 1771615763, 1),
+(14, '2026-02-08-000014', 'App\\Database\\Migrations\\CreateEvents', 'default', 'App', 1771615763, 1),
+(15, '2026-02-08-000015', 'App\\Database\\Migrations\\CreateEventParticipants', 'default', 'App', 1771615763, 1),
+(16, '2026-02-08-000016', 'App\\Database\\Migrations\\CreateAttendance', 'default', 'App', 1771615763, 1),
+(17, '2026-02-08-000017', 'App\\Database\\Migrations\\CreateNotices', 'default', 'App', 1771615763, 1),
+(18, '2026-02-08-000018', 'App\\Database\\Migrations\\CreateNoticeReads', 'default', 'App', 1771615763, 1),
+(19, '2026-02-08-000019', 'App\\Database\\Migrations\\CreateNoticeReplies', 'default', 'App', 1771615764, 1),
+(20, '2026-02-08-000020', 'App\\Database\\Migrations\\CreateDocumentTypes', 'default', 'App', 1771615764, 1),
+(21, '2026-02-08-000021', 'App\\Database\\Migrations\\CreateDocuments', 'default', 'App', 1771615764, 1),
+(22, '2026-02-08-000022', 'App\\Database\\Migrations\\CreateDocumentAlerts', 'default', 'App', 1771615764, 1),
+(23, '2026-02-08-000023', 'App\\Database\\Migrations\\CreateExercises', 'default', 'App', 1771615764, 1),
+(24, '2026-02-08-000024', 'App\\Database\\Migrations\\CreateExerciseTags', 'default', 'App', 1771615764, 1),
+(25, '2026-02-08-000025', 'App\\Database\\Migrations\\CreateExerciseTagLinks', 'default', 'App', 1771615764, 1),
+(26, '2026-02-08-000026', 'App\\Database\\Migrations\\CreateTrainingPlans', 'default', 'App', 1771615764, 1),
+(27, '2026-02-08-000027', 'App\\Database\\Migrations\\CreateTrainingPlanBlocks', 'default', 'App', 1771615764, 1),
+(28, '2026-02-08-000028', 'App\\Database\\Migrations\\CreateTrainingSessions', 'default', 'App', 1771615764, 1),
+(29, '2026-02-08-000029', 'App\\Database\\Migrations\\CreateTrainingSessionAthletes', 'default', 'App', 1771615764, 1),
+(30, '2026-02-08-000030', 'App\\Database\\Migrations\\UpdateExerciseAgeGroupEnum', 'default', 'App', 1771615764, 1),
+(31, '2026-02-08-000031', 'App\\Database\\Migrations\\InsertSub10To20Categories', 'default', 'App', 1771615764, 1),
+(32, '2026-02-08-000032', 'App\\Database\\Migrations\\CreateMatches', 'default', 'App', 1771615764, 1),
+(33, '2026-02-08-000033', 'App\\Database\\Migrations\\CreateMatchCallups', 'default', 'App', 1771615764, 1),
+(34, '2026-02-08-000034', 'App\\Database\\Migrations\\CreateMatchLineupPositions', 'default', 'App', 1771615764, 1),
+(35, '2026-02-08-000035', 'App\\Database\\Migrations\\CreateMatchEvents', 'default', 'App', 1771615764, 1),
+(36, '2026-02-08-000036', 'App\\Database\\Migrations\\CreateMatchReports', 'default', 'App', 1771615764, 1),
+(37, '2026-02-08-000037', 'App\\Database\\Migrations\\CreateMatchAttachments', 'default', 'App', 1771615764, 1),
+(38, '2026-02-08-000038', 'App\\Database\\Migrations\\AlterMatchesIdToBigint', 'default', 'App', 1771615764, 1),
+(39, '2026-02-08-000039', 'App\\Database\\Migrations\\DedupeCategoriesByTeamName', 'default', 'App', 1771615764, 1),
+(40, '2026-02-15-000040', 'App\\Database\\Migrations\\AddLastActivityIndexes', 'default', 'App', 1771615764, 1),
+(41, '2026-02-15-000040', 'App\\Database\\Migrations\\CreateSystemAlerts', 'default', 'App', 1771615764, 1),
+(42, '2026-02-15-000041', 'App\\Database\\Migrations\\AddMediaToTrainingPlanBlocks', 'default', 'App', 1771615764, 1),
+(43, '2026-02-15-000042', 'App\\Database\\Migrations\\CreateTacticalBoards', 'default', 'App', 1771615764, 1),
+(44, '2026-02-15-000043', 'App\\Database\\Migrations\\CreateTacticalBoardStates', 'default', 'App', 1771615764, 1),
+(45, '2026-02-15-000044', 'App\\Database\\Migrations\\CreateTacticalSequences', 'default', 'App', 1771615764, 1),
+(46, '2026-02-15-000045', 'App\\Database\\Migrations\\CreateTacticalSequenceFrames', 'default', 'App', 1771615765, 1),
+(47, '2026-02-15-120000', 'App\\Database\\Migrations\\AddGuardianIdToDocuments', 'default', 'App', 1771615765, 1),
+(48, '2026-02-20-200000', 'App\\Database\\Migrations\\CreateCategoryRequiredDocuments', 'default', 'App', 1771624613, 2),
+(49, '2026-02-21-000046', 'App\\Database\\Migrations\\AddTeamBrandingFields', 'default', 'App', 1771635840, 3),
+(50, '2026-02-21-000047', 'App\\Database\\Migrations\\AddTeamIdToRoles', 'default', 'App', 1771650255, 4),
+(51, '2026-02-21-000048', 'App\\Database\\Migrations\\CreateTacticalBoardTemplates', 'default', 'App', 1771650255, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notices`
+--
+
+CREATE TABLE `notices` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED DEFAULT NULL,
+  `category_id` bigint UNSIGNED DEFAULT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `message` text COLLATE utf8mb4_general_ci NOT NULL,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `priority` enum('normal','important','urgent') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'normal',
+  `publish_at` datetime DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `status` enum('draft','published','archived') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'published',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notices`
+--
+
+INSERT INTO `notices` (`id`, `team_id`, `category_id`, `title`, `message`, `created_by`, `priority`, `publish_at`, `expires_at`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, NULL, NULL, 'Boas-vindas ao BASEPLAY', 'Bem-vindo ao módulo de comunicação. Este é um aviso geral para todos os perfis.', 1, 'normal', '2026-02-20 19:30:53', NULL, 'published', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(2, 1, 1, 'Reunião obrigatória - Comissão técnica', 'Aviso urgente: reunião com a comissão técnica amanhã às 19h.\nLocal: sala de reuniões.', 1, 'urgent', '2026-02-20 19:30:53', NULL, 'published', '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notice_reads`
+--
+
+CREATE TABLE `notice_reads` (
+  `id` bigint UNSIGNED NOT NULL,
+  `notice_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `read_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notice_reads`
+--
+
+INSERT INTO `notice_reads` (`id`, `notice_id`, `user_id`, `read_at`) VALUES
+(1, 1, 1, '2026-02-20 19:30:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notice_replies`
+--
+
+CREATE TABLE `notice_replies` (
+  `id` bigint UNSIGNED NOT NULL,
+  `notice_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `message` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `email` varchar(190) COLLATE utf8mb4_general_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permissions`
+--
+
+CREATE TABLE `permissions` (
+  `id` int UNSIGNED NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `permissions`
+--
+
+INSERT INTO `permissions` (`id`, `name`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'dashboard.view', 'Visualizar dashboards', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(2, 'admin.access', 'Acessar Ã¡rea administrativa', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(3, 'users.manage', 'Gerenciar usuÃ¡rios', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(4, 'roles.manage', 'Gerenciar papÃ©is e permissÃµes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(5, 'settings.manage', 'Gerenciar configuraÃ§Ãµes do sistema', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(6, 'teams.view', 'Visualizar equipes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(7, 'teams.create', 'Criar equipes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(8, 'teams.update', 'Atualizar equipes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(9, 'teams.delete', 'Excluir equipes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(10, 'categories.view', 'Visualizar categorias', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(11, 'categories.create', 'Criar categorias', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(12, 'categories.update', 'Atualizar categorias', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(13, 'categories.delete', 'Excluir categorias', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(14, 'athletes.view', 'Visualizar atletas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(15, 'athletes.create', 'Criar atletas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(16, 'athletes.update', 'Atualizar atletas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(17, 'athletes.delete', 'Excluir atletas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(18, 'profile.view', 'Visualizar perfil prÃ³prio', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(19, 'guardians.view', 'Visualizar responsÃ¡veis', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(20, 'guardians.create', 'Criar responsÃ¡veis', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(21, 'guardians.update', 'Atualizar responsÃ¡veis', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(22, 'guardians.delete', 'Excluir responsÃ¡veis', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(23, 'events.view', 'Visualizar agenda/eventos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(24, 'events.create', 'Criar eventos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(25, 'events.update', 'Atualizar eventos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(26, 'events.delete', 'Excluir eventos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(27, 'callups.view', 'Visualizar convocaÃ§Ãµes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(28, 'callups.create', 'Criar convocaÃ§Ãµes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(29, 'callups.update', 'Atualizar convocaÃ§Ãµes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(30, 'callups.delete', 'Excluir convocaÃ§Ãµes', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(31, 'callups.confirm', 'Confirmar convocaÃ§Ã£o', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(32, 'invitations.manage', 'Gerenciar convocaÃ§Ãµes (legado)', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(33, 'attendance.manage', 'Gerenciar presenÃ§a (modo campo)', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(34, 'notices.view', 'Visualizar avisos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(35, 'notices.create', 'Criar avisos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(36, 'notices.update', 'Atualizar avisos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(37, 'notices.delete', 'Excluir avisos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(38, 'notices.publish', 'Publicar avisos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(39, 'alerts.view', 'Visualizar alertas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(40, 'document_types.manage', 'Gerenciar tipos de documento', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(41, 'documents.view', 'Visualizar documentos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(42, 'documents.upload', 'Enviar documentos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(43, 'documents.update', 'Atualizar documentos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(44, 'documents.delete', 'Excluir documentos', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(45, 'exercises.view', 'Visualizar biblioteca de exercÃ­cios', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(46, 'exercises.create', 'Criar exercÃ­cios', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(47, 'exercises.update', 'Atualizar exercÃ­cios', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(48, 'exercises.delete', 'Excluir exercÃ­cios', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(49, 'training_plans.view', 'Visualizar planos de treino', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(50, 'training_plans.create', 'Criar planos de treino', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(51, 'training_plans.update', 'Atualizar planos de treino', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(52, 'training_plans.delete', 'Excluir planos de treino', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(53, 'training_sessions.view', 'Visualizar sessÃµes realizadas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(54, 'training_sessions.create', 'Criar sessÃµes realizadas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(55, 'training_sessions.update', 'Atualizar sessÃµes realizadas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(56, 'training_sessions.delete', 'Excluir sessÃµes realizadas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(57, 'matches.view', 'Visualizar partidas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(58, 'matches.create', 'Criar partidas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(59, 'matches.update', 'Atualizar partidas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(60, 'matches.delete', 'Excluir partidas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(61, 'match_stats.manage', 'Gerenciar eventos/estatÃ­sticas de partidas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(62, 'match_lineup.manage', 'Gerenciar escalaÃ§Ã£o', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(63, 'match_reports.manage', 'Gerenciar relatÃ³rios de partidas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(64, 'tactical_boards.view', 'Visualizar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(65, 'tactical_boards.create', 'Criar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(66, 'tactical_boards.update', 'Atualizar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(67, 'tactical_boards.delete', 'Excluir pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(68, 'tactical_boards.export', 'Exportar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(69, 'tactical_sequences.manage', 'Gerenciar sequÃªncias/etapas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(70, 'tactical_board.view', 'Alias legado: visualizar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(71, 'tactical_board.create', 'Alias legado: criar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(72, 'tactical_board.update', 'Alias legado: atualizar pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(73, 'tactical_board.delete', 'Alias legado: excluir pranchetas tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(74, 'tactical_sequence.manage', 'Alias legado: gerenciar sequÃªncias tÃ¡ticas', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(75, 'reports.view', 'Visualizar relatÃ³rios', '2026-02-20 19:30:52', '2026-02-21 05:05:48'),
+(76, 'templates.view', 'Visualizar modelos de prancheta', '2026-02-21 05:05:48', '2026-02-21 05:05:48'),
+(77, 'templates.manage', 'Gerenciar modelos de prancheta', '2026-02-21 05:05:48', '2026-02-21 05:05:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` int UNSIGNED NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `team_id` int UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `name`, `description`, `team_id`, `created_at`, `updated_at`) VALUES
+(1, 'admin', 'Administrador', NULL, '2026-02-20 19:30:52', '2026-02-20 19:30:52'),
+(2, 'treinador', 'Treinador', NULL, '2026-02-20 19:30:52', '2026-02-20 19:30:52'),
+(3, 'auxiliar', 'Auxiliar', NULL, '2026-02-20 19:30:52', '2026-02-20 19:30:52'),
+(4, 'atleta', 'Atleta', NULL, '2026-02-20 19:30:52', '2026-02-21 00:02:01'),
+(5, 'Responsavel', 'Responsável', NULL, '2026-02-20 19:30:52', '2026-02-21 00:45:35'),
+(6, 'admin_equipe', 'Administrador de equipe', NULL, '2026-02-21 00:52:13', '2026-02-21 16:16:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permissions`
+--
+
+CREATE TABLE `role_permissions` (
+  `role_id` int UNSIGNED NOT NULL,
+  `permission_id` int UNSIGNED NOT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+INSERT INTO `role_permissions` (`role_id`, `permission_id`, `created_at`) VALUES
+(1, 1, '2026-02-21 05:05:49'),
+(1, 2, '2026-02-21 05:05:49'),
+(1, 3, '2026-02-21 05:05:49'),
+(1, 4, '2026-02-21 05:05:49'),
+(1, 5, '2026-02-21 05:05:49'),
+(1, 6, '2026-02-21 05:05:49'),
+(1, 7, '2026-02-21 05:05:49'),
+(1, 8, '2026-02-21 05:05:49'),
+(1, 9, '2026-02-21 05:05:49'),
+(1, 10, '2026-02-21 05:05:49'),
+(1, 11, '2026-02-21 05:05:49'),
+(1, 12, '2026-02-21 05:05:49'),
+(1, 13, '2026-02-21 05:05:49'),
+(1, 14, '2026-02-21 05:05:49'),
+(1, 15, '2026-02-21 05:05:49'),
+(1, 16, '2026-02-21 05:05:49'),
+(1, 17, '2026-02-21 05:05:49'),
+(1, 18, '2026-02-21 05:05:49'),
+(1, 19, '2026-02-21 05:05:49'),
+(1, 20, '2026-02-21 05:05:49'),
+(1, 21, '2026-02-21 05:05:49'),
+(1, 22, '2026-02-21 05:05:49'),
+(1, 23, '2026-02-21 05:05:49'),
+(1, 24, '2026-02-21 05:05:49'),
+(1, 25, '2026-02-21 05:05:49'),
+(1, 26, '2026-02-21 05:05:49'),
+(1, 27, '2026-02-21 05:05:49'),
+(1, 28, '2026-02-21 05:05:49'),
+(1, 29, '2026-02-21 05:05:49'),
+(1, 30, '2026-02-21 05:05:49'),
+(1, 31, '2026-02-21 05:05:49'),
+(1, 32, '2026-02-21 05:05:49'),
+(1, 33, '2026-02-21 05:05:49'),
+(1, 34, '2026-02-21 05:05:49'),
+(1, 35, '2026-02-21 05:05:49'),
+(1, 36, '2026-02-21 05:05:49'),
+(1, 37, '2026-02-21 05:05:49'),
+(1, 38, '2026-02-21 05:05:49'),
+(1, 39, '2026-02-21 05:05:49'),
+(1, 40, '2026-02-21 05:05:49'),
+(1, 41, '2026-02-21 05:05:49'),
+(1, 42, '2026-02-21 05:05:49'),
+(1, 43, '2026-02-21 05:05:49'),
+(1, 44, '2026-02-21 05:05:49'),
+(1, 45, '2026-02-21 05:05:49'),
+(1, 46, '2026-02-21 05:05:49'),
+(1, 47, '2026-02-21 05:05:49'),
+(1, 48, '2026-02-21 05:05:49'),
+(1, 49, '2026-02-21 05:05:49'),
+(1, 50, '2026-02-21 05:05:49'),
+(1, 51, '2026-02-21 05:05:49'),
+(1, 52, '2026-02-21 05:05:49'),
+(1, 53, '2026-02-21 05:05:49'),
+(1, 54, '2026-02-21 05:05:49'),
+(1, 55, '2026-02-21 05:05:49'),
+(1, 56, '2026-02-21 05:05:49'),
+(1, 57, '2026-02-21 05:05:49'),
+(1, 58, '2026-02-21 05:05:49'),
+(1, 59, '2026-02-21 05:05:49'),
+(1, 60, '2026-02-21 05:05:49'),
+(1, 61, '2026-02-21 05:05:49'),
+(1, 62, '2026-02-21 05:05:49'),
+(1, 63, '2026-02-21 05:05:49'),
+(1, 64, '2026-02-21 05:05:49'),
+(1, 65, '2026-02-21 05:05:49'),
+(1, 66, '2026-02-21 05:05:49'),
+(1, 67, '2026-02-21 05:05:49'),
+(1, 68, '2026-02-21 05:05:49'),
+(1, 69, '2026-02-21 05:05:49'),
+(1, 70, '2026-02-21 05:05:49'),
+(1, 71, '2026-02-21 05:05:49'),
+(1, 72, '2026-02-21 05:05:49'),
+(1, 73, '2026-02-21 05:05:49'),
+(1, 74, '2026-02-21 05:05:49'),
+(1, 75, '2026-02-21 05:05:49'),
+(1, 76, '2026-02-21 05:05:49'),
+(1, 77, '2026-02-21 05:05:49'),
+(2, 1, '2026-02-21 05:05:49'),
+(2, 6, '2026-02-21 05:05:49'),
+(2, 10, '2026-02-21 05:05:49'),
+(2, 14, '2026-02-21 05:05:49'),
+(2, 16, '2026-02-21 05:05:49'),
+(2, 19, '2026-02-21 05:05:49'),
+(2, 23, '2026-02-21 05:05:49'),
+(2, 24, '2026-02-21 05:05:49'),
+(2, 25, '2026-02-21 05:05:49'),
+(2, 26, '2026-02-21 05:05:49'),
+(2, 27, '2026-02-21 05:05:49'),
+(2, 28, '2026-02-21 05:05:49'),
+(2, 29, '2026-02-21 05:05:49'),
+(2, 30, '2026-02-21 05:05:49'),
+(2, 32, '2026-02-21 05:05:49'),
+(2, 33, '2026-02-21 05:05:49'),
+(2, 34, '2026-02-21 05:05:49'),
+(2, 35, '2026-02-21 05:05:49'),
+(2, 36, '2026-02-21 05:05:49'),
+(2, 37, '2026-02-21 05:05:49'),
+(2, 38, '2026-02-21 05:05:49'),
+(2, 39, '2026-02-21 05:05:49'),
+(2, 40, '2026-02-21 05:05:49'),
+(2, 41, '2026-02-21 05:05:49'),
+(2, 42, '2026-02-21 05:05:49'),
+(2, 43, '2026-02-21 05:05:49'),
+(2, 45, '2026-02-21 05:05:49'),
+(2, 46, '2026-02-21 05:05:49'),
+(2, 47, '2026-02-21 05:05:49'),
+(2, 48, '2026-02-21 05:05:49'),
+(2, 49, '2026-02-21 05:05:49'),
+(2, 50, '2026-02-21 05:05:49'),
+(2, 51, '2026-02-21 05:05:49'),
+(2, 52, '2026-02-21 05:05:49'),
+(2, 53, '2026-02-21 05:05:49'),
+(2, 54, '2026-02-21 05:05:49'),
+(2, 55, '2026-02-21 05:05:49'),
+(2, 56, '2026-02-21 05:05:49'),
+(2, 57, '2026-02-21 05:05:49'),
+(2, 58, '2026-02-21 05:05:49'),
+(2, 59, '2026-02-21 05:05:49'),
+(2, 60, '2026-02-21 05:05:49'),
+(2, 61, '2026-02-21 05:05:49'),
+(2, 62, '2026-02-21 05:05:49'),
+(2, 63, '2026-02-21 05:05:49'),
+(2, 64, '2026-02-21 05:05:49'),
+(2, 65, '2026-02-21 05:05:49'),
+(2, 66, '2026-02-21 05:05:49'),
+(2, 67, '2026-02-21 05:05:49'),
+(2, 68, '2026-02-21 05:05:49'),
+(2, 69, '2026-02-21 05:05:49'),
+(2, 70, '2026-02-21 05:05:49'),
+(2, 71, '2026-02-21 05:05:49'),
+(2, 72, '2026-02-21 05:05:49'),
+(2, 73, '2026-02-21 05:05:49'),
+(2, 74, '2026-02-21 05:05:49'),
+(2, 75, '2026-02-21 05:05:49'),
+(2, 76, '2026-02-21 05:05:49'),
+(3, 1, '2026-02-21 05:05:49'),
+(3, 6, '2026-02-21 05:05:49'),
+(3, 10, '2026-02-21 05:05:49'),
+(3, 14, '2026-02-21 05:05:49'),
+(3, 19, '2026-02-21 05:05:49'),
+(3, 23, '2026-02-21 05:05:49'),
+(3, 27, '2026-02-21 05:05:49'),
+(3, 33, '2026-02-21 05:05:49'),
+(3, 34, '2026-02-21 05:05:49'),
+(3, 35, '2026-02-21 05:05:49'),
+(3, 39, '2026-02-21 05:05:49'),
+(3, 41, '2026-02-21 05:05:49'),
+(3, 42, '2026-02-21 05:05:49'),
+(3, 45, '2026-02-21 05:05:49'),
+(3, 49, '2026-02-21 05:05:49'),
+(3, 53, '2026-02-21 05:05:49'),
+(3, 54, '2026-02-21 05:05:49'),
+(3, 55, '2026-02-21 05:05:49'),
+(3, 57, '2026-02-21 05:05:49'),
+(3, 61, '2026-02-21 05:05:49'),
+(3, 62, '2026-02-21 05:05:49'),
+(3, 64, '2026-02-21 05:05:49'),
+(3, 70, '2026-02-21 05:05:49'),
+(3, 75, '2026-02-21 05:05:49'),
+(3, 76, '2026-02-21 05:05:49'),
+(4, 1, '2026-02-21 05:05:49'),
+(4, 18, '2026-02-21 05:05:49'),
+(4, 23, '2026-02-21 05:05:49'),
+(4, 27, '2026-02-21 05:05:49'),
+(4, 34, '2026-02-21 05:05:49'),
+(4, 41, '2026-02-21 05:05:49'),
+(4, 57, '2026-02-21 05:05:49'),
+(4, 64, '2026-02-21 05:05:49'),
+(4, 70, '2026-02-21 05:05:49'),
+(4, 75, '2026-02-21 05:05:49'),
+(4, 76, '2026-02-21 05:05:49'),
+(5, 1, '2026-02-21 00:45:35'),
+(5, 18, '2026-02-21 00:45:35'),
+(5, 23, '2026-02-21 00:45:35'),
+(5, 27, '2026-02-21 00:45:35'),
+(5, 31, '2026-02-21 00:45:35'),
+(5, 34, '2026-02-21 00:45:35'),
+(5, 41, '2026-02-21 00:45:35'),
+(5, 42, '2026-02-21 00:45:35'),
+(5, 53, '2026-02-21 00:45:35'),
+(5, 57, '2026-02-21 00:45:35'),
+(6, 1, '2026-02-21 16:16:05'),
+(6, 6, '2026-02-21 16:16:05'),
+(6, 8, '2026-02-21 16:16:05'),
+(6, 10, '2026-02-21 16:16:05'),
+(6, 14, '2026-02-21 16:16:05'),
+(6, 15, '2026-02-21 16:16:05'),
+(6, 16, '2026-02-21 16:16:05'),
+(6, 17, '2026-02-21 16:16:05'),
+(6, 19, '2026-02-21 16:16:05'),
+(6, 20, '2026-02-21 16:16:05'),
+(6, 21, '2026-02-21 16:16:05'),
+(6, 22, '2026-02-21 16:16:05'),
+(6, 23, '2026-02-21 16:16:05'),
+(6, 24, '2026-02-21 16:16:05'),
+(6, 25, '2026-02-21 16:16:05'),
+(6, 26, '2026-02-21 16:16:05'),
+(6, 27, '2026-02-21 16:16:05'),
+(6, 28, '2026-02-21 16:16:05'),
+(6, 29, '2026-02-21 16:16:05'),
+(6, 30, '2026-02-21 16:16:05'),
+(6, 32, '2026-02-21 16:16:05'),
+(6, 33, '2026-02-21 16:16:05'),
+(6, 34, '2026-02-21 16:16:05'),
+(6, 35, '2026-02-21 16:16:05'),
+(6, 36, '2026-02-21 16:16:05'),
+(6, 37, '2026-02-21 16:16:05'),
+(6, 38, '2026-02-21 16:16:05'),
+(6, 39, '2026-02-21 16:16:05'),
+(6, 40, '2026-02-21 16:16:05'),
+(6, 41, '2026-02-21 16:16:05'),
+(6, 42, '2026-02-21 16:16:05'),
+(6, 43, '2026-02-21 16:16:05'),
+(6, 44, '2026-02-21 16:16:05'),
+(6, 45, '2026-02-21 16:16:05'),
+(6, 46, '2026-02-21 16:16:05'),
+(6, 47, '2026-02-21 16:16:05'),
+(6, 48, '2026-02-21 16:16:05'),
+(6, 49, '2026-02-21 16:16:05'),
+(6, 50, '2026-02-21 16:16:05'),
+(6, 51, '2026-02-21 16:16:05'),
+(6, 52, '2026-02-21 16:16:05'),
+(6, 53, '2026-02-21 16:16:05'),
+(6, 54, '2026-02-21 16:16:05'),
+(6, 55, '2026-02-21 16:16:05'),
+(6, 56, '2026-02-21 16:16:05'),
+(6, 57, '2026-02-21 16:16:05'),
+(6, 58, '2026-02-21 16:16:05'),
+(6, 59, '2026-02-21 16:16:05'),
+(6, 60, '2026-02-21 16:16:05'),
+(6, 61, '2026-02-21 16:16:05'),
+(6, 62, '2026-02-21 16:16:05'),
+(6, 63, '2026-02-21 16:16:05'),
+(6, 64, '2026-02-21 16:16:05'),
+(6, 65, '2026-02-21 16:16:05'),
+(6, 66, '2026-02-21 16:16:05'),
+(6, 67, '2026-02-21 16:16:05'),
+(6, 68, '2026-02-21 16:16:05'),
+(6, 74, '2026-02-21 16:16:05'),
+(6, 75, '2026-02-21 16:16:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `system_alerts`
+--
+
+CREATE TABLE `system_alerts` (
+  `id` int UNSIGNED NOT NULL,
+  `organization_id` int UNSIGNED DEFAULT NULL,
+  `type` varchar(40) COLLATE utf8mb4_general_ci NOT NULL,
+  `entity_type` varchar(30) COLLATE utf8mb4_general_ci NOT NULL,
+  `entity_id` int UNSIGNED DEFAULT NULL,
+  `title` varchar(180) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `severity` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'info',
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `read_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tactical_boards`
+--
+
+CREATE TABLE `tactical_boards` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tactical_boards`
+--
+
+INSERT INTO `tactical_boards` (`id`, `team_id`, `category_id`, `title`, `description`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'Prancheta exemplo 4-3-3', 'Exemplo inicial com jogadores e cones.', 1, '2026-02-20 19:30:53', '2026-02-20 19:30:53', NULL),
+(2, 1, 1, 'MARCAÇÃO PRESSAO', '', 1, '2026-02-20 21:03:17', '2026-02-20 21:03:17', NULL),
+(3, 2, 12, 'Bola Parada (Escanteio Ofensivo)', '', 1, '2026-02-21 05:07:43', '2026-02-21 05:10:35', '2026-02-21 05:10:35'),
+(4, 2, 12, 'Bola Parada', '', 1, '2026-02-21 05:10:55', '2026-02-21 05:10:55', NULL),
+(5, 2, 12, 'teste', 'asd', 1, '2026-02-21 05:11:44', '2026-02-21 05:11:44', NULL),
+(6, 2, 12, '`teste 123', '', 1, '2026-02-21 15:59:25', '2026-02-21 15:59:25', NULL),
+(7, 2, 12, 'teste', 'asas', 1, '2026-02-21 16:00:23', '2026-02-21 16:00:23', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tactical_board_states`
+--
+
+CREATE TABLE `tactical_board_states` (
+  `id` bigint UNSIGNED NOT NULL,
+  `tactical_board_id` bigint UNSIGNED NOT NULL,
+  `state_json` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `version` int NOT NULL DEFAULT '1',
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tactical_board_states`
+--
+
+INSERT INTO `tactical_board_states` (`id`, `tactical_board_id`, `state_json`, `version`, `created_by`, `created_at`) VALUES
+(1, 1, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"p11\",\"type\":\"player\",\"x\":65,\"y\":70,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":44},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":26},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":26},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":26},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":26},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":26},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":26}],\"meta\":{\"notes\":\"Exemplo seedado.\",\"formation\":\"4-3-3\"}}', 1, 1, '2026-02-20 19:30:53'),
+(2, 1, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":77.84,\"y\":83.87,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":74.7,\"y\":81.96,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"meta\":{\"notes\":\"Exemplo seedado.\",\"formation\":\"4-3-3\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":65,\"y\":70,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":44.95,\"y\":53.16,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":77.84,\"y\":83.87,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":74.7,\"y\":81.96,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"}],\"current_step\":1}}', 2, 1, '2026-02-20 20:36:39'),
+(3, 1, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":80.84,\"y\":42.09,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"meta\":{\"notes\":\"Exemplo seedado.\",\"formation\":\"4-3-3\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":65,\"y\":70,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":44.95,\"y\":53.16,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":45.61,\"y\":52.81,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":73.89,\"y\":33.69,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":82.05,\"y\":81.26,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":73.89,\"y\":33.69,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":82.05,\"y\":81.26,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":80.84,\"y\":42.09,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"}],\"current_step\":4}}', 3, 1, '2026-02-20 20:38:29'),
+(4, 1, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":98.4,\"y\":57.55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"meta\":{\"notes\":\"Exemplo seedado.\",\"formation\":\"4-3-3\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":65,\"y\":70,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":44.95,\"y\":53.16,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":65,\"y\":30,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":45.61,\"y\":52.81,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":73.89,\"y\":33.69,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":82.05,\"y\":81.26,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":80.84,\"y\":42.09,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":98.4,\"y\":57.55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"}],\"current_step\":4}}', 4, 1, '2026-02-20 20:40:27'),
+(5, 1, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":98.4,\"y\":57.55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"meta\":{\"notes\":\"Exemplo seedado.\",\"formation\":\"4-3-3\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"x\":8,\"y\":50,\"number\":1,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p2\",\"type\":\"player\",\"x\":22,\"y\":20,\"number\":2,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p3\",\"type\":\"player\",\"x\":22,\"y\":38,\"number\":3,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p4\",\"type\":\"player\",\"x\":22,\"y\":62,\"number\":4,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p5\",\"type\":\"player\",\"x\":22,\"y\":80,\"number\":5,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p6\",\"type\":\"player\",\"x\":42,\"y\":25,\"number\":6,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p7\",\"type\":\"player\",\"x\":42,\"y\":50,\"number\":7,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p8\",\"type\":\"player\",\"x\":42,\"y\":75,\"number\":8,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p9\",\"type\":\"player\",\"x\":77.95,\"y\":38.43,\"number\":9,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p10\",\"type\":\"player\",\"x\":65,\"y\":50,\"number\":10,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"p11\",\"type\":\"player\",\"x\":83.88,\"y\":87.03,\"number\":11,\"label\":\"\",\"color\":\"wine\",\"size\":34},{\"id\":\"c1\",\"type\":\"cone\",\"x\":30,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c2\",\"type\":\"cone\",\"x\":40,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c3\",\"type\":\"cone\",\"x\":50,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c4\",\"type\":\"cone\",\"x\":60,\"y\":35,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c5\",\"type\":\"cone\",\"x\":70,\"y\":55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"c6\",\"type\":\"cone\",\"x\":80,\"y\":15,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":20},{\"id\":\"i_mlvchtteylf6h\",\"type\":\"ball\",\"x\":98.4,\"y\":57.55,\"number\":null,\"label\":\"\",\"color\":\"wine\",\"size\":28,\"angle\":null,\"length\":null,\"rotation\":null}],\"formation\":\"4-3-3\",\"notes\":\"Exemplo seedado.\"}],\"current_step\":0}}', 5, 1, '2026-02-20 20:58:26'),
+(6, 2, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[],\"meta\":{\"notes\":\"\",\"formation\":\"\"}}', 1, 1, '2026-02-20 21:03:17'),
+(7, 3, '{\"field\":{\"background\":\"soccer_field_half_vertical_up\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":10,\"y\":10,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":60,\"y\":35,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"escanteio\"}}', 1, 1, '2026-02-21 05:07:43'),
+(8, 4, '{\"field\":{\"background\":\"soccer_field_half_vertical_up\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":10,\"y\":10,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":60,\"y\":35,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"escanteio\",\"steps\":[{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":10,\"y\":10,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":60,\"y\":35,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":30,\"y\":22,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":58,\"y\":28,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":64,\"y\":38,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":48,\"y\":38,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":45,\"y\":30,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":60,\"y\":30,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":66,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":50,\"y\":40,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":52,\"y\":52,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":42,\"y\":52,\"color\":\"wine\"}]}]}}', 1, 1, '2026-02-21 05:10:55'),
+(9, 5, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":25,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":75,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":20,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":50,\"y\":80,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":60,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"3-5-2\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":25,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":75,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":20,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":50,\"y\":80,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":60,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":28,\"y\":28,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":28,\"y\":72,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":55,\"y\":20,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":78,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":82,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":82,\"y\":60,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":25,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":75,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":60,\"y\":22,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":60,\"y\":76,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":88,\"y\":42,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":88,\"y\":58,\"color\":\"wine\"}]}]}}', 1, 1, '2026-02-21 05:11:44'),
+(10, 6, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[],\"meta\":{\"notes\":\"\",\"formation\":\"\"}}', 1, 1, '2026-02-21 15:59:25'),
+(11, 7, '{\"field\":{\"background\":\"soccer_field_half_vertical_down\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":55,\"y\":55,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"finalizacao\",\"steps\":[{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":55,\"y\":55,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":62,\"y\":40,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":70,\"y\":25,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}]}]}}', 1, 1, '2026-02-21 16:00:23');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tactical_board_templates`
+--
+
+CREATE TABLE `tactical_board_templates` (
+  `id` bigint UNSIGNED NOT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `field_type` varchar(40) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'full',
+  `tags` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `preview_image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `template_json` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tactical_board_templates`
+--
+
+INSERT INTO `tactical_board_templates` (`id`, `title`, `description`, `field_type`, `tags`, `is_default`, `is_active`, `preview_image`, `template_json`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Formação 4-3-3', 'Distribuição clássica com três atacantes.', 'full', 'formacao,4-3-3', 1, 1, NULL, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":18,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":38,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":62,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":82,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":30,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":70,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":75,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":50,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":75,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"4-3-3\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":18,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":38,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":62,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":82,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":30,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":70,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":75,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":50,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":75,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":30,\"y\":18,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":38,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":62,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":30,\"y\":82,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":55,\"y\":28,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":55,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":55,\"y\":72,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":85,\"y\":22,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":83,\"y\":50,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":85,\"y\":78,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":18,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":38,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":62,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":82,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":60,\"y\":30,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":60,\"y\":52,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":60,\"y\":74,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":90,\"y\":20,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":88,\"y\":50,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":90,\"y\":80,\"color\":\"wine\"}]}]}}', NULL, '2026-02-21 05:07:01', '2026-02-21 05:10:14', NULL),
+(2, 'Formação 4-4-2', 'Linha de quatro no meio e dois atacantes.', 'full', 'formacao,4-4-2', 1, 1, NULL, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":20,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":40,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":60,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":80,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":20,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":40,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":60,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":50,\"y\":80,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":60,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"4-4-2\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":20,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":40,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":60,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":80,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":20,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":40,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":60,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":50,\"y\":80,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":60,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":20,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":40,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":60,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":80,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":55,\"y\":25,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":55,\"y\":42,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":55,\"y\":58,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":75,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":83,\"y\":42,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":83,\"y\":58,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":20,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":40,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":60,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":25,\"y\":80,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":60,\"y\":28,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":60,\"y\":45,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":60,\"y\":55,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":60,\"y\":72,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":88,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":88,\"y\":60,\"color\":\"wine\"}]}]}}', NULL, '2026-02-21 05:07:01', '2026-02-21 05:10:14', NULL),
+(3, 'Formação 3-5-2', 'Controle do meio-campo com dois atacantes.', 'full', 'formacao,3-5-2', 1, 1, NULL, '{\"field\":{\"background\":\"soccer_field_v1\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":25,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":75,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":20,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":50,\"y\":80,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":60,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"3-5-2\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":25,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":75,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":20,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":50,\"y\":80,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":75,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":75,\"y\":60,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":28,\"y\":28,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":28,\"y\":72,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":55,\"y\":20,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":78,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":82,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":82,\"y\":60,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":8,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":25,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":75,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":60,\"y\":22,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":35,\"color\":\"wine\"},{\"id\":\"p7\",\"type\":\"player\",\"number\":7,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p8\",\"type\":\"player\",\"number\":8,\"x\":50,\"y\":65,\"color\":\"wine\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":60,\"y\":76,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":88,\"y\":42,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":88,\"y\":58,\"color\":\"wine\"}]}]}}', NULL, '2026-02-21 05:07:01', '2026-02-21 05:10:14', NULL),
+(4, 'Treino de finalização', 'Cones e bola para chutes rápidos.', 'half_bottom_goal', 'treino,finalizacao,bola', 1, 1, NULL, '{\"field\":{\"background\":\"soccer_field_half_vertical_down\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":55,\"y\":55,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"finalizacao\",\"steps\":[{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":55,\"y\":55,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":62,\"y\":40,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":70,\"y\":25,\"color\":\"white\"},{\"id\":\"c1\",\"type\":\"cone\",\"x\":35,\"y\":40,\"color\":\"wine\"},{\"id\":\"c2\",\"type\":\"cone\",\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"c3\",\"type\":\"cone\",\"x\":55,\"y\":30,\"color\":\"wine\"},{\"id\":\"c4\",\"type\":\"cone\",\"x\":65,\"y\":35,\"color\":\"wine\"},{\"id\":\"c5\",\"type\":\"cone\",\"x\":75,\"y\":40,\"color\":\"wine\"}]}]}}', NULL, '2026-02-21 05:07:01', '2026-02-21 05:10:14', NULL),
+(5, 'Saída de bola', 'Posicionamento base para iniciar jogadas.', 'half_bottom_goal', 'treino,saida-de-bola,construcao', 1, 1, NULL, '{\"field\":{\"background\":\"soccer_field_half_vertical_down\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":12,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":30,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":70,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":40,\"y\":40,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":60,\"color\":\"wine\"},{\"id\":\"b1\",\"type\":\"ball\",\"x\":18,\"y\":50,\"color\":\"white\"}],\"meta\":{\"notes\":\"\",\"formation\":\"saida-de-bola\",\"steps\":[{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":12,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":30,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":70,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":40,\"y\":40,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":60,\"color\":\"wine\"},{\"id\":\"b1\",\"type\":\"ball\",\"x\":18,\"y\":50,\"color\":\"white\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":12,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":30,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":70,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":45,\"y\":40,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":45,\"y\":60,\"color\":\"wine\"},{\"id\":\"b1\",\"type\":\"ball\",\"x\":28,\"y\":50,\"color\":\"white\"}]},{\"items\":[{\"id\":\"p1\",\"type\":\"player\",\"number\":1,\"x\":12,\"y\":50,\"color\":\"wine\"},{\"id\":\"p2\",\"type\":\"player\",\"number\":2,\"x\":25,\"y\":30,\"color\":\"wine\"},{\"id\":\"p3\",\"type\":\"player\",\"number\":3,\"x\":25,\"y\":50,\"color\":\"wine\"},{\"id\":\"p4\",\"type\":\"player\",\"number\":4,\"x\":25,\"y\":70,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":38,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":50,\"y\":62,\"color\":\"wine\"},{\"id\":\"b1\",\"type\":\"ball\",\"x\":45,\"y\":50,\"color\":\"white\"}]}]}}', NULL, '2026-02-21 05:07:01', '2026-02-21 05:10:14', NULL),
+(6, 'Bola parada (escanteio ofensivo)', 'Organização ofensiva para escanteio.', 'half_top_goal', 'bola-parada,escanteio,ofensivo', 1, 1, NULL, '{\"field\":{\"background\":\"soccer_field_half_vertical_up\",\"aspectRatio\":1.6},\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":10,\"y\":10,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":60,\"y\":35,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}],\"meta\":{\"notes\":\"\",\"formation\":\"escanteio\",\"steps\":[{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":10,\"y\":10,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":55,\"y\":25,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":60,\"y\":35,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":45,\"y\":35,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":30,\"y\":22,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":58,\"y\":28,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":64,\"y\":38,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":48,\"y\":38,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":50,\"y\":50,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":40,\"y\":50,\"color\":\"wine\"}]},{\"items\":[{\"id\":\"b1\",\"type\":\"ball\",\"x\":45,\"y\":30,\"color\":\"white\"},{\"id\":\"p9\",\"type\":\"player\",\"number\":9,\"x\":60,\"y\":30,\"color\":\"wine\"},{\"id\":\"p10\",\"type\":\"player\",\"number\":10,\"x\":66,\"y\":40,\"color\":\"wine\"},{\"id\":\"p11\",\"type\":\"player\",\"number\":11,\"x\":50,\"y\":40,\"color\":\"wine\"},{\"id\":\"p5\",\"type\":\"player\",\"number\":5,\"x\":52,\"y\":52,\"color\":\"wine\"},{\"id\":\"p6\",\"type\":\"player\",\"number\":6,\"x\":42,\"y\":52,\"color\":\"wine\"}]}]}}', NULL, '2026-02-21 05:07:01', '2026-02-21 05:10:14', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tactical_sequences`
+--
+
+CREATE TABLE `tactical_sequences` (
+  `id` bigint UNSIGNED NOT NULL,
+  `tactical_board_id` bigint UNSIGNED NOT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `fps` int NOT NULL DEFAULT '2',
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tactical_sequence_frames`
+--
+
+CREATE TABLE `tactical_sequence_frames` (
+  `id` bigint UNSIGNED NOT NULL,
+  `tactical_sequence_id` bigint UNSIGNED NOT NULL,
+  `frame_index` int NOT NULL,
+  `frame_json` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `duration_ms` int NOT NULL DEFAULT '500',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `teams`
+--
+
+CREATE TABLE `teams` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(120) COLLATE utf8mb4_general_ci NOT NULL,
+  `short_name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `status` enum('active','inactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `primary_color` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `secondary_color` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `logo_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `teams`
+--
+
+INSERT INTO `teams` (`id`, `name`, `short_name`, `description`, `status`, `primary_color`, `secondary_color`, `logo_path`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'BasePlay Academy', 'BasePlay', 'Equipe base para testes', 'active', NULL, NULL, NULL, '2026-02-20 19:30:53', '2026-02-21 01:58:32', '2026-02-21 01:58:32'),
+(2, 'Ferroviaria SAF', 'AFE', '', 'active', '#6D1818', '#FFFFFF', 'uploads/teams/1771636193_15ab55985dd65e155075.png', '2026-02-21 00:52:13', '2026-02-21 01:53:33', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `training_plans`
+--
+
+CREATE TABLE `training_plans` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `goal` varchar(120) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `planned_date` date DEFAULT NULL,
+  `total_duration_min` int DEFAULT NULL,
+  `status` enum('draft','ready','archived') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'draft',
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `training_plans`
+--
+
+INSERT INTO `training_plans` (`id`, `team_id`, `category_id`, `title`, `goal`, `planned_date`, `total_duration_min`, `status`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'PLANO TESTE', 'TESTE', '2026-02-27', NULL, 'draft', 1, '2026-02-20 22:03:26', '2026-02-20 22:03:26', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `training_plan_blocks`
+--
+
+CREATE TABLE `training_plan_blocks` (
+  `id` bigint UNSIGNED NOT NULL,
+  `training_plan_id` bigint UNSIGNED NOT NULL,
+  `block_type` enum('warmup','technical','tactical','physical','small_sided','match','other') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'other',
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `duration_min` int NOT NULL,
+  `exercise_id` bigint UNSIGNED DEFAULT NULL,
+  `instructions` text COLLATE utf8mb4_general_ci,
+  `order_index` int NOT NULL,
+  `media_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `media_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `media_name` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `media_mime` varchar(120) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `training_sessions`
+--
+
+CREATE TABLE `training_sessions` (
+  `id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `category_id` bigint UNSIGNED NOT NULL,
+  `event_id` bigint UNSIGNED DEFAULT NULL,
+  `training_plan_id` bigint UNSIGNED DEFAULT NULL,
+  `title` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `session_date` date NOT NULL,
+  `start_datetime` datetime DEFAULT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  `location` varchar(190) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `general_notes` text COLLATE utf8mb4_general_ci,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `training_sessions`
+--
+
+INSERT INTO `training_sessions` (`id`, `team_id`, `category_id`, `event_id`, `training_plan_id`, `title`, `session_date`, `start_datetime`, `end_datetime`, `location`, `general_notes`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 2, 12, NULL, 1, 'Treino', '2026-02-22', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 'IV Distrito Industria - R. Antenor Elias, 1450 - Centro Empresarial e Industrial Omar Maksoud, Araraquara - SP, 14804-330, Brasil', 'Treino Tático', 1, '2026-02-21 04:34:26', '2026-02-21 04:50:25', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `training_session_athletes`
+--
+
+CREATE TABLE `training_session_athletes` (
+  `id` bigint UNSIGNED NOT NULL,
+  `training_session_id` bigint UNSIGNED NOT NULL,
+  `athlete_id` bigint UNSIGNED NOT NULL,
+  `attendance_status` enum('present','late','absent','justified') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'present',
+  `performance_note` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `rating` tinyint DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(190) COLLATE utf8mb4_general_ci NOT NULL,
+  `password_hash` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
+  `api_token_hash` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `api_token_expires_at` datetime DEFAULT NULL,
+  `last_login_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `status`, `api_token_hash`, `api_token_expires_at`, `last_login_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Administrador', 'admin@baseplay.local', '$2y$10$Nzvik.rvjK3GrS6zPrVKUO0TIVFcemsjnzZVbiQhl.9ZJb7HqoeHu', 'active', NULL, NULL, '2026-02-21 15:58:36', '2026-02-20 19:30:53', '2026-02-21 15:58:36', NULL),
+(2, 'Miguel Barbosa', 'miguel.barbosa@baseplay.test', '$2y$10$mtGExc6SI9oJhuRm.ZhPpe1uzi6wkbLp8f/0P8h1zl9Hv3SLuvt.i', 'active', NULL, NULL, '2026-02-21 00:53:01', '2026-02-21 00:52:13', '2026-02-21 00:53:01', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_roles`
+--
+
+CREATE TABLE `user_roles` (
+  `user_id` bigint UNSIGNED NOT NULL,
+  `role_id` int UNSIGNED NOT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_roles`
+--
+
+INSERT INTO `user_roles` (`user_id`, `role_id`, `created_at`) VALUES
+(1, 1, '2026-02-20 19:30:53'),
+(2, 6, '2026-02-21 00:52:13');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_team_links`
+--
+
+CREATE TABLE `user_team_links` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `team_id` bigint UNSIGNED NOT NULL,
+  `role_in_team` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_team_links`
+--
+
+INSERT INTO `user_team_links` (`id`, `user_id`, `team_id`, `role_in_team`, `created_at`) VALUES
+(1, 2, 2, 'admin_equipe', '2026-02-21 00:52:13');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `athletes`
+--
+ALTER TABLE `athletes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `first_name_last_name` (`first_name`,`last_name`),
+  ADD KEY `birth_date` (`birth_date`);
+
+--
+-- Indexes for table `athlete_guardians`
+--
+ALTER TABLE `athlete_guardians`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `athlete_id_guardian_id` (`athlete_id`,`guardian_id`),
+  ADD KEY `athlete_id` (`athlete_id`),
+  ADD KEY `guardian_id` (`guardian_id`);
+
+--
+-- Indexes for table `attendance`
+--
+ALTER TABLE `attendance`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `event_id_athlete_id` (`event_id`,`athlete_id`),
+  ADD KEY `event_id` (`event_id`),
+  ADD KEY `athlete_id` (`athlete_id`),
+  ADD KEY `status` (`status`),
+  ADD KEY `idx_attendance_athlete_event` (`athlete_id`,`event_id`);
+
+--
+-- Indexes for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `action` (`action`);
+
+--
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `name` (`name`);
+
+--
+-- Indexes for table `category_required_documents`
+--
+ALTER TABLE `category_required_documents`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `category_id_document_type_id` (`category_id`,`document_type_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `document_type_id` (`document_type_id`);
+
+--
+-- Indexes for table `documents`
+--
+ALTER TABLE `documents`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `athlete_id` (`athlete_id`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `document_type_id` (`document_type_id`),
+  ADD KEY `expires_at` (`expires_at`),
+  ADD KEY `status` (`status`),
+  ADD KEY `idx_documents_guardian_id` (`guardian_id`);
+
+--
+-- Indexes for table `document_alerts`
+--
+ALTER TABLE `document_alerts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `document_id` (`document_id`),
+  ADD KEY `alert_date` (`alert_date`);
+
+--
+-- Indexes for table `document_types`
+--
+ALTER TABLE `document_types`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `name` (`name`);
+
+--
+-- Indexes for table `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `start_datetime` (`start_datetime`),
+  ADD KEY `type` (`type`),
+  ADD KEY `idx_events_type_start` (`type`,`start_datetime`);
+
+--
+-- Indexes for table `event_participants`
+--
+ALTER TABLE `event_participants`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `event_id_athlete_id` (`event_id`,`athlete_id`),
+  ADD KEY `event_id` (`event_id`),
+  ADD KEY `athlete_id` (`athlete_id`);
+
+--
+-- Indexes for table `exercises`
+--
+ALTER TABLE `exercises`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `title` (`title`),
+  ADD KEY `objective` (`objective`),
+  ADD KEY `age_group` (`age_group`),
+  ADD KEY `intensity` (`intensity`);
+
+--
+-- Indexes for table `exercise_tags`
+--
+ALTER TABLE `exercise_tags`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `exercise_tag_links`
+--
+ALTER TABLE `exercise_tag_links`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `exercise_id_tag_id` (`exercise_id`,`tag_id`),
+  ADD KEY `exercise_id` (`exercise_id`),
+  ADD KEY `tag_id` (`tag_id`);
+
+--
+-- Indexes for table `guardians`
+--
+ALTER TABLE `guardians`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `email` (`email`),
+  ADD KEY `phone` (`phone`);
+
+--
+-- Indexes for table `matches`
+--
+ALTER TABLE `matches`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `matches_event_id_foreign` (`event_id`),
+  ADD KEY `matches_created_by_foreign` (`created_by`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `match_date` (`match_date`),
+  ADD KEY `status` (`status`),
+  ADD KEY `opponent_name` (`opponent_name`);
+
+--
+-- Indexes for table `match_attachments`
+--
+ALTER TABLE `match_attachments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `match_id` (`match_id`);
+
+--
+-- Indexes for table `match_callups`
+--
+ALTER TABLE `match_callups`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `match_id_athlete_id` (`match_id`,`athlete_id`),
+  ADD KEY `match_id` (`match_id`),
+  ADD KEY `athlete_id` (`athlete_id`),
+  ADD KEY `idx_match_callups_athlete_match` (`athlete_id`,`match_id`);
+
+--
+-- Indexes for table `match_events`
+--
+ALTER TABLE `match_events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `match_events_related_athlete_id_foreign` (`related_athlete_id`),
+  ADD KEY `match_id` (`match_id`),
+  ADD KEY `event_type` (`event_type`),
+  ADD KEY `athlete_id` (`athlete_id`);
+
+--
+-- Indexes for table `match_lineup_positions`
+--
+ALTER TABLE `match_lineup_positions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `match_id_athlete_id` (`match_id`,`athlete_id`),
+  ADD KEY `match_id` (`match_id`),
+  ADD KEY `athlete_id` (`athlete_id`);
+
+--
+-- Indexes for table `match_reports`
+--
+ALTER TABLE `match_reports`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `match_id` (`match_id`);
+
+--
+-- Indexes for table `migrations`
+--
+ALTER TABLE `migrations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `notices`
+--
+ALTER TABLE `notices`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `priority` (`priority`),
+  ADD KEY `publish_at` (`publish_at`);
+
+--
+-- Indexes for table `notice_reads`
+--
+ALTER TABLE `notice_reads`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `notice_id_user_id` (`notice_id`,`user_id`),
+  ADD KEY `notice_id` (`notice_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `notice_replies`
+--
+ALTER TABLE `notice_replies`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `notice_id` (`notice_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `email` (`email`),
+  ADD KEY `token` (`token`);
+
+--
+-- Indexes for table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD PRIMARY KEY (`role_id`,`permission_id`),
+  ADD KEY `permission_id` (`permission_id`);
+
+--
+-- Indexes for table `system_alerts`
+--
+ALTER TABLE `system_alerts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `type` (`type`),
+  ADD KEY `entity_type_entity_id` (`entity_type`,`entity_id`),
+  ADD KEY `is_read` (`is_read`),
+  ADD KEY `created_at` (`created_at`);
+
+--
+-- Indexes for table `tactical_boards`
+--
+ALTER TABLE `tactical_boards`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `tactical_boards_created_by_foreign` (`created_by`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `title` (`title`);
+
+--
+-- Indexes for table `tactical_board_states`
+--
+ALTER TABLE `tactical_board_states`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `tactical_board_id_version` (`tactical_board_id`,`version`),
+  ADD KEY `tactical_board_states_created_by_foreign` (`created_by`),
+  ADD KEY `tactical_board_id` (`tactical_board_id`),
+  ADD KEY `version` (`version`);
+
+--
+-- Indexes for table `tactical_board_templates`
+--
+ALTER TABLE `tactical_board_templates`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `field_type` (`field_type`),
+  ADD KEY `is_default` (`is_default`),
+  ADD KEY `is_active` (`is_active`);
+
+--
+-- Indexes for table `tactical_sequences`
+--
+ALTER TABLE `tactical_sequences`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `tactical_sequences_created_by_foreign` (`created_by`),
+  ADD KEY `tactical_board_id` (`tactical_board_id`),
+  ADD KEY `fps` (`fps`);
+
+--
+-- Indexes for table `tactical_sequence_frames`
+--
+ALTER TABLE `tactical_sequence_frames`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `tactical_sequence_id_frame_index` (`tactical_sequence_id`,`frame_index`),
+  ADD KEY `tactical_sequence_id` (`tactical_sequence_id`),
+  ADD KEY `frame_index` (`frame_index`);
+
+--
+-- Indexes for table `teams`
+--
+ALTER TABLE `teams`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `name` (`name`);
+
+--
+-- Indexes for table `training_plans`
+--
+ALTER TABLE `training_plans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `planned_date` (`planned_date`),
+  ADD KEY `status` (`status`);
+
+--
+-- Indexes for table `training_plan_blocks`
+--
+ALTER TABLE `training_plan_blocks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `training_plan_id` (`training_plan_id`),
+  ADD KEY `order_index` (`order_index`);
+
+--
+-- Indexes for table `training_sessions`
+--
+ALTER TABLE `training_sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `team_id` (`team_id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `session_date` (`session_date`),
+  ADD KEY `idx_ts_date_category` (`session_date`,`category_id`);
+
+--
+-- Indexes for table `training_session_athletes`
+--
+ALTER TABLE `training_session_athletes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `training_session_id_athlete_id` (`training_session_id`,`athlete_id`),
+  ADD KEY `training_session_id` (`training_session_id`),
+  ADD KEY `athlete_id` (`athlete_id`),
+  ADD KEY `idx_tsa_athlete_session` (`athlete_id`,`training_session_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indexes for table `user_roles`
+--
+ALTER TABLE `user_roles`
+  ADD PRIMARY KEY (`user_id`,`role_id`),
+  ADD KEY `role_id` (`role_id`);
+
+--
+-- Indexes for table `user_team_links`
+--
+ALTER TABLE `user_team_links`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `team_id` (`team_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `athletes`
+--
+ALTER TABLE `athletes`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `athlete_guardians`
+--
+ALTER TABLE `athlete_guardians`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `attendance`
+--
+ALTER TABLE `attendance`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `category_required_documents`
+--
+ALTER TABLE `category_required_documents`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `documents`
+--
+ALTER TABLE `documents`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `document_alerts`
+--
+ALTER TABLE `document_alerts`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `document_types`
+--
+ALTER TABLE `document_types`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `events`
+--
+ALTER TABLE `events`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `event_participants`
+--
+ALTER TABLE `event_participants`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `exercises`
+--
+ALTER TABLE `exercises`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `exercise_tags`
+--
+ALTER TABLE `exercise_tags`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `exercise_tag_links`
+--
+ALTER TABLE `exercise_tag_links`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `guardians`
+--
+ALTER TABLE `guardians`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `matches`
+--
+ALTER TABLE `matches`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `match_attachments`
+--
+ALTER TABLE `match_attachments`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `match_callups`
+--
+ALTER TABLE `match_callups`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `match_events`
+--
+ALTER TABLE `match_events`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `match_lineup_positions`
+--
+ALTER TABLE `match_lineup_positions`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `match_reports`
+--
+ALTER TABLE `match_reports`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+
+--
+-- AUTO_INCREMENT for table `notices`
+--
+ALTER TABLE `notices`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `notice_reads`
+--
+ALTER TABLE `notice_reads`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `notice_replies`
+--
+ALTER TABLE `notice_replies`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `permissions`
+--
+ALTER TABLE `permissions`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+
+--
+-- AUTO_INCREMENT for table `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `system_alerts`
+--
+ALTER TABLE `system_alerts`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `tactical_boards`
+--
+ALTER TABLE `tactical_boards`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `tactical_board_states`
+--
+ALTER TABLE `tactical_board_states`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `tactical_board_templates`
+--
+ALTER TABLE `tactical_board_templates`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `tactical_sequences`
+--
+ALTER TABLE `tactical_sequences`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `tactical_sequence_frames`
+--
+ALTER TABLE `tactical_sequence_frames`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `teams`
+--
+ALTER TABLE `teams`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `training_plans`
+--
+ALTER TABLE `training_plans`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `training_plan_blocks`
+--
+ALTER TABLE `training_plan_blocks`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `training_sessions`
+--
+ALTER TABLE `training_sessions`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `training_session_athletes`
+--
+ALTER TABLE `training_session_athletes`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `user_team_links`
+--
+ALTER TABLE `user_team_links`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `matches`
+--
+ALTER TABLE `matches`
+  ADD CONSTRAINT `matches_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `matches_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `matches_event_id_foreign` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE RESTRICT ON UPDATE SET NULL,
+  ADD CONSTRAINT `matches_team_id_foreign` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Constraints for table `match_attachments`
+--
+ALTER TABLE `match_attachments`
+  ADD CONSTRAINT `match_attachments_match_id_foreign` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `match_callups`
+--
+ALTER TABLE `match_callups`
+  ADD CONSTRAINT `match_callups_athlete_id_foreign` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `match_callups_match_id_foreign` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `match_events`
+--
+ALTER TABLE `match_events`
+  ADD CONSTRAINT `match_events_athlete_id_foreign` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `match_events_match_id_foreign` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `match_events_related_athlete_id_foreign` FOREIGN KEY (`related_athlete_id`) REFERENCES `athletes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Constraints for table `match_lineup_positions`
+--
+ALTER TABLE `match_lineup_positions`
+  ADD CONSTRAINT `match_lineup_positions_athlete_id_foreign` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `match_lineup_positions_match_id_foreign` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `match_reports`
+--
+ALTER TABLE `match_reports`
+  ADD CONSTRAINT `match_reports_match_id_foreign` FOREIGN KEY (`match_id`) REFERENCES `matches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tactical_boards`
+--
+ALTER TABLE `tactical_boards`
+  ADD CONSTRAINT `tactical_boards_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `tactical_boards_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE SET NULL,
+  ADD CONSTRAINT `tactical_boards_team_id_foreign` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tactical_board_states`
+--
+ALTER TABLE `tactical_board_states`
+  ADD CONSTRAINT `tactical_board_states_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE SET NULL,
+  ADD CONSTRAINT `tactical_board_states_tactical_board_id_foreign` FOREIGN KEY (`tactical_board_id`) REFERENCES `tactical_boards` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tactical_sequences`
+--
+ALTER TABLE `tactical_sequences`
+  ADD CONSTRAINT `tactical_sequences_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE SET NULL,
+  ADD CONSTRAINT `tactical_sequences_tactical_board_id_foreign` FOREIGN KEY (`tactical_board_id`) REFERENCES `tactical_boards` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tactical_sequence_frames`
+--
+ALTER TABLE `tactical_sequence_frames`
+  ADD CONSTRAINT `tactical_sequence_frames_tactical_sequence_id_foreign` FOREIGN KEY (`tactical_sequence_id`) REFERENCES `tactical_sequences` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

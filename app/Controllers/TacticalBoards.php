@@ -74,7 +74,6 @@ class TacticalBoards extends BaseController
         $validation = service('validation');
         $validation->setRules([
             'team_id' => 'required|integer|teamExists',
-            'category_id' => 'required|integer|categoryExists',
             'title' => 'required|min_length[3]|max_length[150]',
             'description' => 'permit_empty',
         ]);
@@ -86,6 +85,17 @@ class TacticalBoards extends BaseController
         $payload = $this->request->getPost();
         if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
+        $teamId = (int) ($payload['team_id'] ?? 0);
+        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+        if ($categories === []) {
+            return redirect()->back()->withInput()->with('error', 'Esta equipe nao possui categoria ativa para criar prancheta.');
+        }
+
+        $payload['category_id'] = (int) ($categories[0]['id'] ?? 0);
+        if ($payload['category_id'] <= 0) {
+            return redirect()->back()->withInput()->with('error', 'Nao foi possivel definir a categoria da prancheta.');
         }
 
         $boardId = $this->boards->create($payload, (int) session('user_id'));

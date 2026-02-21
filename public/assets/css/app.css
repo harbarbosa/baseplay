@@ -599,10 +599,9 @@ button.secondary:hover, .button.secondary:hover {
 
 /* Tactical board */
 .tactical-board-layout {
-  display: grid;
-  grid-template-columns: 1fr 320px;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  align-items: start;
 }
 
 .tactical-field-wrap {
@@ -620,7 +619,127 @@ button.secondary:hover, .button.secondary:hover {
 .tactical-field-toolbar-row {
   display: flex;
   gap: 10px;
-  align-items: flex-end;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.tactical-field-toolbar-row > .form-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-right: 12px;
+  margin-right: 2px;
+}
+
+.tactical-field-toolbar-row > .form-group:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--border);
+}
+
+.tactical-left-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tactical-left-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tactical-left-divider {
+  height: 1px;
+  background: var(--border);
+  width: 100%;
+}
+
+.tactical-step-toolbar {
+  flex: 1.2;
+  min-width: 360px;
+}
+
+.tactical-step-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.field-type-icons {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.field-type-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #7A1126;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.field-type-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.field-type-btn:hover {
+  border-color: #7A1126;
+  background: #fbeef1;
+}
+
+.field-type-btn.active {
+  background: #7A1126;
+  border-color: #7A1126;
+  color: #fff;
+}
+
+.field-type-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tactical-quick-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tactical-quick-actions .icon-only-btn {
+  background: #7A1126 !important;
+  border: 1px solid #7A1126 !important;
+  color: #fff !important;
+}
+
+.tactical-quick-actions .icon-only-btn:hover {
+  background: #5C0D1D;
+  border-color: #5C0D1D;
+}
+
+.tactical-quick-actions .icon-only-btn:disabled {
+  background: #d7b6be;
+  border-color: #d7b6be;
+  color: #fff;
 }
 
 .tactical-field {
@@ -629,7 +748,7 @@ button.secondary:hover, .button.secondary:hover {
   aspect-ratio: 16 / 10;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: #0b6f3f center/cover no-repeat;
+  background: #0b6f3f center/contain no-repeat;
   overflow: hidden;
   touch-action: none;
 }
@@ -643,8 +762,8 @@ button.secondary:hover, .button.secondary:hover {
 }
 
 .tactical-sidebar {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -668,6 +787,43 @@ button.secondary:hover, .button.secondary:hover {
 
 .tactical-actions button {
   padding: 8px 10px;
+}
+
+.tactical-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.icon-only-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 7px;
+  min-width: 28px;
+}
+
+.icon-only-btn .btn-icon {
+  width: 14px;
+  height: 14px;
+  color: #fff !important;
+}
+
+.icon-only-btn .btn-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: #fff !important;
+  stroke: #fff;
 }
 
 .step-actions {
@@ -869,6 +1025,7 @@ button.secondary:hover, .button.secondary:hover {
   border: 1px solid var(--border);
   border-radius: 999px;
   background: #fff;
+  color: var(--ink);
   padding: 6px 10px;
   font-size: 12px;
   white-space: nowrap;
@@ -917,8 +1074,97 @@ button.secondary:hover, .button.secondary:hover {
   font-weight: 700;
 }
 
+.tactical-item-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+}
+
+.tactical-item-modal.open {
+  display: block;
+}
+
+.tactical-item-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 14, 24, 0.45);
+}
+
+.tactical-item-modal-dialog {
+  position: relative;
+  width: min(520px, calc(100vw - 24px));
+  margin: 6vh auto 0;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 48px rgba(12, 14, 32, 0.24);
+  padding: 14px;
+}
+
+.tactical-item-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tactical-item-modal-header h3 {
+  margin: 0;
+}
+
+.tactical-item-modal-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.tactical-item-modal-footer {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.step-inline-bar {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.step-inline-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.step-actions-inline {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.step-actions-inline button {
+  padding: 7px 10px;
+}
+
+.step-inline-bar .frame-timeline {
+  margin-top: 4px;
+}
+
 @media (max-width: 1080px) {
-  .tactical-board-layout {
+  .tactical-sidebar {
     grid-template-columns: 1fr;
+  }
+
+  .step-inline-top {
+    align-items: flex-start;
+  }
+
+  .tactical-step-toolbar {
+    min-width: 100%;
   }
 }

@@ -2,14 +2,19 @@
 
 <?= $this->section('content') ?>
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
         <div>
             <h1>Quadro tático</h1>
             <p style="color:var(--muted);">Pranchetas por equipe e categoria.</p>
         </div>
-        <?php if (has_permission('tactical_board.create')): ?>
-            <a href="<?= base_url('/tactical-boards/create') ?>" class="button">Nova prancheta</a>
-        <?php endif; ?>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <?php if (has_permission('templates.view')): ?>
+                <a href="<?= base_url('/tactical-boards/templates') ?>" class="button secondary">Modelos</a>
+            <?php endif; ?>
+            <?php if (has_permission('tactical_board.create')): ?>
+                <a href="<?= base_url('/tactical-boards/create') ?>" class="button">Nova prancheta</a>
+            <?php endif; ?>
+        </div>
     </div>
 
     <form method="get" action="<?= base_url('/tactical-boards') ?>" style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">

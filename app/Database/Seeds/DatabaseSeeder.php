@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call('DocumentTypesSeeder');
         $this->call('DocumentsSeeder');
         $this->call('TacticalBoardsSeeder');
+        $this->call('TemplatesSeeder');
     }
 }

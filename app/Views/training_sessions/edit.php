@@ -57,7 +57,7 @@
         </div>
         <div class="form-group">
             <label>Local</label>
-            <input type="text" name="location" value="<?= esc(old('location', $session['location'])) ?>">
+            <input type="text" id="training-location" name="location" autocomplete="off" value="<?= esc(old('location', $session['location'])) ?>">
         </div>
         <div class="form-group">
             <label>Observações gerais</label>
@@ -88,4 +88,25 @@
     filterCategories();
 })();
 </script>
+<?php $mapsKey = getenv('GOOGLE_MAPS_API_KEY'); ?>
+<?php if (!empty($mapsKey)): ?>
+<script>
+function initTrainingLocationAutocomplete() {
+    const input = document.getElementById('training-location');
+    if (!input || !window.google || !google.maps || !google.maps.places) return;
+
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+        fields: ['formatted_address', 'name'],
+    });
+
+    autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        const formatted = place && place.formatted_address ? place.formatted_address : '';
+        const name = place && place.name ? place.name : '';
+        input.value = formatted || name || input.value;
+    });
+}
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=<?= esc($mapsKey) ?>&libraries=places&callback=initTrainingLocationAutocomplete"></script>
+<?php endif; ?>
 <?= $this->endSection() ?>

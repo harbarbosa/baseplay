@@ -30,7 +30,7 @@ if (has_permission('alerts.view')) {
     <nav class="bp-nav">
         <div class="bp-nav-section">Visao Geral</div>
         <?php if (has_permission('dashboard.view')): ?>
-            <a href="<?= base_url('/') ?>" class="bp-nav-link menu-item dashboard <?= $isActive('') ? 'active' : '' ?>"><span class="menu-icon"></span>Dashboard</a>
+            <a href="<?= base_url('/') ?>" class="bp-nav-link menu-item dashboard <?= $isActive('') ? 'active' : '' ?>"><span class="menu-icon"></span>Painel</a>
         <?php endif; ?>
         <?php if (has_permission('alerts.view')): ?>
             <a href="<?= base_url('/pending-center') ?>" class="bp-nav-link menu-item pending-center <?= $isActive('pending-center') ? 'active' : '' ?>"><span class="menu-icon"></span>Central de pendências</a>
@@ -61,10 +61,13 @@ if (has_permission('alerts.view')) {
             <a href="<?= base_url('/training-plans') ?>" class="bp-nav-link menu-item training-plans <?= $isActive('training-plans') ? 'active' : '' ?>"><span class="menu-icon"></span>Planos de treino</a>
         <?php endif; ?>
         <?php if (has_permission('training_sessions.view')): ?>
-            <a href="<?= base_url('/training-sessions') ?>" class="bp-nav-link menu-item training-sessions <?= $isActive('training-sessions') ? 'active' : '' ?>"><span class="menu-icon"></span>Sessões realizadas</a>
+            <a href="<?= base_url('/training-sessions') ?>" class="bp-nav-link menu-item training-sessions <?= $isActive('training-sessions') ? 'active' : '' ?>"><span class="menu-icon"></span>Sessões de treinos</a>
         <?php endif; ?>
         <?php if (has_permission('tactical_boards.view') || has_permission('tactical_board.view')): ?>
             <a href="<?= base_url('/tactical-boards') ?>" class="bp-nav-link menu-item tactical-boards <?= $isActive('tactical-boards') ? 'active' : '' ?>"><span class="menu-icon"></span>Quadro tático</a>
+        <?php if (has_permission('templates.view')): ?>
+            <a href="<?= base_url('/tactical-boards/templates') ?>" class="bp-nav-link menu-item tactical-boards-templates <?= $isActive('tactical-boards/templates') ? 'active' : '' ?>"><span class="menu-icon"></span>Modelos táticos</a>
+        <?php endif; ?>
         <?php endif; ?>
 
         <div class="bp-nav-section">Jogos e Agenda</div>
@@ -106,3 +109,4 @@ if (has_permission('alerts.view')) {
         <?php endif; ?>
     </nav>
 </aside>
+

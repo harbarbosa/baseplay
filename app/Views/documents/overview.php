@@ -1,22 +1,21 @@
 <?= $this->extend('layouts/base') ?>
 
-<?= $this->section('quick_action') ?>
-<?php if (has_permission('documents.upload')): ?>
-    <a href="<?= base_url('/documents/create') ?>" class="bp-btn-primary">Novo documento</a>
-<?php endif; ?>
-<?= $this->endSection() ?>
-
 <?= $this->section('content') ?>
 <div class="bp-card" style="margin-bottom:18px;">
-    <div class="bp-card-body">
-        <h1 style="margin:0 0 6px;">Documentos - Visao geral</h1>
-        <p style="margin:0; color:var(--muted);">Pendencias, conformidade e acoes rapidas em um unico lugar.</p>
+    <div class="bp-card-body" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h1 style="margin:0 0 6px;">Documentos - Visao geral</h1>
+            <p style="margin:0; color:var(--muted);">Pendencias, conformidade e acoes rapidas em um unico lugar.</p>
+        </div>
+        <?php if (has_permission('documents.upload')): ?>
+            <a href="<?= base_url('/documents/create') ?>" class="bp-btn-primary">Novo documento</a>
+        <?php endif; ?>
     </div>
 </div>
 
 <div class="bp-card" style="margin-bottom:18px;">
     <div class="bp-card-body">
-        <form method="get" action="<?= current_url() ?>" style="display:flex; flex-wrap:wrap; gap:10px;">
+        <form method="get" action="<?= current_url() ?>" style="display:flex; flex-wrap:nowrap; gap:10px; align-items:center; overflow-x:auto; padding-bottom:4px;">
             <select name="team_id" class="bp-select">
                 <option value="">Equipe</option>
                 <?php foreach ($teams as $team): ?>

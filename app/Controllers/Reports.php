@@ -29,21 +29,21 @@ class Reports extends BaseController
     {
         $filters = $this->commonFilters();
         $result = $this->reports->attendance($filters);
-        return $this->renderReport('Relatório de Presença', 'reports/attendance', $filters, $result);
+        return $this->renderReport('Relatorio de Presenca', 'reports/attendance', $filters, $result);
     }
 
     public function trainings()
     {
         $filters = $this->commonFilters();
         $result = $this->reports->trainings($filters);
-        return $this->renderReport('Relatório de Treinos', 'reports/trainings', $filters, $result);
+        return $this->renderReport('Relatorio de Treinos', 'reports/trainings', $filters, $result);
     }
 
     public function matches()
     {
         $filters = $this->commonFilters();
         $result = $this->reports->matches($filters);
-        return $this->renderReport('Relatório de Jogos', 'reports/matches', $filters, $result);
+        return $this->renderReport('Relatorio de Jogos', 'reports/matches', $filters, $result);
     }
 
     public function documents()
@@ -51,14 +51,14 @@ class Reports extends BaseController
         $filters = $this->commonFilters();
         $filters['expiring_in_days'] = $this->request->getGet('expiring_in_days');
         $result = $this->reports->documents($filters);
-        return $this->renderReport('Relatório de Documentos', 'reports/documents', $filters, $result);
+        return $this->renderReport('Relatorio de Documentos', 'reports/documents', $filters, $result);
     }
 
     public function athlete(int $id)
     {
         $filters = $this->commonFilters();
         $result = $this->reports->athlete($id, $filters);
-        return $this->renderReport('Relatório do Atleta', 'reports/athlete', $filters, $result, $id);
+        return $this->renderReport('Relatorio do Atleta', 'reports/athlete', $filters, $result, $id);
     }
 
     protected function renderReport(string $title, string $view, array $filters, array $result, ?int $athleteId = null)
@@ -71,9 +71,10 @@ class Reports extends BaseController
             return $this->export->toXlsx($this->filename($title, 'xlsx'), $result['headers'], $result['rows']);
         }
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listAll(!empty($filters['team_id']) ? (int) $filters['team_id'] : null);
-        $athletesResult = $this->athletes->list([], 200, 'athletes_filter');
+        $athletesResult = $this->athletes->list(['team_id' => $filters['team_id']], 200, 'athletes_filter');
         $athletes = $athletesResult['items'] ?? [];
 
         return view($view, [
@@ -91,7 +92,7 @@ class Reports extends BaseController
 
     protected function commonFilters(): array
     {
-        return [
+        $filters = [
             'team_id' => $this->request->getGet('team_id'),
             'category_id' => $this->request->getGet('category_id'),
             'athlete_id' => $this->request->getGet('athlete_id'),
@@ -100,6 +101,9 @@ class Reports extends BaseController
             'status' => $this->request->getGet('status'),
             'competition_name' => $this->request->getGet('competition_name'),
         ];
+
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        return $filters;
     }
 
     protected function filename(string $title, string $ext): string

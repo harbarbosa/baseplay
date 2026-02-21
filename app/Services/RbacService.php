@@ -45,6 +45,13 @@ class RbacService
             return $this->permissionCache[$userId] = [];
         }
 
+        $roles = $this->roles->whereIn('id', $roleIds)->findAll();
+        $roleNames = array_map('strtolower', array_column($roles, 'name'));
+        if (in_array('admin', $roleNames, true)) {
+            $allPermissions = array_column($this->permissions->findAll(), 'name');
+            return $this->permissionCache[$userId] = $allPermissions;
+        }
+
         $permissionIds = array_column(
             $this->rolePermissions->whereIn('role_id', $roleIds)->findAll(),
             'permission_id'

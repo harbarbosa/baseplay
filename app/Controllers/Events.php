@@ -40,10 +40,13 @@ class Events extends BaseController
             'to_date' => $this->request->getGet('to_date'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $viewMode = $this->request->getGet('view') ?: 'list';
         $result = $this->events->list($filters, 20, 'events');
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true);
 
         $eventsByDate = [];
@@ -67,8 +70,13 @@ class Events extends BaseController
 
     public function create()
     {
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $teamId = (int) $this->request->getGet('team_id');
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        if ($this->scopedTeamIds !== [] && !$teamId) {
+            return redirect()->to('/events')->with('error', 'Acesso negado.');
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
 
         return view('events/create', [
@@ -86,6 +94,13 @@ class Events extends BaseController
         $payload['start_datetime'] = $this->normalizeDateTime($payload['start_datetime'] ?? null);
         $payload['end_datetime'] = $this->normalizeDateTime($payload['end_datetime'] ?? null);
 
+        if ($this->scopedTeamIds !== []) {
+            $payload['team_id'] = $this->pickScopedTeamId((int) ($payload['team_id'] ?? 0));
+        }
+        if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->eventCreate, config('Validation')->eventCreate_errors);
 
@@ -94,7 +109,7 @@ class Events extends BaseController
         }
 
         if (!$this->validateDateRange($payload['start_datetime'] ?? null, $payload['end_datetime'] ?? null)) {
-            return redirect()->back()->withInput()->with('error', 'A data final deve ser maior ou igual à data inicial.');
+            return redirect()->back()->withInput()->with('error', 'A data final deve ser maior ou igual a data inicial.');
         }
 
         $eventId = $this->events->create($payload, (int) session('user_id'));
@@ -107,7 +122,11 @@ class Events extends BaseController
     {
         $event = $this->events->findWithRelations($id);
         if (!$event) {
-            return redirect()->to('/events')->with('error', 'Evento não encontrado.');
+            return redirect()->to('/events')->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
         }
 
         $participants = $this->participants->listByEvent($id);
@@ -133,14 +152,20 @@ class Events extends BaseController
     {
         $event = $this->events->find($id);
         if (!$event) {
-            return redirect()->to('/events')->with('error', 'Evento não encontrado.');
+            return redirect()->to('/events')->with('error', 'Evento nao encontrado.');
         }
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $teamId = (int) $this->request->getGet('team_id');
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
+        }
+
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
         if ($teamId <= 0) {
             $teamId = (int) $event['team_id'];
         }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
 
         return view('events/edit', [
@@ -157,12 +182,23 @@ class Events extends BaseController
     {
         $event = $this->events->find($id);
         if (!$event) {
-            return redirect()->to('/events')->with('error', 'Evento não encontrado.');
+            return redirect()->to('/events')->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
         }
 
         $payload = $this->request->getPost();
         $payload['start_datetime'] = $this->normalizeDateTime($payload['start_datetime'] ?? null);
         $payload['end_datetime'] = $this->normalizeDateTime($payload['end_datetime'] ?? null);
+
+        if ($this->scopedTeamIds !== []) {
+            $payload['team_id'] = $this->pickScopedTeamId((int) ($payload['team_id'] ?? 0));
+        }
+        if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
 
         $validation = service('validation');
         $validation->setRules(config('Validation')->eventUpdate, config('Validation')->eventCreate_errors);
@@ -172,7 +208,7 @@ class Events extends BaseController
         }
 
         if (!$this->validateDateRange($payload['start_datetime'] ?? null, $payload['end_datetime'] ?? null)) {
-            return redirect()->back()->withInput()->with('error', 'A data final deve ser maior ou igual à data inicial.');
+            return redirect()->back()->withInput()->with('error', 'A data final deve ser maior ou igual a data inicial.');
         }
 
         $this->events->update($id, $payload, (int) session('user_id'));
@@ -185,7 +221,11 @@ class Events extends BaseController
     {
         $event = $this->events->find($id);
         if (!$event) {
-            return redirect()->to('/events')->with('error', 'Evento não encontrado.');
+            return redirect()->to('/events')->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
         }
 
         return view('events/delete', ['title' => 'Excluir evento', 'event' => $event]);
@@ -195,7 +235,11 @@ class Events extends BaseController
     {
         $event = $this->events->find($id);
         if (!$event) {
-            return redirect()->to('/events')->with('error', 'Evento não encontrado.');
+            return redirect()->to('/events')->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
         }
 
         $this->events->delete($id);
@@ -204,22 +248,22 @@ class Events extends BaseController
         return redirect()->to('/events')->with('success', 'Evento removido.');
     }
 
-    public function addParticipantsCategory(int $eventId)
-    {
-        $event = $this->events->find($eventId);
-        if (!$event) {
-            return redirect()->back()->with('error', 'Evento não encontrado.');
-        }
-
-        $count = $this->participants->addFromCategory($eventId, (int) $event['category_id']);
-        return redirect()->back()->with('success', "$count atletas adicionados.");
-    }
-
     public function addParticipant(int $eventId)
     {
         $event = $this->events->find($eventId);
         if (!$event) {
-            return redirect()->back()->with('error', 'Evento não encontrado.');
+            return redirect()->back()->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
+        }
+
+        $athleteIds = $this->request->getPost('athlete_ids');
+        if (is_array($athleteIds) && $athleteIds !== []) {
+            $normalized = array_map(static fn($id) => (int) $id, $athleteIds);
+            $count = $this->participants->addParticipantsBulk($eventId, $normalized);
+            return redirect()->back()->with('success', $count . ' atletas convocados.');
         }
 
         $athleteId = (int) $this->request->getPost('athlete_id');
@@ -235,12 +279,17 @@ class Events extends BaseController
     {
         $participant = $this->participants->find($id);
         if (!$participant) {
-            return redirect()->back()->with('error', 'Convocado não encontrado.');
+            return redirect()->back()->with('error', 'Convocado nao encontrado.');
+        }
+
+        $event = $this->events->find((int) $participant['event_id']);
+        if ($event && ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events'))) {
+            return $response;
         }
 
         $status = $this->request->getPost('invitation_status') ?: 'invited';
         if ($status === 'confirmed' && $this->events->isCancelled((int) $participant['event_id'])) {
-            return redirect()->back()->with('error', 'Não é possível confirmar convite em evento cancelado.');
+            return redirect()->back()->with('error', 'Nao e possivel confirmar convite em evento cancelado.');
         }
 
         $this->participants->update($id, $status, $this->request->getPost('notes'));
@@ -251,7 +300,12 @@ class Events extends BaseController
     {
         $participant = $this->participants->find($id);
         if (!$participant) {
-            return redirect()->back()->with('error', 'Convocado não encontrado.');
+            return redirect()->back()->with('error', 'Convocado nao encontrado.');
+        }
+
+        $event = $this->events->find((int) $participant['event_id']);
+        if ($event && ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events'))) {
+            return $response;
         }
 
         $this->participants->delete($id);
@@ -262,22 +316,26 @@ class Events extends BaseController
     {
         $event = $this->events->find($eventId);
         if (!$event) {
-            return redirect()->back()->with('error', 'Evento não encontrado.');
+            return redirect()->back()->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
         }
 
         $athleteId = (int) $this->request->getPost('athlete_id');
         $status = $this->request->getPost('status');
 
         if ($athleteId <= 0 || !$status) {
-            return redirect()->back()->with('error', 'Dados inválidos.');
+            return redirect()->back()->with('error', 'Dados invalidos.');
         }
 
         if (!$this->participants->isParticipant($eventId, $athleteId)) {
-            return redirect()->back()->with('error', 'Atleta não está convocado para este evento.');
+            return redirect()->back()->with('error', 'Atleta nao esta convocado para este evento.');
         }
 
         $this->attendance->upsert($eventId, $athleteId, $status, $this->request->getPost('notes'));
-        return redirect()->back()->with('success', 'Presença registrada.');
+        return redirect()->back()->with('success', 'Presenca registrada.');
     }
 
     protected function validateDateRange(?string $start, ?string $end): bool
@@ -308,8 +366,8 @@ class Events extends BaseController
         return [
             'TRAINING' => 'Treino',
             'MATCH' => 'Jogo',
-            'MEETING' => 'Reunião',
-            'EVALUATION' => 'Avaliação',
+            'MEETING' => 'Reuniao',
+            'EVALUATION' => 'Avaliacao',
             'TRAVEL' => 'Viagem',
         ];
     }

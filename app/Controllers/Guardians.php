@@ -33,10 +33,14 @@ class Guardians extends BaseController
             'status' => $this->request->getGet('status'),
         ];
 
+        if ($this->scopedTeamIds !== []) {
+            $filters['team_ids'] = $this->scopedTeamIds;
+        }
+
         $result = $this->guardians->list($filters, 15, 'guardians');
 
         return view('guardians/index', [
-            'title' => 'Responsáveis',
+            'title' => 'Responsaveis',
             'guardians' => $result['items'],
             'pager' => $result['pager'],
             'filters' => $filters,
@@ -47,13 +51,17 @@ class Guardians extends BaseController
     {
         $guardian = $this->guardians->find($id);
         if (!$guardian) {
-            return redirect()->to('/guardians')->with('error', 'Responsável não encontrado.');
+            return redirect()->to('/guardians')->with('error', 'Responsavel nao encontrado.');
+        }
+
+        if ($response = $this->denyIfGuardianForbidden($id)) {
+            return $response;
         }
 
         $athletes = $this->links->listByGuardian($id);
 
         return view('guardians/show', [
-            'title' => 'Responsável',
+            'title' => 'Responsavel',
             'guardian' => $guardian,
             'athletes' => $athletes,
         ]);
@@ -61,11 +69,15 @@ class Guardians extends BaseController
 
     public function create()
     {
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+
         return view('guardians/create', [
-            'title' => 'Novo responsável',
-            'teams' => $this->teams->list([], 200, 'teams_filter')['items'],
-            'categories' => $this->categories->listAll(),
-            'athletes' => $this->athletes->listAllWithRelations(),
+            'title' => 'Novo responsavel',
+            'teams' => $teams,
+            'categories' => $this->categories->listAll($teamId > 0 ? $teamId : null),
+            'athletes' => $this->athletes->listAllWithRelations($this->scopedTeamIds),
         ]);
     }
 
@@ -88,22 +100,30 @@ class Guardians extends BaseController
         }
 
         Services::audit()->log(session('user_id'), 'guardian_created', ['guardian_id' => $guardianId]);
-        return redirect()->to('/guardians/' . $guardianId)->with('success', 'Responsável criado com sucesso.');
+        return redirect()->to('/guardians/' . $guardianId)->with('success', 'Responsavel criado com sucesso.');
     }
 
     public function edit(int $id)
     {
         $guardian = $this->guardians->find($id);
         if (!$guardian) {
-            return redirect()->to('/guardians')->with('error', 'Responsável não encontrado.');
+            return redirect()->to('/guardians')->with('error', 'Responsavel nao encontrado.');
         }
 
+        if ($response = $this->denyIfGuardianForbidden($id)) {
+            return $response;
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+
         return view('guardians/edit', [
-            'title' => 'Editar responsável',
+            'title' => 'Editar responsavel',
             'guardian' => $guardian,
-            'teams' => $this->teams->list([], 200, 'teams_filter')['items'],
-            'categories' => $this->categories->listAll(),
-            'athletes' => $this->athletes->listAllWithRelations(),
+            'teams' => $teams,
+            'categories' => $this->categories->listAll($teamId > 0 ? $teamId : null),
+            'athletes' => $this->athletes->listAllWithRelations($this->scopedTeamIds),
         ]);
     }
 
@@ -111,7 +131,11 @@ class Guardians extends BaseController
     {
         $guardian = $this->guardians->find($id);
         if (!$guardian) {
-            return redirect()->to('/guardians')->with('error', 'Responsável não encontrado.');
+            return redirect()->to('/guardians')->with('error', 'Responsavel nao encontrado.');
+        }
+
+        if ($response = $this->denyIfGuardianForbidden($id)) {
+            return $response;
         }
 
         $validation = service('validation');
@@ -131,29 +155,59 @@ class Guardians extends BaseController
         }
 
         Services::audit()->log(session('user_id'), 'guardian_updated', ['guardian_id' => $id]);
-        return redirect()->to('/guardians/' . $id)->with('success', 'Responsável atualizado.');
+        return redirect()->to('/guardians/' . $id)->with('success', 'Responsavel atualizado.');
     }
 
     public function deleteConfirm(int $id)
     {
         $guardian = $this->guardians->find($id);
         if (!$guardian) {
-            return redirect()->to('/guardians')->with('error', 'Responsável não encontrado.');
+            return redirect()->to('/guardians')->with('error', 'Responsavel nao encontrado.');
         }
 
-        return view('guardians/delete', ['title' => 'Excluir responsável', 'guardian' => $guardian]);
+        if ($response = $this->denyIfGuardianForbidden($id)) {
+            return $response;
+        }
+
+        return view('guardians/delete', ['title' => 'Excluir responsavel', 'guardian' => $guardian]);
     }
 
     public function delete(int $id)
     {
         $guardian = $this->guardians->find($id);
         if (!$guardian) {
-            return redirect()->to('/guardians')->with('error', 'Responsável não encontrado.');
+            return redirect()->to('/guardians')->with('error', 'Responsavel nao encontrado.');
+        }
+
+        if ($response = $this->denyIfGuardianForbidden($id)) {
+            return $response;
         }
 
         $this->guardians->delete($id);
         Services::audit()->log(session('user_id'), 'guardian_deleted', ['guardian_id' => $id]);
 
-        return redirect()->to('/guardians')->with('success', 'Responsável removido.');
+        return redirect()->to('/guardians')->with('success', 'Responsavel removido.');
+    }
+
+    protected function denyIfGuardianForbidden(int $guardianId)
+    {
+        if ($this->scopedTeamIds === []) {
+            return null;
+        }
+
+        $row = db_connect()->table('athlete_guardians ag')
+            ->select('c.team_id')
+            ->join('athletes a', 'a.id = ag.athlete_id', 'left')
+            ->join('categories c', 'c.id = a.category_id', 'left')
+            ->where('ag.guardian_id', $guardianId)
+            ->whereIn('c.team_id', $this->scopedTeamIds)
+            ->get()
+            ->getRowArray();
+
+        if (!$row) {
+            return redirect()->to('/guardians')->with('error', 'Acesso negado.');
+        }
+
+        return null;
     }
 }

@@ -52,8 +52,11 @@ class Matches extends BaseController
             'competition_name' => $this->request->getGet('competition_name'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $result = $this->matches->list($filters, 20, 'matches');
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true);
 
         return view('matches/index', [
@@ -68,8 +71,13 @@ class Matches extends BaseController
 
     public function create()
     {
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $teamId = (int) $this->request->getGet('team_id');
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        if ($this->scopedTeamIds !== [] && !$teamId) {
+            return redirect()->to('/matches')->with('error', 'Acesso negado.');
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
         $events = $this->agenda->list(['type' => 'MATCH'], 200, 'match_events')['items'];
 
@@ -85,6 +93,14 @@ class Matches extends BaseController
     public function store()
     {
         $payload = $this->request->getPost();
+
+        if ($this->scopedTeamIds !== []) {
+            $payload['team_id'] = $this->pickScopedTeamId((int) ($payload['team_id'] ?? 0));
+        }
+        if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->matchCreate, config('Validation')->matchCreate_errors);
 
@@ -94,7 +110,7 @@ class Matches extends BaseController
 
         if (($payload['status'] ?? 'scheduled') === 'completed') {
             if ($payload['score_for'] === '' || $payload['score_against'] === '') {
-                return redirect()->back()->withInput()->with('error', 'Informe o placar para jogos concluídos.');
+                return redirect()->back()->withInput()->with('error', 'Informe o placar para jogos concluidos.');
             }
         }
 
@@ -108,7 +124,11 @@ class Matches extends BaseController
     {
         $match = $this->matches->findWithRelations($id);
         if (!$match) {
-            return redirect()->to('/matches')->with('error', 'Jogo não encontrado.');
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $callups = $this->callups->listByMatch($id);
@@ -134,14 +154,20 @@ class Matches extends BaseController
     {
         $match = $this->matches->find($id);
         if (!$match) {
-            return redirect()->to('/matches')->with('error', 'Jogo não encontrado.');
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
         }
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $teamId = (int) $this->request->getGet('team_id');
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
         if ($teamId <= 0) {
             $teamId = (int) $match['team_id'];
         }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
         $events = $this->agenda->list(['type' => 'MATCH'], 200, 'match_events')['items'];
 
@@ -159,10 +185,21 @@ class Matches extends BaseController
     {
         $match = $this->matches->find($id);
         if (!$match) {
-            return redirect()->to('/matches')->with('error', 'Jogo não encontrado.');
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $payload = $this->request->getPost();
+        if ($this->scopedTeamIds !== []) {
+            $payload['team_id'] = $this->pickScopedTeamId((int) ($payload['team_id'] ?? 0));
+        }
+        if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->matchCreate, config('Validation')->matchCreate_errors);
 
@@ -172,7 +209,7 @@ class Matches extends BaseController
 
         if (($payload['status'] ?? 'scheduled') === 'completed') {
             if ($payload['score_for'] === '' || $payload['score_against'] === '') {
-                return redirect()->back()->withInput()->with('error', 'Informe o placar para jogos concluídos.');
+                return redirect()->back()->withInput()->with('error', 'Informe o placar para jogos concluidos.');
             }
         }
 
@@ -186,7 +223,11 @@ class Matches extends BaseController
     {
         $match = $this->matches->find($id);
         if (!$match) {
-            return redirect()->to('/matches')->with('error', 'Jogo não encontrado.');
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         return view('matches/delete', ['title' => 'Excluir jogo', 'match' => $match]);
@@ -196,7 +237,11 @@ class Matches extends BaseController
     {
         $match = $this->matches->find($id);
         if (!$match) {
-            return redirect()->to('/matches')->with('error', 'Jogo não encontrado.');
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $this->matches->delete($id);
@@ -209,7 +254,12 @@ class Matches extends BaseController
     {
         $matchId = $this->matches->createFromEvent($eventId, (int) session('user_id'));
         if (!$matchId) {
-            return redirect()->to('/matches')->with('error', 'Evento inválido para criar jogo.');
+            return redirect()->to('/matches')->with('error', 'Evento invalido para criar jogo.');
+        }
+
+        $match = $this->matches->find($matchId);
+        if ($match && ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches'))) {
+            return $response;
         }
 
         $this->callups->addFromEventParticipants($matchId, $eventId);
@@ -220,11 +270,15 @@ class Matches extends BaseController
     {
         $match = $this->matches->find($matchId);
         if (!$match) {
-            return redirect()->back()->with('error', 'Jogo não encontrado.');
+            return redirect()->back()->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $count = $this->callups->addFromCategory($matchId, (int) $match['category_id']);
-        return redirect()->back()->with('success', "$count atletas convocados.");
+        return redirect()->back()->with('success', $count . ' atletas convocados.');
     }
 
     public function importCallupsFromEvent(int $matchId)
@@ -234,15 +288,23 @@ class Matches extends BaseController
             return redirect()->back()->with('error', 'Nenhum evento vinculado ao jogo.');
         }
 
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+
         $count = $this->callups->addFromEventParticipants($matchId, (int) $match['event_id']);
-        return redirect()->back()->with('success', "$count atletas importados do evento.");
+        return redirect()->back()->with('success', $count . ' atletas importados do evento.');
     }
 
     public function addCallup(int $matchId)
     {
         $match = $this->matches->find($matchId);
         if (!$match) {
-            return redirect()->back()->with('error', 'Jogo não encontrado.');
+            return redirect()->back()->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $athleteId = (int) $this->request->getPost('athlete_id');
@@ -258,37 +320,51 @@ class Matches extends BaseController
     {
         $callup = $this->callups->find($id);
         if (!$callup) {
-            return redirect()->back()->with('error', 'Convocação não encontrada.');
+            return redirect()->back()->with('error', 'Convocacao nao encontrada.');
+        }
+
+        $match = $this->matches->find((int) $callup['match_id']);
+        if ($match && ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches'))) {
+            return $response;
         }
 
         $status = $this->request->getPost('callup_status') ?? 'invited';
         $isStarting = (int) ($this->request->getPost('is_starting') ?? 0);
 
         $this->callups->update($id, $status, $isStarting);
-        return redirect()->back()->with('success', 'Convocação atualizada.');
+        return redirect()->back()->with('success', 'Convocacao atualizada.');
     }
 
     public function deleteCallup(int $id)
     {
         $callup = $this->callups->find($id);
         if (!$callup) {
-            return redirect()->back()->with('error', 'Convocação não encontrada.');
+            return redirect()->back()->with('error', 'Convocacao nao encontrada.');
+        }
+
+        $match = $this->matches->find((int) $callup['match_id']);
+        if ($match && ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches'))) {
+            return $response;
         }
 
         $this->callups->delete($id);
-        return redirect()->back()->with('success', 'Convocação removida.');
+        return redirect()->back()->with('success', 'Convocacao removida.');
     }
 
     public function saveLineup(int $matchId)
     {
         $match = $this->matches->find($matchId);
         if (!$match) {
-            return redirect()->back()->with('error', 'Jogo não encontrado.');
+            return redirect()->back()->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $athleteId = (int) $this->request->getPost('athlete_id');
         if ($athleteId <= 0 || !$this->callups->isCalledUp($matchId, $athleteId)) {
-            return redirect()->back()->with('error', 'Atleta não convocado para este jogo.');
+            return redirect()->back()->with('error', 'Atleta nao convocado para este jogo.');
         }
 
         $this->lineups->upsert($matchId, $athleteId, [
@@ -298,14 +374,18 @@ class Matches extends BaseController
             'order_index' => $this->request->getPost('order_index') ?? 0,
         ]);
 
-        return redirect()->back()->with('success', 'Escalação atualizada.');
+        return redirect()->back()->with('success', 'Escalacao atualizada.');
     }
 
     public function addEvent(int $matchId)
     {
         $match = $this->matches->find($matchId);
         if (!$match) {
-            return redirect()->back()->with('error', 'Jogo não encontrado.');
+            return redirect()->back()->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $payload = $this->request->getPost();
@@ -325,7 +405,12 @@ class Matches extends BaseController
     {
         $event = $this->events->find($id);
         if (!$event) {
-            return redirect()->back()->with('error', 'Evento não encontrado.');
+            return redirect()->back()->with('error', 'Evento nao encontrado.');
+        }
+
+        $match = $this->matches->find((int) $event['match_id']);
+        if ($match && ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches'))) {
+            return $response;
         }
 
         $payload = $this->request->getPost();
@@ -337,7 +422,12 @@ class Matches extends BaseController
     {
         $event = $this->events->find($id);
         if (!$event) {
-            return redirect()->back()->with('error', 'Evento não encontrado.');
+            return redirect()->back()->with('error', 'Evento nao encontrado.');
+        }
+
+        $match = $this->matches->find((int) $event['match_id']);
+        if ($match && ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches'))) {
+            return $response;
         }
 
         $this->events->delete($id);
@@ -348,18 +438,26 @@ class Matches extends BaseController
     {
         $match = $this->matches->find($matchId);
         if (!$match) {
-            return redirect()->back()->with('error', 'Jogo não encontrado.');
+            return redirect()->back()->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $this->reports->upsert($matchId, $this->request->getPost());
-        return redirect()->back()->with('success', 'Relatório atualizado.');
+        return redirect()->back()->with('success', 'Relatorio atualizado.');
     }
 
     public function addAttachment(int $matchId)
     {
         $match = $this->matches->find($matchId);
         if (!$match) {
-            return redirect()->back()->with('error', 'Jogo não encontrado.');
+            return redirect()->back()->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
         }
 
         $url = trim((string) $this->request->getPost('url'));
@@ -380,7 +478,12 @@ class Matches extends BaseController
     {
         $attachment = $this->attachments->find($id);
         if (!$attachment) {
-            return redirect()->back()->with('error', 'Anexo não encontrado.');
+            return redirect()->back()->with('error', 'Anexo nao encontrado.');
+        }
+
+        $match = $this->matches->find((int) $attachment['match_id']);
+        if ($match && ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches'))) {
+            return $response;
         }
 
         $this->attachments->delete($id);

@@ -38,10 +38,12 @@ class Athletes extends BaseController
             'status' => $this->request->getGet('status'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $result = $this->athletes->list($filters, 15, 'athletes');
-        $teams = (new TeamService())->list([], 200, 'teams_filter')['items'];
-        $categoryService = new CategoryService();
-        $categories = $categoryService->listAll(!empty($filters['team_id']) ? (int) $filters['team_id'] : null);
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll(!empty($filters['team_id']) ? (int) $filters['team_id'] : null);
 
         return view('athletes/index', [
             'title' => 'Atletas',
@@ -55,13 +57,17 @@ class Athletes extends BaseController
 
     public function create()
     {
-        $teams = (new TeamService())->list([], 200, 'teams_filter')['items'];
-        $teamId = (int) $this->request->getGet('team_id');
-        $categoryService = new CategoryService();
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        if ($this->scopedTeamIds !== [] && !$teamId) {
+            return redirect()->to('/athletes')->with('error', 'Acesso negado.');
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = [];
         if ($teamId > 0) {
-            $categoryService->ensureStandardCategories($teamId, 10, 20);
-            $categories = $categoryService->listDistinctByTeam($teamId, true);
+            $this->categories->ensureStandardCategories($teamId, 10, 20);
+            $categories = $this->categories->listDistinctByTeam($teamId, true);
         }
 
         return view('athletes/create', [
@@ -74,6 +80,14 @@ class Athletes extends BaseController
 
     public function store()
     {
+        $categoryId = (int) $this->request->getPost('category_id');
+        if ($this->scopedTeamIds !== []) {
+            $category = $this->categories->find($categoryId);
+            if (!$category || !in_array((int) $category['team_id'], $this->scopedTeamIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria invalida para sua equipe.');
+            }
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->athleteCreate, config('Validation')->athleteCreate_errors);
 
@@ -82,7 +96,7 @@ class Athletes extends BaseController
         }
 
         if ($this->isFutureDate($this->request->getPost('birth_date'))) {
-            return redirect()->back()->withInput()->with('error', 'A data de nascimento não pode ser futura.');
+            return redirect()->back()->withInput()->with('error', 'A data de nascimento nao pode ser futura.');
         }
 
         $athleteId = $this->athletes->create($this->request->getPost());
@@ -95,7 +109,11 @@ class Athletes extends BaseController
     {
         $athlete = $this->athletes->findWithRelations($id);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) ($athlete['team_id'] ?? 0), '/athletes')) {
+            return $response;
         }
 
         $guardians = $this->links->listByAthlete($id);
@@ -113,21 +131,27 @@ class Athletes extends BaseController
     {
         $athlete = $this->athletes->find($id);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
         }
 
-        $teams = (new TeamService())->list([], 200, 'teams_filter')['items'];
-        $categoryService = new CategoryService();
-        $currentCategory = $categoryService->find((int) $athlete['category_id']);
+        $currentCategory = $this->categories->find((int) $athlete['category_id']);
         $teamId = $currentCategory ? (int) $currentCategory['team_id'] : 0;
-        $requestedTeamId = (int) $this->request->getGet('team_id');
+        if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
+            return $response;
+        }
+
+        $requestedTeamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
         if ($requestedTeamId > 0) {
             $teamId = $requestedTeamId;
         }
+
         if ($teamId > 0) {
-            $categoryService->ensureStandardCategories($teamId, 10, 20);
+            $this->categories->ensureStandardCategories($teamId, 10, 20);
         }
-        $categories = $categoryService->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
 
         return view('athletes/edit', [
             'title' => 'Editar atleta',
@@ -142,7 +166,21 @@ class Athletes extends BaseController
     {
         $athlete = $this->athletes->find($id);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
+        }
+
+        $currentCategory = $this->categories->find((int) $athlete['category_id']);
+        $teamId = $currentCategory ? (int) $currentCategory['team_id'] : 0;
+        if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
+            return $response;
+        }
+
+        $categoryId = (int) $this->request->getPost('category_id');
+        if ($this->scopedTeamIds !== []) {
+            $category = $this->categories->find($categoryId);
+            if (!$category || !in_array((int) $category['team_id'], $this->scopedTeamIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria invalida para sua equipe.');
+            }
         }
 
         $validation = service('validation');
@@ -153,7 +191,7 @@ class Athletes extends BaseController
         }
 
         if ($this->isFutureDate($this->request->getPost('birth_date'))) {
-            return redirect()->back()->withInput()->with('error', 'A data de nascimento não pode ser futura.');
+            return redirect()->back()->withInput()->with('error', 'A data de nascimento nao pode ser futura.');
         }
 
         $this->athletes->update($id, $this->request->getPost());
@@ -166,7 +204,13 @@ class Athletes extends BaseController
     {
         $athlete = $this->athletes->find($id);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
+        }
+
+        $currentCategory = $this->categories->find((int) $athlete['category_id']);
+        $teamId = $currentCategory ? (int) $currentCategory['team_id'] : 0;
+        if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
+            return $response;
         }
 
         return view('athletes/delete', ['title' => 'Excluir atleta', 'athlete' => $athlete]);
@@ -176,7 +220,13 @@ class Athletes extends BaseController
     {
         $athlete = $this->athletes->find($id);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
+        }
+
+        $currentCategory = $this->categories->find((int) $athlete['category_id']);
+        $teamId = $currentCategory ? (int) $currentCategory['team_id'] : 0;
+        if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
+            return $response;
         }
 
         $this->athletes->delete($id);
@@ -187,9 +237,13 @@ class Athletes extends BaseController
 
     public function linkGuardian(int $athleteId)
     {
-        $athlete = $this->athletes->find($athleteId);
+        $athlete = $this->athletes->findWithRelations($athleteId);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) ($athlete['team_id'] ?? 0), '/athletes')) {
+            return $response;
         }
 
         $guardianId = (int) $this->request->getPost('guardian_id');
@@ -197,20 +251,24 @@ class Athletes extends BaseController
         $notes = $this->request->getPost('notes');
 
         if ($guardianId <= 0) {
-            return redirect()->back()->with('error', 'Selecione um responsável.');
+            return redirect()->back()->with('error', 'Selecione um responsavel.');
         }
 
         $this->links->link($athleteId, $guardianId, $isPrimary, $notes);
         Services::audit()->log(session('user_id'), 'athlete_guardian_linked', ['athlete_id' => $athleteId]);
 
-        return redirect()->back()->with('success', 'Responsável vinculado.');
+        return redirect()->back()->with('success', 'Responsavel vinculado.');
     }
 
     public function createGuardianAndLink(int $athleteId)
     {
-        $athlete = $this->athletes->find($athleteId);
+        $athlete = $this->athletes->findWithRelations($athleteId);
         if (!$athlete) {
-            return redirect()->to('/athletes')->with('error', 'Atleta não encontrado.');
+            return redirect()->to('/athletes')->with('error', 'Atleta nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) ($athlete['team_id'] ?? 0), '/athletes')) {
+            return $response;
         }
 
         $validation = service('validation');
@@ -224,14 +282,19 @@ class Athletes extends BaseController
         $this->links->link($athleteId, $guardianId, 1, '');
         Services::audit()->log(session('user_id'), 'athlete_guardian_created', ['athlete_id' => $athleteId, 'guardian_id' => $guardianId]);
 
-        return redirect()->back()->with('success', 'Responsável criado e vinculado.');
+        return redirect()->back()->with('success', 'Responsavel criado e vinculado.');
     }
 
     public function updateLink(int $id)
     {
         $link = $this->links->findLink($id);
         if (!$link) {
-            return redirect()->back()->with('error', 'Vínculo não encontrado.');
+            return redirect()->back()->with('error', 'Vinculo nao encontrado.');
+        }
+
+        $athlete = $this->athletes->findWithRelations((int) $link['athlete_id']);
+        if ($athlete && ($response = $this->denyIfTeamForbidden((int) ($athlete['team_id'] ?? 0), '/athletes'))) {
+            return $response;
         }
 
         $isPrimary = (int) $this->request->getPost('is_primary');
@@ -239,20 +302,25 @@ class Athletes extends BaseController
         $this->links->updateLink($id, (int) $link['athlete_id'], $isPrimary, $notes);
         Services::audit()->log(session('user_id'), 'athlete_guardian_updated', ['link_id' => $id]);
 
-        return redirect()->back()->with('success', 'Vínculo atualizado.');
+        return redirect()->back()->with('success', 'Vinculo atualizado.');
     }
 
     public function unlinkGuardian(int $id)
     {
         $link = $this->links->findLink($id);
         if (!$link) {
-            return redirect()->back()->with('error', 'Vínculo não encontrado.');
+            return redirect()->back()->with('error', 'Vinculo nao encontrado.');
+        }
+
+        $athlete = $this->athletes->findWithRelations((int) $link['athlete_id']);
+        if ($athlete && ($response = $this->denyIfTeamForbidden((int) ($athlete['team_id'] ?? 0), '/athletes'))) {
+            return $response;
         }
 
         $this->links->unlink($id);
         Services::audit()->log(session('user_id'), 'athlete_guardian_unlinked', ['link_id' => $id]);
 
-        return redirect()->back()->with('success', 'Vínculo removido.');
+        return redirect()->back()->with('success', 'Vinculo removido.');
     }
 
     protected function isFutureDate(string $date): bool
@@ -263,5 +331,4 @@ class Athletes extends BaseController
 
         return strtotime($date) > time();
     }
-
 }

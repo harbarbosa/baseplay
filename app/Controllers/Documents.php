@@ -55,11 +55,14 @@ class Documents extends BaseController
             }
         }
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $result = $this->documents->list($filters, 15, 'documents');
         $types = $this->types->listAllActive();
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $athletes = $this->athletes->listAllWithRelations();
-        $categories = $this->categories->listDistinctAllByTeam(true);
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
         $statusCounters = $this->documents->statusCounters($filters);
         $complianceByCategory = $this->documents->complianceByCategory(!empty($filters['team_id']) ? (int) $filters['team_id'] : null);
 
@@ -87,9 +90,12 @@ class Documents extends BaseController
             'days' => $this->request->getGet('days'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $data = $this->overview->overview((int) session('user_id'), $filters);
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctAllByTeam(true);
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
         $types = $this->types->listAllActive();
 
         return view('documents/overview', [
@@ -107,9 +113,10 @@ class Documents extends BaseController
     public function create()
     {
         $types = $this->types->listAllActive();
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $athletes = $this->athletes->listAllWithRelations();
-        $categories = $this->categories->listDistinctAllByTeam(true);
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
         $guardianContext = $this->resolveCurrentGuardianContext();
 
         return view('documents/create', [
@@ -127,7 +134,6 @@ class Documents extends BaseController
         $payload = $this->request->getPost();
         $guardianContext = $this->resolveCurrentGuardianContext();
 
-        
         $typeName = trim((string) ($payload['document_type_name'] ?? ''));
         if (empty($payload['document_type_id']) && $typeName !== '') {
             $payload['document_type_id'] = $this->types->findOrCreateByName($typeName);
@@ -164,8 +170,12 @@ class Documents extends BaseController
             $payload['athlete_id'] = $payload['athlete_id'] ?? null;
             $payload['team_id'] = $payload['team_id'] ?? null;
             if (empty($payload['guardian_id'])) {
-                return redirect()->back()->withInput()->with('error', 'Seu usuário não está vinculado a um responsável. Peça ao admin para vincular o mesmo e-mail.');
+                return redirect()->back()->withInput()->with('error', 'Seu usuario nao esta vinculado a um responsavel.');
             }
+        }
+
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
         }
 
         $validation = service('validation');
@@ -177,7 +187,7 @@ class Documents extends BaseController
 
         $file = $this->request->getFile('document_file');
         if (!$file || !$file->isValid()) {
-            return redirect()->back()->withInput()->with('error', 'Arquivo inválido.');
+            return redirect()->back()->withInput()->with('error', 'Arquivo invalido.');
         }
 
         $type = $this->types->find((int) $payload['document_type_id']);
@@ -187,7 +197,7 @@ class Documents extends BaseController
 
         if (!empty($payload['issued_at']) && !empty($payload['expires_at'])) {
             if (strtotime($payload['expires_at']) < strtotime($payload['issued_at'])) {
-                return redirect()->back()->withInput()->with('error', 'A data de vencimento deve ser maior ou igual à data de emissão.');
+                return redirect()->back()->withInput()->with('error', 'A data de vencimento deve ser maior ou igual a data de emissao.');
             }
         }
 
@@ -202,11 +212,11 @@ class Documents extends BaseController
     {
         $document = $this->documents->findWithRelations($id);
         if (!$document) {
-            return redirect()->to('/documents')->with('error', 'Documento não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Documento nao encontrado.');
         }
 
         if (!$this->documents->userCanAccessDocument((int) session('user_id'), $document)) {
-            return redirect()->to('/documents')->with('error', 'Sem permissão para acessar este documento.');
+            return redirect()->to('/documents')->with('error', 'Sem permissao para acessar este documento.');
         }
 
         return view('documents/show', [
@@ -219,13 +229,18 @@ class Documents extends BaseController
     {
         $document = $this->documents->findWithRelations($id);
         if (!$document) {
-            return redirect()->to('/documents')->with('error', 'Documento não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Documento nao encontrado.');
+        }
+
+        if (!$this->documents->userCanAccessDocument((int) session('user_id'), $document)) {
+            return redirect()->to('/documents')->with('error', 'Sem permissao para acessar este documento.');
         }
 
         $types = $this->types->listAllActive();
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $athletes = $this->athletes->listAllWithRelations();
-        $categories = $this->categories->listDistinctAllByTeam(true);
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
 
         return view('documents/edit', [
             'title' => 'Editar documento',
@@ -242,7 +257,11 @@ class Documents extends BaseController
     {
         $document = $this->documents->findWithRelations($id);
         if (!$document) {
-            return redirect()->to('/documents')->with('error', 'Documento não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Documento nao encontrado.');
+        }
+
+        if (!$this->documents->userCanAccessDocument((int) session('user_id'), $document)) {
+            return redirect()->to('/documents')->with('error', 'Sem permissao para acessar este documento.');
         }
 
         $payload = $this->request->getPost();
@@ -282,6 +301,10 @@ class Documents extends BaseController
             $payload['guardian_id'] = $guardianContext['guardian_id'] ?: null;
         }
 
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->documentUpdate, config('Validation')->documentCreate_errors);
 
@@ -296,7 +319,7 @@ class Documents extends BaseController
 
         if (!empty($payload['issued_at']) && !empty($payload['expires_at'])) {
             if (strtotime($payload['expires_at']) < strtotime($payload['issued_at'])) {
-                return redirect()->back()->withInput()->with('error', 'A data de vencimento deve ser maior ou igual à data de emissão.');
+                return redirect()->back()->withInput()->with('error', 'A data de vencimento deve ser maior ou igual a data de emissao.');
             }
         }
 
@@ -316,7 +339,11 @@ class Documents extends BaseController
     {
         $document = $this->documents->findWithRelations($id);
         if (!$document) {
-            return redirect()->to('/documents')->with('error', 'Documento não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Documento nao encontrado.');
+        }
+
+        if (!$this->documents->userCanAccessDocument((int) session('user_id'), $document)) {
+            return redirect()->to('/documents')->with('error', 'Sem permissao para acessar este documento.');
         }
 
         return view('documents/delete', ['title' => 'Excluir documento', 'document' => $document]);
@@ -326,7 +353,12 @@ class Documents extends BaseController
     {
         $document = $this->documents->find($id);
         if (!$document) {
-            return redirect()->to('/documents')->with('error', 'Documento não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Documento nao encontrado.');
+        }
+
+        $documentFull = $this->documents->findWithRelations($id);
+        if ($documentFull && !$this->documents->userCanAccessDocument((int) session('user_id'), $documentFull)) {
+            return redirect()->to('/documents')->with('error', 'Sem permissao para acessar este documento.');
         }
 
         $this->documents->delete($id);
@@ -335,20 +367,95 @@ class Documents extends BaseController
         return redirect()->to('/documents')->with('success', 'Documento removido.');
     }
 
+    public function exportPendingCsv()
+    {
+        if (!has_permission('documents.view')) {
+            return redirect()->back()->with('error', 'Sem permissao para exportar.');
+        }
+
+        $ids = $this->request->getPost('document_ids');
+        if (!is_array($ids)) {
+            return redirect()->back()->with('error', 'Selecione documentos para exportar.');
+        }
+
+        $ids = array_values(array_filter(array_map(static fn($id) => (int) $id, $ids)));
+        if ($ids === []) {
+            return redirect()->back()->with('error', 'Selecione documentos para exportar.');
+        }
+
+        $today = date('Y-m-d');
+        $future = date('Y-m-d', strtotime('+7 days'));
+
+        $builder = db_connect()->table('documents d')
+            ->select('d.id, d.status, d.expires_at')
+            ->select('dt.name AS type_name')
+            ->select('a.first_name, a.last_name')
+            ->select('c.name AS category_name, t.name AS team_name')
+            ->join('document_types dt', 'dt.id = d.document_type_id', 'left')
+            ->join('athletes a', 'a.id = d.athlete_id', 'left')
+            ->join('categories c', 'c.id = a.category_id', 'left')
+            ->join('teams t', 't.id = c.team_id', 'left')
+            ->where('d.deleted_at', null)
+            ->whereIn('d.id', $ids)
+            ->groupStart()
+                ->where('d.expires_at <', $today)
+                ->orGroupStart()
+                    ->where('d.expires_at >=', $today)
+                    ->where('d.expires_at <=', $future)
+                ->groupEnd()
+            ->groupEnd();
+
+        if ($this->scopedTeamIds !== []) {
+            $builder->groupStart()
+                ->whereIn('c.team_id', $this->scopedTeamIds)
+                ->orWhereIn('d.team_id', $this->scopedTeamIds)
+                ->groupEnd();
+        }
+
+        $rows = $builder->get()->getResultArray();
+
+        if (!$rows) {
+            return redirect()->back()->with('error', 'Nenhuma pendencia encontrada nos itens selecionados.');
+        }
+
+        $filename = 'pendencias_documentos_' . date('Ymd_His') . '.csv';
+        $handle = fopen('php://temp', 'w+');
+        fputcsv($handle, ['Atleta', 'Tipo', 'Status', 'Vencimento', 'Equipe', 'Categoria']);
+        foreach ($rows as $row) {
+            $athlete = trim(($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? ''));
+            fputcsv($handle, [
+                $athlete !== '' ? $athlete : '-',
+                $row['type_name'] ?? '-',
+                $row['status'] ?? '-',
+                $row['expires_at'] ?? '-',
+                $row['team_name'] ?? '-',
+                $row['category_name'] ?? '-',
+            ]);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($csv);
+    }
+
     public function download(int $id)
     {
         $document = $this->documents->findWithRelations($id);
         if (!$document) {
-            return redirect()->to('/documents')->with('error', 'Documento não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Documento nao encontrado.');
         }
 
         if (!$this->documents->userCanAccessDocument((int) session('user_id'), $document)) {
-            return redirect()->to('/documents')->with('error', 'Sem permissão para acessar este documento.');
+            return redirect()->to('/documents')->with('error', 'Sem permissao para acessar este documento.');
         }
 
         $path = WRITEPATH . 'uploads/' . $document['file_path'];
         if (!is_file($path)) {
-            return redirect()->to('/documents')->with('error', 'Arquivo não encontrado.');
+            return redirect()->to('/documents')->with('error', 'Arquivo nao encontrado.');
         }
 
         $downloadName = $document['original_name'] ?? basename($path);
@@ -421,7 +528,7 @@ class Documents extends BaseController
         }
 
         if (count($exactMatches) > 1) {
-            return ['id' => null, 'error' => 'Há mais de um atleta com esse nome. Informe clube e sub para filtrar.'];
+            return ['id' => null, 'error' => 'Ha mais de um atleta com esse nome. Informe clube e sub para filtrar.'];
         }
 
         if (count($partialMatches) === 1) {
@@ -429,17 +536,17 @@ class Documents extends BaseController
         }
 
         if (count($partialMatches) > 1) {
-            return ['id' => null, 'error' => 'Há mais de um atleta com nome parecido. Informe clube e sub para filtrar.'];
+            return ['id' => null, 'error' => 'Ha mais de um atleta com nome parecido. Informe clube e sub para filtrar.'];
         }
 
-        return ['id' => null, 'error' => 'Atleta não encontrado. Verifique o nome.'];
+        return ['id' => null, 'error' => 'Atleta nao encontrado. Verifique o nome.'];
     }
 
     protected function resolveCurrentGuardianContext(): array
     {
         helper('auth');
         $roles = array_map(static fn($r) => mb_strtolower((string) $r), user_roles());
-        $isGuardian = in_array('responsavel', $roles, true) || in_array('responsável', $roles, true) || in_array('responsã¡vel', $roles, true);
+        $isGuardian = in_array('responsavel', $roles, true) || in_array('responsavel', $roles, true) || in_array('responsavel', $roles, true);
 
         if (!$isGuardian) {
             return ['is_guardian' => false, 'guardian_id' => null, 'guardian_name' => null];

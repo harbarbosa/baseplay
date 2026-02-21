@@ -24,6 +24,17 @@
                 <option value="inactive" <?= old('status') === 'inactive' ? 'selected' : '' ?>>Inativo</option>
             </select>
         </div>
+        <div class="form-group">
+            <label for="admin_name">Admin da equipe (nome)</label>
+            <input id="admin_name" name="admin_name" type="text" value="<?= esc(old('admin_name')) ?>">
+        </div>
+        <div class="form-group">
+            <label for="admin_email">Admin da equipe (email)</label>
+            <input id="admin_email" name="admin_email" type="email" value="<?= esc(old('admin_email')) ?>" required>
+        </div>
+        <div class="form-group">
+            <small>Senha sera gerada automaticamente e enviada depois.</small>
+        </div>
         <button type="submit">Criar</button>
         <a href="<?= base_url('/teams') ?>" class="button secondary">Cancelar</a>
     </form>

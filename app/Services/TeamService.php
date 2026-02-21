@@ -18,6 +18,13 @@ class TeamService
     {
         $model = $this->teams;
 
+        if (!empty($filters['ids']) && is_array($filters['ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('id', $ids);
+            }
+        }
+
         if (!empty($filters['search'])) {
             $model = $model->groupStart()
                 ->like('name', $filters['search'])

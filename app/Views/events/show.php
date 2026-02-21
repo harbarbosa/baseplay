@@ -39,9 +39,8 @@
             <form method="post" action="<?= base_url('/events/' . $event['id'] . '/participants/add') ?>" style="margin-bottom:12px;">
                 <?= csrf_field() ?>
                 <div class="form-group">
-                    <label for="athlete_id">Adicionar atleta individual</label>
-                    <select id="athlete_id" name="athlete_id">
-                        <option value="">Selecione</option>
+                    <label for="athlete_ids">Adicionar atletas (selecao multipla)</label>
+                    <select id="athlete_ids" name="athlete_ids[]" multiple size="6">
                         <?php foreach ($athletes as $athlete): ?>
                             <option value="<?= esc($athlete['id']) ?>">
                                 <?= esc(trim($athlete['first_name'] . ' ' . ($athlete['last_name'] ?? ''))) ?>
@@ -49,7 +48,7 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <button type="submit">Adicionar</button>
+                <button type="submit">Convocar selecionados</button>
             </form>
         <?php endif; ?>
 

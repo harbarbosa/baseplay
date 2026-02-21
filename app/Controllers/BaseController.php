@@ -20,6 +20,8 @@ use Psr\Log\LoggerInterface;
  */
 abstract class BaseController extends Controller
 {
+    protected array $scopedTeamIds = [];
+
     /**
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
@@ -41,5 +43,53 @@ abstract class BaseController extends Controller
 
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
+
+        $this->scopedTeamIds = $this->resolveScopedTeamIds();
+    }
+
+    protected function resolveScopedTeamIds(): array
+    {
+        $userId = (int) session('user_id');
+        if ($userId <= 0) {
+            return [];
+        }
+
+        if (function_exists('has_permission') && has_permission('admin.access')) {
+            return [];
+        }
+
+        $rows = db_connect()->table('user_team_links')
+            ->select('team_id')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
+
+        return array_map(static fn($row) => (int) $row['team_id'], $rows);
+    }
+
+    protected function pickScopedTeamId(?int $teamId): ?int
+    {
+        if ($this->scopedTeamIds === []) {
+            return $teamId;
+        }
+
+        if ($teamId && in_array($teamId, $this->scopedTeamIds, true)) {
+            return $teamId;
+        }
+
+        return $this->scopedTeamIds[0] ?? null;
+    }
+
+    protected function denyIfTeamForbidden(?int $teamId, string $redirectTo = '/')
+    {
+        if ($this->scopedTeamIds === []) {
+            return null;
+        }
+
+        if (!$teamId || !in_array($teamId, $this->scopedTeamIds, true)) {
+            return redirect()->to($redirectTo)->with('error', 'Acesso negado.');
+        }
+
+        return null;
     }
 }

@@ -1,5 +1,4 @@
 <?php
-$quickActionSlot = trim($this->renderSection('quick_action') ?? '');
 $quickAction = $quickAction ?? null;
 ?>
 <header class="bp-topbar">
@@ -11,9 +10,21 @@ $quickAction = $quickAction ?? null;
         </div>
     </div>
     <div class="bp-topbar-right">
-        <?php if (!empty($quickActionSlot)): ?>
-            <?= $quickActionSlot ?>
-        <?php elseif (is_array($quickAction) && !empty($quickAction['label'])): ?>
+        <details class="bp-quickmenu">
+            <summary class="bp-quickmenu-toggle">Visão geral</summary>
+            <div class="bp-quickmenu-menu">
+                <?php if (has_permission('athletes.view')): ?>
+                    <a href="<?= base_url('/squad') ?>" class="bp-quickmenu-item">Elenco</a>
+                <?php endif; ?>
+                <?php if (has_permission('documents.view')): ?>
+                    <a href="<?= base_url('/documents/overview') ?>" class="bp-quickmenu-item">Documentos</a>
+                <?php endif; ?>
+                <?php if (has_permission('events.view')): ?>
+                    <a href="<?= base_url('/ops') ?>" class="bp-quickmenu-item">Operação</a>
+                <?php endif; ?>
+            </div>
+        </details>
+        <?php if (is_array($quickAction) && !empty($quickAction['label'])): ?>
             <a href="<?= esc($quickAction['url'] ?? '#') ?>" class="bp-btn-primary"><?= esc($quickAction['label']) ?></a>
         <?php endif; ?>
 

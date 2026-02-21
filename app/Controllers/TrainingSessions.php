@@ -41,12 +41,15 @@ class TrainingSessions extends BaseController
             'date_to' => $this->request->getGet('date_to'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $result = $this->sessions->list($filters, 15, 'training_sessions');
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll($filters['team_id'] ? (int) $filters['team_id'] : null);
 
         return view('training_sessions/index', [
-            'title' => 'SessÃÂµes realizadas',
+            'title' => 'Sessoes realizadas',
             'sessions' => $result['items'],
             'pager' => $result['pager'],
             'filters' => $filters,
@@ -59,13 +62,17 @@ class TrainingSessions extends BaseController
     {
         $session = $this->sessions->findWithRelations($id);
         if (!$session) {
-            return redirect()->to('/training-sessions')->with('error', 'SessÃÂ£o nÃÂ£o encontrada.');
+            return redirect()->to('/training-sessions')->with('error', 'Sessao nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
         }
 
         $athletes = $this->sessions->listAthletes($id);
 
         return view('training_sessions/show', [
-            'title' => 'SessÃÂ£o',
+            'title' => 'Sessao',
             'session' => $session,
             'athletes' => $athletes,
         ]);
@@ -73,12 +80,14 @@ class TrainingSessions extends BaseController
 
     public function create()
     {
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
         $plans = $this->plans->list([], 200, 'training_plans_select')['items'];
 
         return view('training_sessions/create', [
-            'title' => 'Nova sessÃÂ£o',
+            'title' => 'Nova sessao',
             'teams' => $teams,
             'categories' => $categories,
             'plans' => $plans,
@@ -89,15 +98,20 @@ class TrainingSessions extends BaseController
     {
         $event = $this->events->find($eventId);
         if (!$event) {
-            return redirect()->back()->with('error', 'Evento nÃÂ£o encontrado.');
+            return redirect()->back()->with('error', 'Evento nao encontrado.');
         }
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/training-sessions')) {
+            return $response;
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll((int) $event['team_id']);
         $plans = $this->plans->list([], 200, 'training_plans_select')['items'];
 
         return view('training_sessions/create', [
-            'title' => 'Nova sessÃÂ£o (evento)',
+            'title' => 'Nova sessao (evento)',
             'teams' => $teams,
             'categories' => $categories,
             'plans' => $plans,
@@ -107,6 +121,11 @@ class TrainingSessions extends BaseController
 
     public function store()
     {
+        $payload = $this->request->getPost();
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->trainingSessionCreate, config('Validation')->trainingSessionCreate_errors);
 
@@ -114,25 +133,30 @@ class TrainingSessions extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $id = $this->sessions->create($this->request->getPost(), (int) session('user_id'));
+        $id = $this->sessions->create($payload, (int) session('user_id'));
         Services::audit()->log(session('user_id'), 'training_session_created', ['training_session_id' => $id]);
 
-        return redirect()->to('/training-sessions/' . $id)->with('success', 'SessÃÂ£o criada.');
+        return redirect()->to('/training-sessions/' . $id)->with('success', 'Sessao criada.');
     }
 
     public function edit(int $id)
     {
         $session = $this->sessions->find($id);
         if (!$session) {
-            return redirect()->to('/training-sessions')->with('error', 'SessÃÂ£o nÃÂ£o encontrada.');
+            return redirect()->to('/training-sessions')->with('error', 'Sessao nao encontrada.');
         }
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll((int) $session['team_id']);
         $plans = $this->plans->list([], 200, 'training_plans_select')['items'];
 
         return view('training_sessions/edit', [
-            'title' => 'Editar sessÃÂ£o',
+            'title' => 'Editar sessao',
             'session' => $session,
             'teams' => $teams,
             'categories' => $categories,
@@ -144,7 +168,16 @@ class TrainingSessions extends BaseController
     {
         $session = $this->sessions->find($id);
         if (!$session) {
-            return redirect()->to('/training-sessions')->with('error', 'SessÃÂ£o nÃÂ£o encontrada.');
+            return redirect()->to('/training-sessions')->with('error', 'Sessao nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
+        }
+
+        $payload = $this->request->getPost();
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
         }
 
         $validation = service('validation');
@@ -154,40 +187,52 @@ class TrainingSessions extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $this->sessions->update($id, $this->request->getPost());
+        $this->sessions->update($id, $payload);
         Services::audit()->log(session('user_id'), 'training_session_updated', ['training_session_id' => $id]);
 
-        return redirect()->to('/training-sessions/' . $id)->with('success', 'SessÃÂ£o atualizada.');
+        return redirect()->to('/training-sessions/' . $id)->with('success', 'Sessao atualizada.');
     }
 
     public function deleteConfirm(int $id)
     {
         $session = $this->sessions->find($id);
         if (!$session) {
-            return redirect()->to('/training-sessions')->with('error', 'SessÃÂ£o nÃÂ£o encontrada.');
+            return redirect()->to('/training-sessions')->with('error', 'Sessao nao encontrada.');
         }
 
-        return view('training_sessions/delete', ['title' => 'Excluir sessÃÂ£o', 'session' => $session]);
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
+        }
+
+        return view('training_sessions/delete', ['title' => 'Excluir sessao', 'session' => $session]);
     }
 
     public function delete(int $id)
     {
         $session = $this->sessions->find($id);
         if (!$session) {
-            return redirect()->to('/training-sessions')->with('error', 'SessÃÂ£o nÃÂ£o encontrada.');
+            return redirect()->to('/training-sessions')->with('error', 'Sessao nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
         }
 
         $this->sessions->delete($id);
         Services::audit()->log(session('user_id'), 'training_session_deleted', ['training_session_id' => $id]);
 
-        return redirect()->to('/training-sessions')->with('success', 'SessÃÂ£o removida.');
+        return redirect()->to('/training-sessions')->with('success', 'Sessao removida.');
     }
 
     public function fieldMode(int $id)
     {
         $session = $this->sessions->findWithRelations($id);
         if (!$session) {
-            return redirect()->to('/training-sessions')->with('error', 'SessÃÂ£o nÃÂ£o encontrada.');
+            return redirect()->to('/training-sessions')->with('error', 'Sessao nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
         }
 
         $athletes = $this->sessions->listAthletes($id);
@@ -206,7 +251,11 @@ class TrainingSessions extends BaseController
     {
         $session = $this->sessions->find($sessionId);
         if (!$session) {
-            return redirect()->back()->with('error', 'SessÃ£o nÃ£o encontrada.');
+            return redirect()->back()->with('error', 'Sessao nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
         }
 
         $data = $this->request->getPost();
@@ -232,7 +281,6 @@ class TrainingSessions extends BaseController
                 'errors' => json_encode($errors, JSON_UNESCAPED_UNICODE),
             ]);
 
-            // Fallback defensivo para nÃ£o bloquear o modo campo por divergÃªncias histÃ³ricas.
             if (!$this->canPersistSessionAthlete($sessionId, $athleteId)) {
                 return redirect()->back()->withInput()->with('errors', $errors);
             }

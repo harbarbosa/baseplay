@@ -45,40 +45,52 @@
         <a href="<?= base_url('/training-plans') ?>" class="button secondary">Limpar</a>
     </form>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Equipe</th>
-                <th>Categoria</th>
-                <th>Data</th>
-                <th>Status</th>
-                <th>Total (min)</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($plans as $plan): ?>
-            <tr>
-                <td><?= esc($plan['title']) ?></td>
-                <td><?= esc($plan['team_name'] ?? '-') ?></td>
-                <td><?= esc($plan['category_name'] ?? '-') ?></td>
-                <td><?= esc(format_date_br($plan['planned_date'] ?? null)) ?></td>
-                <td><?= esc(enum_label($plan['status'], 'status')) ?></td>
-                <td><?= esc($plan['total_duration_min'] ?? '-') ?></td>
-                <td>
-                    <a href="<?= base_url('/training-plans/' . $plan['id']) ?>">Detalhes</a>
-                    <?php if (has_permission('training_plans.update')): ?>
-                        | <a href="<?= base_url('/training-plans/' . $plan['id'] . '/edit') ?>">Editar</a>
-                    <?php endif; ?>
-                    <?php if (has_permission('training_plans.delete')): ?>
-                        | <a href="<?= base_url('/training-plans/' . $plan['id'] . '/delete') ?>">Excluir</a>
-                    <?php endif; ?>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
+    <?php if (empty($plans)): ?>
+        <div class="bp-empty-state" style="margin-top:16px;">
+            <strong>Nenhum plano ainda</strong>
+            <div>Crie o primeiro plano de treino para organizar o ciclo.</div>
+            <?php if (has_permission('training_plans.create')): ?>
+                <div style="margin-top:12px;">
+                    <a href="<?= base_url('/training-plans/create') ?>" class="bp-btn-primary">Criar plano</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php else: ?>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>TÃ­tulo</th>
+                    <th>Equipe</th>
+                    <th>Categoria</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Total (min)</th>
+                    <th>AÃ§Ãµes</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($plans as $plan): ?>
+                <tr>
+                    <td><?= esc($plan['title']) ?></td>
+                    <td><?= esc($plan['team_name'] ?? '-') ?></td>
+                    <td><?= esc($plan['category_name'] ?? '-') ?></td>
+                    <td><?= esc(format_date_br($plan['planned_date'] ?? null)) ?></td>
+                    <td><?= esc(enum_label($plan['status'], 'status')) ?></td>
+                    <td><?= esc($plan['total_duration_min'] ?? '-') ?></td>
+                    <td>
+                        <a href="<?= base_url('/training-plans/' . $plan['id']) ?>">Detalhes</a>
+                        <?php if (has_permission('training_plans.update')): ?>
+                            | <a href="<?= base_url('/training-plans/' . $plan['id'] . '/edit') ?>">Editar</a>
+                        <?php endif; ?>
+                        <?php if (has_permission('training_plans.delete')): ?>
+                            | <a href="<?= base_url('/training-plans/' . $plan['id'] . '/delete') ?>">Excluir</a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 
     <?php if ($pager): ?>
         <?= $pager->links('training_plans', 'default_full') ?>

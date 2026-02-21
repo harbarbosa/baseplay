@@ -38,6 +38,8 @@ class Notices extends BaseController
             'to_date' => $this->request->getGet('to_date'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $isElevated = has_permission('notices.publish') || has_permission('admin.access');
         $result = $this->notices->list(
             $filters,
@@ -47,7 +49,8 @@ class Notices extends BaseController
             !$isElevated
         );
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $teamId = (int) ($filters['team_id'] ?? 0);
         $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
 
@@ -63,8 +66,9 @@ class Notices extends BaseController
 
     public function create()
     {
-        $teamId = (int) $this->request->getGet('team_id');
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
 
         return view('notices/create', [
@@ -81,6 +85,10 @@ class Notices extends BaseController
         $payload['publish_at'] = $this->normalizeDateTime($payload['publish_at'] ?? null);
         $payload['expires_at'] = $this->normalizeDateTime($payload['expires_at'] ?? null);
 
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->noticeCreate, config('Validation')->noticeCreate_errors);
         if (!$validation->run($payload)) {
@@ -88,11 +96,11 @@ class Notices extends BaseController
         }
 
         if (!$this->validateDateRange($payload['publish_at'] ?? null, $payload['expires_at'] ?? null)) {
-            return redirect()->back()->withInput()->with('error', 'A data de expiração deve ser maior ou igual à publicação.');
+            return redirect()->back()->withInput()->with('error', 'A data de expiracao deve ser maior ou igual a publicacao.');
         }
 
         if (($payload['status'] ?? 'published') === 'published' && !has_permission('notices.publish')) {
-            return redirect()->back()->withInput()->with('error', 'Você não tem permissão para publicar avisos.');
+            return redirect()->back()->withInput()->with('error', 'Voce nao tem permissao para publicar avisos.');
         }
 
         $payload['status'] = $payload['status'] ?? (has_permission('notices.publish') ? 'published' : 'draft');
@@ -106,12 +114,12 @@ class Notices extends BaseController
     {
         $notice = $this->notices->findWithRelations($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
         }
 
         $isElevated = has_permission('notices.publish') || has_permission('admin.access');
         if (!$isElevated && !$this->notices->userCanAccessNotice((int) session('user_id'), $notice)) {
-            return redirect()->to('/notices')->with('error', 'Sem permissão para acessar este aviso.');
+            return redirect()->to('/notices')->with('error', 'Sem permissao para acessar este aviso.');
         }
 
         return view('notices/show', [
@@ -127,11 +135,16 @@ class Notices extends BaseController
     {
         $notice = $this->notices->find($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
         }
 
         $teamId = (int) ($notice['team_id'] ?? 0);
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        if ($response = $this->denyIfTeamForbidden($teamId, '/notices')) {
+            return $response;
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
 
         return view('notices/edit', [
@@ -147,12 +160,21 @@ class Notices extends BaseController
     {
         $notice = $this->notices->find($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
+        }
+
+        $teamId = (int) ($notice['team_id'] ?? 0);
+        if ($response = $this->denyIfTeamForbidden($teamId, '/notices')) {
+            return $response;
         }
 
         $payload = $this->request->getPost();
         $payload['publish_at'] = $this->normalizeDateTime($payload['publish_at'] ?? null);
         $payload['expires_at'] = $this->normalizeDateTime($payload['expires_at'] ?? null);
+
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
 
         $validation = service('validation');
         $validation->setRules(config('Validation')->noticeUpdate, config('Validation')->noticeCreate_errors);
@@ -161,11 +183,11 @@ class Notices extends BaseController
         }
 
         if (!$this->validateDateRange($payload['publish_at'] ?? null, $payload['expires_at'] ?? null)) {
-            return redirect()->back()->withInput()->with('error', 'A data de expiração deve ser maior ou igual à publicação.');
+            return redirect()->back()->withInput()->with('error', 'A data de expiracao deve ser maior ou igual a publicacao.');
         }
 
         if (($payload['status'] ?? $notice['status']) === 'published' && !has_permission('notices.publish')) {
-            return redirect()->back()->withInput()->with('error', 'Você não tem permissão para publicar avisos.');
+            return redirect()->back()->withInput()->with('error', 'Voce nao tem permissao para publicar avisos.');
         }
 
         $this->notices->update($id, $payload);
@@ -178,7 +200,12 @@ class Notices extends BaseController
     {
         $notice = $this->notices->find($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
+        }
+
+        $teamId = (int) ($notice['team_id'] ?? 0);
+        if ($response = $this->denyIfTeamForbidden($teamId, '/notices')) {
+            return $response;
         }
 
         return view('notices/delete', ['title' => 'Excluir aviso', 'notice' => $notice]);
@@ -188,7 +215,12 @@ class Notices extends BaseController
     {
         $notice = $this->notices->find($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
+        }
+
+        $teamId = (int) ($notice['team_id'] ?? 0);
+        if ($response = $this->denyIfTeamForbidden($teamId, '/notices')) {
+            return $response;
         }
 
         $this->notices->delete($id);
@@ -200,12 +232,12 @@ class Notices extends BaseController
     {
         $notice = $this->notices->findWithRelations($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
         }
 
         $isElevated = has_permission('notices.publish') || has_permission('admin.access');
         if (!$isElevated && !$this->notices->userCanAccessNotice((int) session('user_id'), $notice)) {
-            return redirect()->to('/notices')->with('error', 'Sem permissão para acessar este aviso.');
+            return redirect()->to('/notices')->with('error', 'Sem permissao para acessar este aviso.');
         }
 
         $this->reads->markRead($id, (int) session('user_id'));
@@ -216,7 +248,7 @@ class Notices extends BaseController
     {
         $notice = $this->notices->findWithRelations($id);
         if (!$notice) {
-            return redirect()->to('/notices')->with('error', 'Aviso não encontrado.');
+            return redirect()->to('/notices')->with('error', 'Aviso nao encontrado.');
         }
 
         $message = trim((string) $this->request->getPost('message'));
@@ -226,7 +258,7 @@ class Notices extends BaseController
 
         $isElevated = has_permission('notices.publish') || has_permission('admin.access');
         if (!$isElevated && !$this->notices->userCanAccessNotice((int) session('user_id'), $notice)) {
-            return redirect()->to('/notices')->with('error', 'Sem permissão para acessar este aviso.');
+            return redirect()->to('/notices')->with('error', 'Sem permissao para acessar este aviso.');
         }
 
         $this->replies->create($id, (int) session('user_id'), $message);

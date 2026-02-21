@@ -11,6 +11,9 @@
             <?php if (has_permission('athletes.update')): ?>
                 <a href="<?= base_url('/athletes/' . $athlete['id'] . '/edit') ?>" class="button">Editar atleta</a>
             <?php endif; ?>
+            <?php if (has_permission('reports.view')): ?>
+                <a href="<?= base_url('/reports/athlete/' . $athlete['id']) ?>" class="button secondary">Relatorio do atleta</a>
+            <?php endif; ?>
         </div>
     </div>
 

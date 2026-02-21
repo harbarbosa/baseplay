@@ -1,4 +1,4 @@
-﻿<?= $this->extend('layouts/base') ?>
+<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <div class="card">
@@ -85,58 +85,77 @@
         <?php endif; ?>
     </div>
 
-    <table class="table" style="margin-top:16px;">
-        <thead>
-            <tr>
-                <th>Arquivo</th>
-                <th>Tipo</th>
-                <th>Atleta</th>
-                <th>Responsável</th>
-                <th>Equipe</th>
-                <th>Validade</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($documents as $doc): ?>
-            <?php
-                $status = (string) ($doc['status'] ?? 'active');
-                $badgeClass = $status === 'expired' ? 'badge-expired' : ($status === 'archived' ? 'badge-archived' : 'badge-active');
-                $expiresTs = !empty($doc['expires_at']) ? strtotime($doc['expires_at']) : null;
-                $isUrgent = $expiresTs && $expiresTs <= strtotime('+7 days') && $status === 'active';
-                $isWarning = $expiresTs && $expiresTs > strtotime('+7 days') && $expiresTs <= strtotime('+30 days') && $status === 'active';
-                $fullName = trim(($doc['first_name'] ?? '') . ' ' . ($doc['last_name'] ?? ''));
-            ?>
-            <tr>
-                <td><?= esc($doc['original_name'] ?? '-') ?></td>
-                <td><?= esc($doc['type_name'] ?? '-') ?></td>
-                <td><?= esc($fullName !== '' ? $fullName : '-') ?></td>
-                <td><?= esc($doc['guardian_name'] ?? '-') ?></td>
-                <td><?= esc($doc['team_name'] ?? '-') ?></td>
-                <td>
-                    <?= esc(format_date_br($doc['expires_at'] ?? null)) ?>
-                    <?php if ($isUrgent): ?><span class="badge badge-critical" style="margin-left:6px;">Urgente</span><?php endif; ?>
-                    <?php if ($isWarning): ?><span class="badge badge-warning" style="margin-left:6px;">A vencer</span><?php endif; ?>
-                </td>
-                <td><span class="badge <?= esc($badgeClass) ?>"><?= esc(enum_label($status, 'status')) ?></span></td>
-                <td>
-                    <a href="<?= base_url('/documents/' . $doc['id']) ?>">Detalhes</a>
-                    | <a href="<?= base_url('/documents/' . $doc['id'] . '/download') ?>">Baixar</a>
-                    <?php if (has_permission('documents.update')): ?>
-                        | <a href="<?= base_url('/documents/' . $doc['id'] . '/edit') ?>">Editar</a>
-                    <?php endif; ?>
-                    <?php if (has_permission('documents.delete')): ?>
-                        | <a href="<?= base_url('/documents/' . $doc['id'] . '/delete') ?>">Excluir</a>
-                    <?php endif; ?>
-                </td>
-            </tr>
-        <?php endforeach; ?>
+    <form method="post" action="<?= base_url('/documents/export-pending') ?>" style="margin-top:16px;">
+        <?= csrf_field() ?>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+            <button type="submit" class="bp-btn-secondary">Exportar pendencias (CSV)</button>
+            <span style="color:var(--muted); font-size:12px;">Selecione documentos para exportar.</span>
+        </div>
+
         <?php if (empty($documents)): ?>
-            <tr><td colspan="8">Nenhum documento encontrado.</td></tr>
+            <div class="bp-empty-state">
+                <strong>Nenhum documento ainda</strong>
+                <div>Envie o primeiro documento para iniciar o controle.</div>
+                <?php if (has_permission('documents.upload')): ?>
+                    <div style="margin-top:12px;">
+                        <a href="<?= base_url('/documents/create') ?>" class="bp-btn-primary">Enviar documento</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php else: ?>
+            <table class="table" style="margin-top:0;">
+                <thead>
+                    <tr>
+                        <th style="width:36px;"><input type="checkbox" id="doc-select-all"></th>
+                        <th>Arquivo</th>
+                        <th>Tipo</th>
+                        <th>Atleta</th>
+                        <th>Responsavel</th>
+                        <th>Equipe</th>
+                        <th>Validade</th>
+                        <th>Status</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($documents as $doc): ?>
+                    <?php
+                        $status = (string) ($doc['status'] ?? 'active');
+                        $badgeClass = $status === 'expired' ? 'badge-expired' : ($status === 'archived' ? 'badge-archived' : 'badge-active');
+                        $expiresTs = !empty($doc['expires_at']) ? strtotime($doc['expires_at']) : null;
+                        $isUrgent = $expiresTs && $expiresTs <= strtotime('+7 days') && $status === 'active';
+                        $isWarning = $expiresTs && $expiresTs > strtotime('+7 days') && $expiresTs <= strtotime('+30 days') && $status === 'active';
+                        $fullName = trim(($doc['first_name'] ?? '') . ' ' . ($doc['last_name'] ?? ''));
+                    ?>
+                    <tr>
+                        <td><input type="checkbox" name="document_ids[]" value="<?= esc($doc['id']) ?>"></td>
+                        <td><?= esc($doc['original_name'] ?? '-') ?></td>
+                        <td><?= esc($doc['type_name'] ?? '-') ?></td>
+                        <td><?= esc($fullName !== '' ? $fullName : '-') ?></td>
+                        <td><?= esc($doc['guardian_name'] ?? '-') ?></td>
+                        <td><?= esc($doc['team_name'] ?? '-') ?></td>
+                        <td>
+                            <?= esc(format_date_br($doc['expires_at'] ?? null)) ?>
+                            <?php if ($isUrgent): ?><span class="badge badge-critical" style="margin-left:6px;">Urgente</span><?php endif; ?>
+                            <?php if ($isWarning): ?><span class="badge badge-warning" style="margin-left:6px;">A vencer</span><?php endif; ?>
+                        </td>
+                        <td><span class="badge <?= esc($badgeClass) ?>"><?= esc(enum_label($status, 'status')) ?></span></td>
+                        <td>
+                            <a href="<?= base_url('/documents/' . $doc['id']) ?>">Detalhes</a>
+                            | <a href="<?= base_url('/documents/' . $doc['id'] . '/download') ?>">Baixar</a>
+                            <?php if (has_permission('documents.update')): ?>
+                                | <a href="<?= base_url('/documents/' . $doc['id'] . '/edit') ?>">Editar</a>
+                            <?php endif; ?>
+                            <?php if (has_permission('documents.delete')): ?>
+                                | <a href="<?= base_url('/documents/' . $doc['id'] . '/delete') ?>">Excluir</a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
         <?php endif; ?>
-        </tbody>
-    </table>
+    </form>
 
     <?php if ($pager): ?>
         <?= $pager->links('documents', 'default_full') ?>
@@ -164,6 +183,17 @@
 
     teamSelect.addEventListener('change', filterCategories);
     filterCategories();
+})();
+</script>
+<script>
+(() => {
+    const selectAll = document.getElementById('doc-select-all');
+    if (!selectAll) return;
+    selectAll.addEventListener('change', () => {
+        document.querySelectorAll('input[name="document_ids[]"]').forEach((cb) => {
+            cb.checked = selectAll.checked;
+        });
+    });
 })();
 </script>
 <?= $this->endSection() ?>

@@ -42,6 +42,13 @@ class RolePermissionsSeeder extends Seeder
             'reports.view',
         ];
 
+        $adminEquipe = array_merge($treinador, [
+            'athletes.create', 'athletes.delete',
+            'guardians.create', 'guardians.update', 'guardians.delete',
+            'documents.delete',
+            'teams.update',
+        ]);
+
         $auxiliar = [
             'dashboard.view',
             'teams.view',
@@ -89,6 +96,7 @@ class RolePermissionsSeeder extends Seeder
 
         return [
             'admin' => $admin,
+            'admin_equipe' => $adminEquipe,
             'treinador' => $treinador,
             'auxiliar' => $auxiliar,
             'atleta' => $atleta,

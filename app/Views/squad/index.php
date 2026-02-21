@@ -1,11 +1,5 @@
 <?= $this->extend('layouts/base') ?>
 
-<?= $this->section('quick_action') ?>
-<?php if (has_permission('athletes.create')): ?>
-    <a href="<?= base_url('/athletes/create') ?>" class="bp-btn-primary">Novo atleta</a>
-<?php endif; ?>
-<?= $this->endSection() ?>
-
 <?= $this->section('content') ?>
 <?php
 $pendingItems = $pending['items'] ?? [];
@@ -24,9 +18,14 @@ $pageUrl = static function (string $key, int $page): string {
 ?>
 
 <div class="bp-card" style="margin-bottom:18px;">
-    <div class="bp-card-body">
-        <h1 style="margin:0 0 6px;">Elenco overview</h1>
-        <p style="margin:0; color:var(--muted);">Resumo rapido com foco no que precisa de atencao imediata.</p>
+    <div class="bp-card-body" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h1 style="margin:0 0 6px;">Elenco — Visão geral</h1>
+            <p style="margin:0; color:var(--muted);">Resumo rapido com foco no que precisa de atencao imediata.</p>
+        </div>
+        <?php if (has_permission('athletes.create')): ?>
+            <a href="<?= base_url('/athletes/create') ?>" class="bp-btn-primary">Novo atleta</a>
+        <?php endif; ?>
     </div>
 </div>
 

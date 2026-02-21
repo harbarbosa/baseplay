@@ -16,7 +16,25 @@ class GuardianService
 
     public function list(array $filters = [], int $perPage = 15, string $group = 'guardians'): array
     {
-        $model = $this->guardians->where('deleted_at', null);
+        $model = $this->guardians->where('guardians.deleted_at', null);
+
+        if (!empty($filters['team_id']) || !empty($filters['team_ids'])) {
+            $model = $model
+                ->select('guardians.*')
+                ->distinct()
+                ->join('athlete_guardians ag', 'ag.guardian_id = guardians.id', 'left')
+                ->join('athletes a', 'a.id = ag.athlete_id', 'left')
+                ->join('categories c', 'c.id = a.category_id', 'left');
+
+            if (!empty($filters['team_id'])) {
+                $model = $model->where('c.team_id', (int) $filters['team_id']);
+            } elseif (!empty($filters['team_ids']) && is_array($filters['team_ids'])) {
+                $ids = array_values(array_filter(array_map('intval', $filters['team_ids'])));
+                if ($ids !== []) {
+                    $model = $model->whereIn('c.team_id', $ids);
+                }
+            }
+        }
 
         if (!empty($filters['search'])) {
             $model = $model->groupStart()

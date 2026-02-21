@@ -62,13 +62,19 @@ class CategoryService
         return $builder->get()->getResultArray();
     }
 
-    public function listDistinctAllByTeam(bool $onlyActive = false): array
+    public function listDistinctAllByTeam(bool $onlyActive = false, array $teamIds = []): array
     {
         $builder = $this->categories->builder();
         $builder->select('MIN(categories.id) AS id, categories.team_id, categories.name');
         $builder->where('categories.deleted_at', null);
         if ($onlyActive) {
             $builder->where('categories.status', 'active');
+        }
+        if ($teamIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $teamIds)));
+            if ($ids !== []) {
+                $builder->whereIn('categories.team_id', $ids);
+            }
         }
         $builder->groupBy('categories.team_id, categories.name');
         $builder->orderBy('categories.name', 'ASC');

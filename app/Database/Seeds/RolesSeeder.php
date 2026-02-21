@@ -14,6 +14,7 @@ class RolesSeeder extends Seeder
     {
         return [
             ['name' => 'admin', 'description' => 'Administrador'],
+            ['name' => 'admin_equipe', 'description' => 'Administrador de equipe'],
             ['name' => 'treinador', 'description' => 'Treinador'],
             ['name' => 'auxiliar', 'description' => 'Auxiliar'],
             ['name' => 'atleta', 'description' => 'Atleta'],

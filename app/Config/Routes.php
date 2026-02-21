@@ -24,6 +24,9 @@ $routes->group('admin', ['filter' => 'permission:admin.access'], static function
     $routes->get('roles', 'Admin\\Roles::index', ['filter' => 'permission:roles.manage']);
     $routes->get('roles/create', 'Admin\\Roles::create', ['filter' => 'permission:roles.manage']);
     $routes->post('roles', 'Admin\\Roles::store', ['filter' => ['csrf', 'permission:roles.manage']]);
+    $routes->get('roles/(:num)/edit', 'Admin\\Roles::edit/$1', ['filter' => 'permission:roles.manage']);
+    $routes->post('roles/(:num)/update', 'Admin\\Roles::update/$1', ['filter' => ['csrf', 'permission:roles.manage']]);
+    $routes->post('roles/(:num)/delete', 'Admin\\Roles::delete/$1', ['filter' => ['csrf', 'permission:roles.manage']]);
 });
 
 $routes->group('api', static function ($routes) {
@@ -191,6 +194,8 @@ $routes->group('api', static function ($routes) {
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('squad', 'Squad::index', ['filter' => 'permission:athletes.view']);
     $routes->get('overview/squad', 'Squad::index', ['filter' => 'permission:athletes.view']);
+    $routes->get('ops', 'Ops::index', ['filter' => 'permission:events.view']);
+    $routes->get('events/overview', 'Ops::index', ['filter' => 'permission:events.view']);
 
     $routes->get('teams', 'Teams::index', ['filter' => 'permission:teams.view']);
     $routes->get('teams/create', 'Teams::create', ['filter' => 'permission:teams.create']);
@@ -260,6 +265,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
 
     $routes->get('documents', 'Documents::index', ['filter' => 'permission:documents.view']);
     $routes->get('documents/overview', 'Documents::overview', ['filter' => 'permission:documents.view']);
+    $routes->post('documents/export-pending', 'Documents::exportPendingCsv', ['filter' => 'permission:documents.view']);
     $routes->get('documents/create', 'Documents::create', ['filter' => 'permission:documents.upload']);
     $routes->post('documents', 'Documents::store', ['filter' => ['csrf', 'permission:documents.upload']]);
     $routes->get('documents/(:num)', 'Documents::show/$1', ['filter' => 'permission:documents.view']);

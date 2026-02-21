@@ -19,9 +19,14 @@ class Categories extends BaseController
 
     public function create(int $teamId)
     {
+        $teamId = (int) $this->pickScopedTeamId($teamId);
+        if ($this->scopedTeamIds !== [] && !$teamId) {
+            return redirect()->to('/teams')->with('error', 'Acesso negado.');
+        }
+
         $team = $this->teams->find($teamId);
         if (!$team) {
-            return redirect()->to('/teams')->with('error', 'Equipe não encontrada.');
+            return redirect()->to('/teams')->with('error', 'Equipe nao encontrada.');
         }
 
         return view('categories/create', [
@@ -32,9 +37,14 @@ class Categories extends BaseController
 
     public function store(int $teamId)
     {
+        $teamId = (int) $this->pickScopedTeamId($teamId);
+        if ($this->scopedTeamIds !== [] && !$teamId) {
+            return redirect()->to('/teams')->with('error', 'Acesso negado.');
+        }
+
         $team = $this->teams->find($teamId);
         if (!$team) {
-            return redirect()->to('/teams')->with('error', 'Equipe não encontrada.');
+            return redirect()->to('/teams')->with('error', 'Equipe nao encontrada.');
         }
 
         $validation = service('validation');
@@ -50,7 +60,7 @@ class Categories extends BaseController
         $payload['team_id'] = $teamId;
 
         if (!$this->validateYearRange($payload)) {
-            return redirect()->back()->withInput()->with('error', 'Ano inicial não pode ser maior que o ano final.');
+            return redirect()->back()->withInput()->with('error', 'Ano inicial nao pode ser maior que o ano final.');
         }
 
         $categoryId = $this->categories->create($payload);
@@ -63,7 +73,11 @@ class Categories extends BaseController
     {
         $category = $this->categories->find($id);
         if (!$category) {
-            return redirect()->to('/teams')->with('error', 'Categoria não encontrada.');
+            return redirect()->to('/teams')->with('error', 'Categoria nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $category['team_id'], '/teams')) {
+            return $response;
         }
 
         $team = $this->teams->find((int) $category['team_id']);
@@ -79,10 +93,13 @@ class Categories extends BaseController
     {
         $category = $this->categories->find($id);
         if (!$category) {
-            return redirect()->to('/teams')->with('error', 'Categoria não encontrada.');
+            return redirect()->to('/teams')->with('error', 'Categoria nao encontrada.');
         }
 
         $teamId = (int) $category['team_id'];
+        if ($response = $this->denyIfTeamForbidden($teamId, '/teams')) {
+            return $response;
+        }
 
         $validation = service('validation');
         $rules = config('Validation')->categoryUpdate;
@@ -96,7 +113,7 @@ class Categories extends BaseController
 
         $payload = $this->request->getPost();
         if (!$this->validateYearRange($payload)) {
-            return redirect()->back()->withInput()->with('error', 'Ano inicial não pode ser maior que o ano final.');
+            return redirect()->back()->withInput()->with('error', 'Ano inicial nao pode ser maior que o ano final.');
         }
 
         $this->categories->update($id, $payload);
@@ -109,7 +126,11 @@ class Categories extends BaseController
     {
         $category = $this->categories->find($id);
         if (!$category) {
-            return redirect()->to('/teams')->with('error', 'Categoria não encontrada.');
+            return redirect()->to('/teams')->with('error', 'Categoria nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $category['team_id'], '/teams')) {
+            return $response;
         }
 
         return view('categories/delete', [
@@ -122,10 +143,14 @@ class Categories extends BaseController
     {
         $category = $this->categories->find($id);
         if (!$category) {
-            return redirect()->to('/teams')->with('error', 'Categoria não encontrada.');
+            return redirect()->to('/teams')->with('error', 'Categoria nao encontrada.');
         }
 
         $teamId = (int) $category['team_id'];
+        if ($response = $this->denyIfTeamForbidden($teamId, '/teams')) {
+            return $response;
+        }
+
         $this->categories->delete($id);
         Services::audit()->log(session('user_id'), 'category_deleted', ['category_id' => $id]);
 

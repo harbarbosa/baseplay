@@ -129,13 +129,22 @@ class AthleteService
             ->findAll();
     }
 
-    public function listAllWithRelations(): array
+    public function listAllWithRelations(array $teamIds = []): array
     {
-        return $this->athletes
+        $model = $this->athletes
             ->select('athletes.id, athletes.first_name, athletes.last_name, categories.id AS category_id, categories.name AS category_name, teams.id AS team_id, teams.name AS team_name')
             ->join('categories', 'categories.id = athletes.category_id', 'left')
             ->join('teams', 'teams.id = categories.team_id', 'left')
-            ->where('athletes.deleted_at', null)
+            ->where('athletes.deleted_at', null);
+
+        if ($teamIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $teamIds)));
+            if ($ids !== []) {
+                $model = $model->whereIn('teams.id', $ids);
+            }
+        }
+
+        return $model
             ->orderBy('teams.name', 'ASC')
             ->orderBy('categories.name', 'ASC')
             ->orderBy('athletes.first_name', 'ASC')

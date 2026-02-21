@@ -36,9 +36,12 @@ class TrainingPlans extends BaseController
             'status' => $this->request->getGet('status'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $result = $this->plans->list($filters, 15, 'training_plans');
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll($filters['team_id'] ? (int) $filters['team_id'] : null);
 
         return view('training_plans/index', [
             'title' => 'Planos de treino',
@@ -54,7 +57,11 @@ class TrainingPlans extends BaseController
     {
         $plan = $this->plans->findWithRelations($id);
         if (!$plan) {
-            return redirect()->to('/training-plans')->with('error', 'Plano nÃ£o encontrado.');
+            return redirect()->to('/training-plans')->with('error', 'Plano nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
         }
 
         $blocks = $this->plans->listBlocks($id);
@@ -70,8 +77,10 @@ class TrainingPlans extends BaseController
 
     public function create()
     {
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
 
         return view('training_plans/create', [
             'title' => 'Novo plano',
@@ -82,6 +91,11 @@ class TrainingPlans extends BaseController
 
     public function store()
     {
+        $payload = $this->request->getPost();
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
         $validation = service('validation');
         $validation->setRules(config('Validation')->trainingPlanCreate, config('Validation')->trainingPlanCreate_errors);
 
@@ -89,7 +103,7 @@ class TrainingPlans extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $id = $this->plans->create($this->request->getPost(), (int) session('user_id'));
+        $id = $this->plans->create($payload, (int) session('user_id'));
         Services::audit()->log(session('user_id'), 'training_plan_created', ['training_plan_id' => $id]);
 
         return redirect()->to('/training-plans/' . $id)->with('success', 'Plano criado.');
@@ -99,11 +113,16 @@ class TrainingPlans extends BaseController
     {
         $plan = $this->plans->find($id);
         if (!$plan) {
-            return redirect()->to('/training-plans')->with('error', 'Plano nÃ£o encontrado.');
+            return redirect()->to('/training-plans')->with('error', 'Plano nao encontrado.');
         }
 
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll();
+        if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
+        }
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listAll((int) $plan['team_id']);
 
         return view('training_plans/edit', [
             'title' => 'Editar plano',
@@ -117,7 +136,16 @@ class TrainingPlans extends BaseController
     {
         $plan = $this->plans->find($id);
         if (!$plan) {
-            return redirect()->to('/training-plans')->with('error', 'Plano nÃ£o encontrado.');
+            return redirect()->to('/training-plans')->with('error', 'Plano nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
+        }
+
+        $payload = $this->request->getPost();
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
         }
 
         $validation = service('validation');
@@ -127,7 +155,7 @@ class TrainingPlans extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $this->plans->update($id, $this->request->getPost());
+        $this->plans->update($id, $payload);
         Services::audit()->log(session('user_id'), 'training_plan_updated', ['training_plan_id' => $id]);
 
         return redirect()->to('/training-plans/' . $id)->with('success', 'Plano atualizado.');
@@ -137,7 +165,11 @@ class TrainingPlans extends BaseController
     {
         $plan = $this->plans->find($id);
         if (!$plan) {
-            return redirect()->to('/training-plans')->with('error', 'Plano nÃ£o encontrado.');
+            return redirect()->to('/training-plans')->with('error', 'Plano nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
         }
 
         return view('training_plans/delete', ['title' => 'Excluir plano', 'plan' => $plan]);
@@ -147,7 +179,11 @@ class TrainingPlans extends BaseController
     {
         $plan = $this->plans->find($id);
         if (!$plan) {
-            return redirect()->to('/training-plans')->with('error', 'Plano nÃ£o encontrado.');
+            return redirect()->to('/training-plans')->with('error', 'Plano nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
         }
 
         $this->plans->delete($id);
@@ -160,7 +196,11 @@ class TrainingPlans extends BaseController
     {
         $plan = $this->plans->find($planId);
         if (!$plan) {
-            return redirect()->back()->with('error', 'Plano nÃ£o encontrado.');
+            return redirect()->back()->with('error', 'Plano nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
         }
 
         $data = $this->request->getPost();
@@ -190,7 +230,12 @@ class TrainingPlans extends BaseController
     {
         $block = $this->blocks->find($id);
         if (!$block) {
-            return redirect()->back()->with('error', 'Bloco nÃ£o encontrado.');
+            return redirect()->back()->with('error', 'Bloco nao encontrado.');
+        }
+
+        $plan = $this->plans->find((int) $block['training_plan_id']);
+        if ($plan && ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans'))) {
+            return $response;
         }
 
         $data = $this->request->getPost();
@@ -220,7 +265,12 @@ class TrainingPlans extends BaseController
     {
         $block = $this->blocks->find($id);
         if (!$block) {
-            return redirect()->back()->with('error', 'Bloco nÃ£o encontrado.');
+            return redirect()->back()->with('error', 'Bloco nao encontrado.');
+        }
+
+        $plan = $this->plans->find((int) $block['training_plan_id']);
+        if ($plan && ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans'))) {
+            return $response;
         }
 
         $this->blocks->delete($id);
@@ -233,12 +283,17 @@ class TrainingPlans extends BaseController
     {
         $block = $this->blocks->find($id);
         if (!$block || empty($block['media_path'])) {
-            return redirect()->back()->with('error', 'Arquivo do bloco nÃ£o encontrado.');
+            return redirect()->back()->with('error', 'Arquivo do bloco nao encontrado.');
+        }
+
+        $plan = $this->plans->find((int) $block['training_plan_id']);
+        if ($plan && ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans'))) {
+            return $response;
         }
 
         $fullPath = WRITEPATH . $block['media_path'];
         if (!is_file($fullPath)) {
-            return redirect()->back()->with('error', 'Arquivo do bloco nÃ£o encontrado.');
+            return redirect()->back()->with('error', 'Arquivo do bloco nao encontrado.');
         }
 
         $downloadName = $block['media_name'] ?? basename($fullPath);
@@ -275,7 +330,7 @@ class TrainingPlans extends BaseController
         ];
 
         if (!in_array($detectedMime, $allowed, true)) {
-            return ['error' => 'Formato não permitido. Use PDF, imagem ou vídeo.', 'data' => []];
+            return ['error' => 'Formato nao permitido. Use PDF, imagem ou video.', 'data' => []];
         }
 
         $targetDir = WRITEPATH . 'uploads/training_blocks';

@@ -15,6 +15,7 @@ class Dashboard extends BaseController
         $service = new DashboardService();
 
         switch ($role) {
+            case 'admin_equipe':
             case 'treinador':
                 $data = $service->trainer($userId);
                 break;

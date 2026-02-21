@@ -37,12 +37,15 @@ class TacticalBoards extends BaseController
             'category_id' => $this->request->getGet('category_id'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
         $result = $this->boards->list($filters, 15, 'tactical_boards');
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true);
 
         return view('tactical_boards/index', [
-            'title' => 'Quadro tático',
+            'title' => 'Quadro tatico',
             'boards' => $result['items'],
             'pager' => $result['pager'],
             'filters' => $filters,
@@ -53,8 +56,9 @@ class TacticalBoards extends BaseController
 
     public function create()
     {
-        $teamId = (int) $this->request->getGet('team_id');
-        $teams = $this->teams->list([], 200, 'teams_filter')['items'];
+        $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
 
         return view('tactical_boards/create', [
@@ -79,7 +83,12 @@ class TacticalBoards extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $boardId = $this->boards->create($this->request->getPost(), (int) session('user_id'));
+        $payload = $this->request->getPost();
+        if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+
+        $boardId = $this->boards->create($payload, (int) session('user_id'));
         $this->states->saveNewVersion($boardId, $this->states->defaultStateJson(), (int) session('user_id'));
 
         Services::audit()->log(session('user_id'), 'tactical_board_created', ['tactical_board_id' => $boardId]);
@@ -96,18 +105,22 @@ class TacticalBoards extends BaseController
     {
         $board = $this->boards->find($id);
         if (!$board) {
-            return redirect()->to('/tactical-boards')->with('error', 'Prancheta não encontrada.');
+            return redirect()->to('/tactical-boards')->with('error', 'Prancheta nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         $stateJson = (string) ($this->request->getPost('state_json') ?? '');
         $decoded = json_decode($stateJson, true);
         if (!is_array($decoded)) {
-            return redirect()->back()->with('error', 'Estado do quadro inválido.');
+            return redirect()->back()->with('error', 'Estado do quadro invalido.');
         }
 
         $savedId = $this->states->saveNewVersion($id, $stateJson, (int) session('user_id'));
         if ($savedId <= 0) {
-            return redirect()->back()->with('error', 'Não foi possível salvar a versão.');
+            return redirect()->back()->with('error', 'Nao foi possivel salvar a versao.');
         }
 
         Services::audit()->log(session('user_id'), 'tactical_board_saved', [
@@ -115,18 +128,22 @@ class TacticalBoards extends BaseController
             'state_id' => $savedId,
         ]);
 
-        return redirect()->to('/tactical-boards/' . $id)->with('success', 'Versão salva.');
+        return redirect()->to('/tactical-boards/' . $id)->with('success', 'Versao salva.');
     }
 
     public function states(int $id)
     {
         $board = $this->boards->findWithRelations($id);
         if (!$board) {
-            return redirect()->to('/tactical-boards')->with('error', 'Prancheta não encontrada.');
+            return redirect()->to('/tactical-boards')->with('error', 'Prancheta nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         return view('tactical_boards/states', [
-            'title' => 'Versões da prancheta',
+            'title' => 'Versoes da prancheta',
             'board' => $board,
             'versions' => $this->states->listByBoard($id, 100),
         ]);
@@ -141,7 +158,11 @@ class TacticalBoards extends BaseController
     {
         $board = $this->boards->find($id);
         if (!$board) {
-            return redirect()->to('/tactical-boards')->with('error', 'Prancheta não encontrada.');
+            return redirect()->to('/tactical-boards')->with('error', 'Prancheta nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         $this->boards->delete($id);
@@ -154,12 +175,16 @@ class TacticalBoards extends BaseController
     {
         $board = $this->boards->find($id);
         if (!$board) {
-            return redirect()->to('/tactical-boards')->with('error', 'Prancheta não encontrada.');
+            return redirect()->to('/tactical-boards')->with('error', 'Prancheta nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         $newBoardId = $this->boards->duplicate($id, (int) session('user_id'));
         if ($newBoardId <= 0) {
-            return redirect()->to('/tactical-boards')->with('error', 'Não foi possível duplicar a prancheta.');
+            return redirect()->to('/tactical-boards')->with('error', 'Nao foi possivel duplicar a prancheta.');
         }
 
         $latestState = $this->states->getLatest($id);
@@ -178,7 +203,11 @@ class TacticalBoards extends BaseController
     {
         $board = $this->boards->find($boardId);
         if (!$board) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Prancheta não encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+            return $this->response->setJSON(['success' => false, 'message' => 'Prancheta nao encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         return $this->response->setJSON([
@@ -193,18 +222,22 @@ class TacticalBoards extends BaseController
     {
         $board = $this->boards->find($boardId);
         if (!$board) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Prancheta não encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+            return $this->response->setJSON(['success' => false, 'message' => 'Prancheta nao encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         $payload = $this->request->getJSON(true) ?: $this->request->getPost();
         $title = trim((string) ($payload['title'] ?? ''));
         if ($title === '') {
-            return $this->response->setJSON(['success' => false, 'message' => 'Título obrigatório.', 'data' => null, 'errors' => ['title' => 'required']])->setStatusCode(422);
+            return $this->response->setJSON(['success' => false, 'message' => 'Titulo obrigatorio.', 'data' => null, 'errors' => ['title' => 'required']])->setStatusCode(422);
         }
 
         $id = $this->sequences->create($boardId, $payload, (int) session('user_id'));
         if ($id <= 0) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Não foi possível criar sequência.', 'data' => null, 'errors' => null])->setStatusCode(400);
+            return $this->response->setJSON(['success' => false, 'message' => 'Nao foi possivel criar sequencia.', 'data' => null, 'errors' => null])->setStatusCode(400);
         }
 
         $seedFrame = [
@@ -216,46 +249,61 @@ class TacticalBoards extends BaseController
         ];
         $this->frames->saveAll($id, $payload['fps'] ?? 2, $seedFrame);
 
-        return $this->response->setJSON(['success' => true, 'message' => 'Sequência criada.', 'data' => ['id' => $id], 'errors' => null])->setStatusCode(201);
+        return $this->response->setJSON(['success' => true, 'message' => 'Sequencia criada.', 'data' => ['id' => $id], 'errors' => null])->setStatusCode(201);
     }
 
     public function updateSequenceJson(int $sequenceId)
     {
         $sequence = $this->sequences->find($sequenceId);
         if (!$sequence) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Sequência não encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+            return $this->response->setJSON(['success' => false, 'message' => 'Sequencia nao encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+        }
+
+        $board = $this->boards->find((int) $sequence['board_id']);
+        if ($board && ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards'))) {
+            return $response;
         }
 
         $payload = $this->request->getJSON(true) ?: $this->request->getPost();
         $title = trim((string) ($payload['title'] ?? ''));
         if (array_key_exists('title', $payload) && $title === '') {
-            return $this->response->setJSON(['success' => false, 'message' => 'Título obrigatório.', 'data' => null, 'errors' => ['title' => 'required']])->setStatusCode(422);
+            return $this->response->setJSON(['success' => false, 'message' => 'Titulo obrigatorio.', 'data' => null, 'errors' => ['title' => 'required']])->setStatusCode(422);
         }
 
         $ok = $this->sequences->update($sequenceId, $payload);
         if (!$ok) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Falha ao atualizar sequência.', 'data' => null, 'errors' => null])->setStatusCode(400);
+            return $this->response->setJSON(['success' => false, 'message' => 'Falha ao atualizar sequencia.', 'data' => null, 'errors' => null])->setStatusCode(400);
         }
 
-        return $this->response->setJSON(['success' => true, 'message' => 'Sequência atualizada.', 'data' => ['id' => $sequenceId], 'errors' => null]);
+        return $this->response->setJSON(['success' => true, 'message' => 'Sequencia atualizada.', 'data' => ['id' => $sequenceId], 'errors' => null]);
     }
 
     public function deleteSequenceJson(int $sequenceId)
     {
         $sequence = $this->sequences->find($sequenceId);
         if (!$sequence) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Sequência não encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+            return $this->response->setJSON(['success' => false, 'message' => 'Sequencia nao encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+        }
+
+        $board = $this->boards->find((int) $sequence['board_id']);
+        if ($board && ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards'))) {
+            return $response;
         }
 
         $this->sequences->delete($sequenceId);
-        return $this->response->setJSON(['success' => true, 'message' => 'Sequência removida.', 'data' => ['id' => $sequenceId], 'errors' => null]);
+        return $this->response->setJSON(['success' => true, 'message' => 'Sequencia removida.', 'data' => ['id' => $sequenceId], 'errors' => null]);
     }
 
     public function listFramesJson(int $sequenceId)
     {
         $sequence = $this->sequences->find($sequenceId);
         if (!$sequence) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Sequência não encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+            return $this->response->setJSON(['success' => false, 'message' => 'Sequencia nao encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+        }
+
+        $board = $this->boards->find((int) $sequence['board_id']);
+        if ($board && ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards'))) {
+            return $response;
         }
 
         return $this->response->setJSON([
@@ -270,7 +318,12 @@ class TacticalBoards extends BaseController
     {
         $sequence = $this->sequences->find($sequenceId);
         if (!$sequence) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Sequência não encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+            return $this->response->setJSON(['success' => false, 'message' => 'Sequencia nao encontrada.', 'data' => null, 'errors' => null])->setStatusCode(404);
+        }
+
+        $board = $this->boards->find((int) $sequence['board_id']);
+        if ($board && ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards'))) {
+            return $response;
         }
 
         $payload = $this->request->getJSON(true) ?: $this->request->getPost();
@@ -278,7 +331,7 @@ class TacticalBoards extends BaseController
         $fps = $payload['fps'] ?? ($sequence['fps'] ?? 2);
 
         if (!is_array($frames) || count($frames) < 1) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Frames inválidos.', 'data' => null, 'errors' => ['frames' => 'required']])->setStatusCode(422);
+            return $this->response->setJSON(['success' => false, 'message' => 'Frames invalidos.', 'data' => null, 'errors' => ['frames' => 'required']])->setStatusCode(422);
         }
 
         $ok = $this->frames->saveAll($sequenceId, $fps, $frames);
@@ -293,7 +346,11 @@ class TacticalBoards extends BaseController
     {
         $board = $this->boards->findWithRelations($id);
         if (!$board) {
-            return redirect()->to('/tactical-boards')->with('error', 'Prancheta não encontrada.');
+            return redirect()->to('/tactical-boards')->with('error', 'Prancheta nao encontrada.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $board['team_id'], '/tactical-boards')) {
+            return $response;
         }
 
         $selectedState = null;

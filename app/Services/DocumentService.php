@@ -90,11 +90,10 @@ class DocumentService
 
     public function statusCounters(array $filters = []): array
     {
-        $base = $this->documents->builder();
-        $base->from('documents');
-        $base->join('athletes', 'athletes.id = documents.athlete_id', 'left');
+        $base = db_connect()->table('documents d');
+        $base->join('athletes', 'athletes.id = d.athlete_id', 'left');
         $base->join('categories', 'categories.id = athletes.category_id', 'left');
-        $base->where('documents.deleted_at', null);
+        $base->where('d.deleted_at', null);
 
         if (!empty($filters['team_id'])) {
             $base->where('categories.team_id', (int) $filters['team_id']);
@@ -111,9 +110,9 @@ class DocumentService
         ];
 
         $rows = $base
-            ->select("SUM(documents.expires_at < '{$today}') AS expired_count")
-            ->select("SUM(documents.expires_at >= '{$today}' AND documents.expires_at <= DATE_ADD('{$today}', INTERVAL 30 DAY)) AS expiring_count")
-            ->select("SUM(documents.status = 'active') AS active_count")
+            ->select("SUM(d.expires_at < '{$today}') AS expired_count")
+            ->select("SUM(d.expires_at >= '{$today}' AND d.expires_at <= DATE_ADD('{$today}', INTERVAL 30 DAY)) AS expiring_count")
+            ->select("SUM(d.status = 'active') AS active_count")
             ->get()
             ->getRowArray();
 

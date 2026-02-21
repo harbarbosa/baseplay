@@ -3,20 +3,20 @@
 <?= $this->section('content') ?>
 <div class="bp-card">
     <div class="bp-card-header">
-        <h1 style="margin:0;">Novo papel</h1>
-        <div class="bp-text-muted">Defina nome, descricao e permissoes.</div>
+        <h1 style="margin:0;">Editar papel</h1>
+        <div class="bp-text-muted">Ajuste dados e permissoes do papel.</div>
     </div>
     <div class="bp-card-body">
-        <form method="post" action="<?= base_url('/admin/roles') ?>">
+        <form method="post" action="<?= base_url('/admin/roles/' . $role['id'] . '/update') ?>">
             <?= csrf_field() ?>
             <div style="display:grid; gap:16px; max-width:640px;">
                 <div>
                     <label for="name">Nome</label>
-                    <input id="name" name="name" type="text" class="bp-input" value="<?= esc(old('name')) ?>" required>
+                    <input id="name" name="name" type="text" class="bp-input" value="<?= esc(old('name') ?: $role['name']) ?>" required>
                 </div>
                 <div>
                     <label for="description">Descricao</label>
-                    <input id="description" name="description" type="text" class="bp-input" value="<?= esc(old('description')) ?>">
+                    <input id="description" name="description" type="text" class="bp-input" value="<?= esc(old('description') ?: $role['description']) ?>">
                 </div>
             </div>
             <div style="margin-top:16px;">
@@ -127,9 +127,10 @@
                                 }
                                 ?>
                                 <?php foreach ($itemsToRender as $item): ?>
+                                    <?php $checked = in_array((int) $item['id'], array_map('intval', (array) $assigned), true); ?>
                                     <?php $label = $actionLabels[$item['action']] ?? ($item['action'] !== '' ? ucfirst($item['action']) : $item['name']); ?>
                                     <label style="display:flex; gap:8px; align-items:center;">
-                                        <input type="checkbox" name="permissions[]" value="<?= esc($item['id']) ?>">
+                                        <input type="checkbox" name="permissions[]" value="<?= esc($item['id']) ?>" <?= $checked ? 'checked' : '' ?>>
                                         <?= esc($label) ?>
                                     </label>
                                 <?php endforeach; ?>
@@ -139,7 +140,7 @@
                 </div>
             </div>
             <div style="display:flex; gap:8px; margin-top:20px;">
-                <button type="submit" class="bp-btn-primary">Criar</button>
+                <button type="submit" class="bp-btn-primary">Salvar</button>
                 <a href="<?= base_url('/admin/roles') ?>" class="bp-btn-ghost">Cancelar</a>
             </div>
         </form>

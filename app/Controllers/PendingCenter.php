@@ -27,17 +27,22 @@ class PendingCenter extends BaseController
             'type' => $this->request->getGet('type'),
         ];
 
+        $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+
+        $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
+        $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
+        $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true);
+
         return view('pending_center/index', [
-            'title' => 'Central de Pendências',
+            'title' => 'Central de Pendencias',
             'filters' => $filters,
             'data' => $this->pending->getData($filters),
-            'teams' => $this->teams->list([], 200, 'teams_filter')['items'],
-            'categories' => $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true),
+            'teams' => $teams,
+            'categories' => $categories,
             'breadcrumbs' => [
                 ['label' => 'Ferramentas'],
-                ['label' => 'Central de Pendências'],
+                ['label' => 'Central de Pendencias'],
             ],
         ]);
     }
 }
-

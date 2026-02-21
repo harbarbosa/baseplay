@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/base') ?>
+﻿<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <?php
@@ -7,7 +7,7 @@ if (!is_array($decoded)) {
     $decoded = [
         'field' => ['background' => 'soccer_field_v1', 'aspectRatio' => 1.6],
         'items' => [],
-        'meta' => ['notes' => '', 'formation' => ''],
+        'meta' => [],
     ];
 }
 ?>
@@ -24,11 +24,16 @@ if (!is_array($decoded)) {
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <?php if ($canEdit): ?>
-                <button type="button" id="presentation-toggle" class="secondary">Apresentação</button>
+                <button type="button" id="presentation-toggle" class="secondary">ApresentaÃ§Ã£o</button>
                 <button type="button" id="export-image" class="secondary">Exportar imagem</button>
                 <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/duplicate') ?>" style="display:inline;">
                     <?= csrf_field() ?>
                     <button type="submit" class="secondary">Duplicar prancheta</button>
+                </form>
+                <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/save') ?>" id="save-form" style="display:inline;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="state_json" id="state_json">
+                    <button type="submit">Salvar</button>
                 </form>
             <?php endif; ?>
             <a href="<?= base_url('/tactical-boards') ?>" class="button secondary">Voltar</a>
@@ -39,15 +44,59 @@ if (!is_array($decoded)) {
         <div class="tactical-field-wrap">
             <div class="tactical-field-toolbar">
                 <div class="tactical-field-toolbar-row">
-                    <div class="form-group" style="margin:0; flex:1;">
-                        <label for="field-background">Tipo de campo</label>
-                        <select id="field-background" <?= !$canEdit ? 'disabled' : '' ?>>
-                            <option value="soccer_field_v1">Campo inteiro</option>
-                            <option value="soccer_field_half_vertical_down">Meio campo (gol embaixo)</option>
-                            <option value="soccer_field_half_vertical_up">Meio campo (gol em cima)</option>
-                        </select>
+                    <div class="form-group tactical-left-stack" style="margin:0; flex:1;">
+                        <div class="tactical-left-section">
+                            <label>Elementos Táticos</label>
+                            <div class="tactical-quick-actions">
+                                <button type="button" id="add-goal-toolbar" class="tactical-icon-btn icon-only-btn" title="Adicionar gol" aria-label="Adicionar gol" <?= !$canEdit ? 'disabled' : '' ?>><span class="btn-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M4 18V8h16v10h-2v-8H6v8H4zm4 0V12h8v6h-2v-4h-4v4H8z"/></svg></span></button>
+                                <button type="button" id="add-player" class="tactical-icon-btn icon-only-btn" title="Adicionar jogador" aria-label="Adicionar jogador" <?= !$canEdit ? 'disabled' : '' ?>><span class="btn-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle fill="#fff" cx="12" cy="7" r="3"/><path fill="#fff" d="M7 20c0-3 2.2-5 5-5s5 2 5 5H7z"/></svg></span></button>
+                                <button type="button" id="add-cone" class="tactical-icon-btn icon-only-btn" title="Adicionar cone" aria-label="Adicionar cone" <?= !$canEdit ? 'disabled' : '' ?>><span class="btn-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M12 4l7 14H5l7-14zm-4.2 16h8.4v2H7.8z"/></svg></span></button>
+                                <button type="button" id="add-ball" class="tactical-icon-btn icon-only-btn" title="Adicionar bola" aria-label="Adicionar bola" <?= !$canEdit ? 'disabled' : '' ?>><span class="btn-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2l2.8 2-1.1 3.2H10.3L9.2 6 12 4zm-5.6 4.1l2.2-.6 1.1 3.1-2.4 1.8-2.2-1.6a8.1 8.1 0 011.3-2.7zm-.4 6.9l2.1 1.5.2 3-2 .7A8 8 0 014 15zm12 5.2l-2-.7.2-3 2.1-1.5a8 8 0 01-2.3 5.2zM12 20l-2.2-1.6-.2-2.7 2.4-1.8 2.4 1.8-.2 2.7L12 20zm4.6-7.5l-2.4-1.8 1.1-3.1 2.2.6c.6.8 1 1.7 1.3 2.7l-2.2 1.6z"/></svg></span></button>
+                                <button type="button" id="add-arrow" class="tactical-icon-btn icon-only-btn" title="Adicionar seta" aria-label="Adicionar seta" <?= !$canEdit ? 'disabled' : '' ?>><span class="btn-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M4 11h10V8l6 4-6 4v-3H4v-2z"/></svg></span></button>
+                                <button type="button" id="apply-433" class="tactical-icon-btn icon-only-btn" title="2 times" aria-label="2 times" <?= !$canEdit ? 'disabled' : '' ?>><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle fill="#fff" cx="8" cy="7" r="2.1"/><circle fill="#fff" cx="16" cy="7" r="2.1"/><path fill="#fff" d="M4.5 16c0-2.5 1.8-4.2 3.9-4.2s3.9 1.7 3.9 4.2H4.5z"/><path fill="#fff" d="M11.7 16c0-2.5 1.8-4.2 3.9-4.2s3.9 1.7 3.9 4.2h-7.8z"/></svg></span></button>
+                            </div>
+                        </div>
+                        <div class="tactical-left-divider"></div>
+                        <div class="tactical-left-section">
+                            <label>Tipo de campo</label>
+                            <div class="field-type-icons" role="group" aria-label="Tipo de campo">
+                                <button type="button" class="field-type-btn" data-field-bg="soccer_field_v1" title="Campo inteiro" aria-label="Campo inteiro" <?= !$canEdit ? 'disabled' : '' ?>>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="2.5" y="4.5" width="19" height="15" rx="1.5"></rect>
+                                        <line x1="12" y1="4.5" x2="12" y2="19.5"></line>
+                                        <circle cx="12" cy="12" r="2.2"></circle>
+                                    </svg>
+                                </button>
+                                <button type="button" class="field-type-btn" data-field-bg="soccer_field_half_vertical_down" title="Meio campo (gol embaixo)" aria-label="Meio campo (gol embaixo)" <?= !$canEdit ? 'disabled' : '' ?>>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="2.5" y="4.5" width="19" height="15" rx="1.5"></rect>
+                                        <line x1="2.5" y1="12" x2="21.5" y2="12"></line>
+                                        <path d="M8 19.5v-3h8v3"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" class="field-type-btn" data-field-bg="soccer_field_half_vertical_up" title="Meio campo (gol em cima)" aria-label="Meio campo (gol em cima)" <?= !$canEdit ? 'disabled' : '' ?>>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="2.5" y="4.5" width="19" height="15" rx="1.5"></rect>
+                                        <line x1="2.5" y1="12" x2="21.5" y2="12"></line>
+                                        <path d="M8 4.5v3h8v-3"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <button type="button" id="add-goal-toolbar" class="secondary" style="align-self:flex-end;" <?= !$canEdit ? 'disabled' : '' ?>>+ Adicionar gol</button>
+                    <div class="form-group tactical-step-toolbar" style="margin:0; align-self:flex-start;">
+                        <label>Etapas</label>
+                        <div class="tactical-step-toolbar-row">
+                            <div class="tactical-actions step-actions-inline">
+                                <button type="button" id="step-add" <?= !$canEdit ? 'disabled' : '' ?>>+ Etapa</button>
+                                <button type="button" id="step-duplicate" <?= !$canEdit ? 'disabled' : '' ?>>Duplicar</button>
+                                <button type="button" id="step-delete" <?= !$canEdit ? 'disabled' : '' ?>>Excluir</button>
+                                <button type="button" id="step-prev">Prev</button>
+                                <button type="button" id="step-next">Next</button>
+                            </div>
+                        </div>
+                        <div id="step-timeline" class="frame-timeline"></div>
+                    </div>
                 </div>
             </div>
             <div id="tactical-field" class="tactical-field" aria-label="Campo tatico"></div>
@@ -58,98 +107,51 @@ if (!is_array($decoded)) {
                     <button type="button" id="viewer-next" class="viewer-nav-btn" aria-label="Proxima etapa">&rarr;</button>
                 </div>
             </div>
+        </div></div>
+</div>
+
+<div id="item-modal" class="tactical-item-modal" aria-hidden="true">
+    <div class="tactical-item-modal-backdrop" data-close-modal="1"></div>
+    <div class="tactical-item-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
+        <div class="tactical-item-modal-header">
+            <h3 id="item-modal-title">Item selecionado</h3>
+            <button type="button" id="item-modal-close" class="secondary">Fechar</button>
         </div>
-
-        <aside class="tactical-sidebar"<?= !$canEdit ? ' style="display:none;"' : '' ?>>
-            <div class="tactical-panel">
-                <h3>Itens</h3>
-                <div class="tactical-actions">
-                    <button type="button" id="add-player" <?= !$canEdit ? 'disabled' : '' ?>>+ Jogador</button>
-                    <button type="button" id="add-cone" <?= !$canEdit ? 'disabled' : '' ?>>+ Cone</button>
-                    <button type="button" id="add-ball" <?= !$canEdit ? 'disabled' : '' ?>>+ Bola</button>
-                    <button type="button" id="add-arrow" <?= !$canEdit ? 'disabled' : '' ?>>+ Seta</button>
-                </div>
-
-                <div class="form-group" style="margin-top:12px; display:none;">
-                    <label for="items-list">Selecionado</label>
-                    <select id="items-list" size="6"></select>
-                </div>
-
-                <div class="form-group">
-                    <label for="prop-type">Tipo</label>
-                    <input id="prop-type" type="text" readonly>
-                </div>
-                <div class="form-group" id="group-prop-number">
-                    <label for="prop-number">Numero (jogador)</label>
-                    <input id="prop-number" type="number" min="0" max="99" <?= !$canEdit ? 'disabled' : '' ?>>
-                </div>
-                <div class="form-group">
-                    <label for="prop-label">Label</label>
-                    <input id="prop-label" type="text" <?= !$canEdit ? 'disabled' : '' ?>>
-                </div>
-                <div class="form-group" id="group-prop-color">
-                    <label for="prop-color">Cor</label>
-                    <select id="prop-color" <?= !$canEdit ? 'disabled' : '' ?>>
-                        <option value="wine">Vinho</option>
-                        <option value="white">Branco</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                <div class="form-group" id="group-prop-goal-direction">
-                    <label for="prop-goal-direction">Direcao do gol</label>
-                    <select id="prop-goal-direction" <?= !$canEdit ? 'disabled' : '' ?>>
-                        <option value="0">Baixo</option>
-                        <option value="90">Esquerda</option>
-                        <option value="180">Cima</option>
-                        <option value="270">Direita</option>
-                    </select>
-                </div>
-
-                <div class="tactical-actions">
-                    <button type="button" id="remove-selected" <?= !$canEdit ? 'disabled' : '' ?>>Remover</button>
-                    <button type="button" id="reset-board" class="secondary" <?= !$canEdit ? 'disabled' : '' ?>>Resetar</button>
-                </div>
+        <div class="tactical-item-modal-body">
+            <div class="form-group">
+                <label for="m-prop-type">Tipo</label>
+                <input id="m-prop-type" type="text" readonly>
             </div>
-
-            <div class="tactical-panel">
-                <h3>Metadados</h3>
-                <div class="form-group">
-                    <label for="meta-formation">Formacao</label>
-                    <input id="meta-formation" type="text" placeholder="Ex: 4-3-3" <?= !$canEdit ? 'disabled' : '' ?>>
-                </div>
-                <div class="form-group">
-                    <label for="meta-notes">Notas</label>
-                    <textarea id="meta-notes" rows="4" <?= !$canEdit ? 'disabled' : '' ?>></textarea>
-                </div>
-
-                <?php if ($canEdit): ?>
-                    <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/save') ?>" id="save-form">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="state_json" id="state_json">
-                        <button type="submit">Salvar</button>
-                    </form>
-                <?php else: ?>
-                    <p style="color:var(--muted); margin-top:8px;">Somente leitura.</p>
-                <?php endif; ?>
+            <div class="form-group" id="m-group-prop-number">
+                <label for="m-prop-number">Numero (jogador)</label>
+                <input id="m-prop-number" type="number" min="0" max="99" <?= !$canEdit ? 'disabled' : '' ?>>
             </div>
-
-            <div class="tactical-panel">
-                <h3>Etapas</h3>
-                <div style="margin-bottom:8px;">
-                    <strong id="step-counter">Etapa atual: 1/1</strong>
-                </div>
-                <div id="step-timeline" class="frame-timeline"></div>
-                <div class="tactical-actions step-actions">
-                    <button type="button" id="step-add" <?= !$canEdit ? 'disabled' : '' ?>>+ Etapa</button>
-                    <button type="button" id="step-duplicate" <?= !$canEdit ? 'disabled' : '' ?>>Duplicar etapa</button>
-                    <button type="button" id="step-delete" <?= !$canEdit ? 'disabled' : '' ?>>Excluir etapa</button>
-                </div>
-                <div class="tactical-actions step-nav">
-                    <button type="button" id="step-prev">Prev</button>
-                    <button type="button" id="step-next">Next</button>
-                </div>
+            <div class="form-group">
+                <label for="m-prop-label">Label</label>
+                <input id="m-prop-label" type="text" <?= !$canEdit ? 'disabled' : '' ?>>
             </div>
-        </aside>
+            <div class="form-group" id="m-group-prop-color">
+                <label for="m-prop-color">Cor</label>
+                <select id="m-prop-color" <?= !$canEdit ? 'disabled' : '' ?>>
+                    <option value="wine">Vinho</option>
+                    <option value="white">Branco</option>
+                </select>
+            </div>
+            <div class="form-group" id="m-group-prop-goal-direction">
+                <label for="m-prop-goal-direction">Direcao do gol</label>
+                <select id="m-prop-goal-direction" <?= !$canEdit ? 'disabled' : '' ?>>
+                    <option value="0">Baixo</option>
+                    <option value="90">Esquerda</option>
+                    <option value="180">Cima</option>
+                    <option value="270">Direita</option>
+                </select>
+            </div>
+        </div>
+        <div class="tactical-item-modal-footer">
+            <button type="button" id="m-save-item" <?= !$canEdit ? 'disabled' : '' ?>>Salvar alteracao</button>
+            <button type="button" id="m-remove-selected" <?= !$canEdit ? 'disabled' : '' ?>>Remover</button>
+            <button type="button" id="m-reset-board" <?= !$canEdit ? 'disabled' : '' ?>>Resetar</button>
+        </div>
     </div>
 </div>
 
@@ -164,18 +166,17 @@ if (!is_array($decoded)) {
     const GOAL_HEIGHT = 24;
     const coneIconUrl = "<?= base_url('assets/img/cone-icon.svg') ?>";
     const fieldEl = document.getElementById('tactical-field');
-    const listEl = document.getElementById('items-list');
-    const propType = document.getElementById('prop-type');
-    const propNumber = document.getElementById('prop-number');
-    const propLabel = document.getElementById('prop-label');
-    const propColor = document.getElementById('prop-color');
-    const propGoalDirection = document.getElementById('prop-goal-direction');
-    const groupPropNumber = document.getElementById('group-prop-number');
-    const groupPropColor = document.getElementById('group-prop-color');
-    const groupPropGoalDirection = document.getElementById('group-prop-goal-direction');
-    const fieldBackground = document.getElementById('field-background');
-    const metaFormation = document.getElementById('meta-formation');
-    const metaNotes = document.getElementById('meta-notes');
+    const itemModal = document.getElementById('item-modal');
+    const itemModalClose = document.getElementById('item-modal-close');
+    const mPropType = document.getElementById('m-prop-type');
+    const mPropNumber = document.getElementById('m-prop-number');
+    const mPropLabel = document.getElementById('m-prop-label');
+    const mPropColor = document.getElementById('m-prop-color');
+    const mPropGoalDirection = document.getElementById('m-prop-goal-direction');
+    const mGroupPropNumber = document.getElementById('m-group-prop-number');
+    const mGroupPropColor = document.getElementById('m-group-prop-color');
+    const mGroupPropGoalDirection = document.getElementById('m-group-prop-goal-direction');
+    const fieldTypeButtons = Array.from(document.querySelectorAll('.field-type-btn'));
     const stateInput = document.getElementById('state_json');
     const stepCounter = document.getElementById('step-counter');
     const stepTimeline = document.getElementById('step-timeline');
@@ -183,11 +184,12 @@ if (!is_array($decoded)) {
     const initialState = <?= json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const state = JSON.parse(JSON.stringify(initialState));
     state.items = Array.isArray(state.items) ? state.items : [];
-    state.meta = state.meta || {notes: '', formation: ''};
+    state.meta = state.meta || {};
     state.field = state.field || {background: 'soccer_field_v1', aspectRatio: 1.6};
 
     let selectedId = null;
     let dragging = {id: null, pointerId: null, offsetX: 0, offsetY: 0};
+    let pointerState = {id: null, pointerId: null, startX: 0, startY: 0, moved: false};
     let drawArrowMode = false;
     let drawingArrow = null;
     let steps = [];
@@ -213,6 +215,23 @@ if (!is_array($decoded)) {
         const config = getFieldConfig(state.field.background);
         fieldEl.style.backgroundImage = `url("<?= base_url('assets/img') ?>/${config.file}")`;
         fieldEl.style.aspectRatio = String(config.aspectRatio);
+        fieldTypeButtons.forEach((button) => {
+            const isActive = button.dataset.fieldBg === state.field.background;
+            button.classList.toggle('active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+    }
+
+    function openItemModal() {
+        if (!itemModal || !selectedId) return;
+        itemModal.classList.add('open');
+        itemModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeItemModal() {
+        if (!itemModal) return;
+        itemModal.classList.remove('open');
+        itemModal.setAttribute('aria-hidden', 'true');
     }
 
     function itemText(item) {
@@ -224,17 +243,9 @@ if (!is_array($decoded)) {
         return item.type;
     }
 
-    function ensureMeta() {
-        state.meta.formation = metaFormation.value || '';
-        state.meta.notes = metaNotes.value || '';
-    }
-
     function getStepSnapshot() {
-        ensureMeta();
         return {
             items: JSON.parse(JSON.stringify(state.items || [])),
-            formation: state.meta.formation || '',
-            notes: state.meta.notes || '',
         };
     }
 
@@ -243,10 +254,6 @@ if (!is_array($decoded)) {
         currentStepIndex = stepIndex;
         const step = steps[stepIndex];
         state.items = JSON.parse(JSON.stringify(step.items || []));
-        state.meta.formation = step.formation || '';
-        state.meta.notes = step.notes || '';
-        metaFormation.value = state.meta.formation;
-        metaNotes.value = state.meta.notes;
         selectedId = state.items.length ? state.items[0].id : null;
         fieldEl.classList.toggle('playback-transition', withTransition);
         renderAll();
@@ -263,15 +270,15 @@ if (!is_array($decoded)) {
         if (Array.isArray(raw) && raw.length) {
             return raw.map((step) => ({
                 items: Array.isArray(step.items) ? step.items : [],
-                formation: step.formation || '',
-                notes: step.notes || '',
             }));
         }
         return [getStepSnapshot()];
     }
 
     function renderSteps() {
-        stepCounter.textContent = `Etapa atual: ${currentStepIndex + 1}/${steps.length}`;
+        if (stepCounter) {
+            stepCounter.textContent = `Etapa atual: ${currentStepIndex + 1}/${steps.length}`;
+        }
         stepTimeline.innerHTML = '';
         steps.forEach((_, idx) => {
             const btn = document.createElement('button');
@@ -315,6 +322,8 @@ if (!is_array($decoded)) {
             stopPlayback();
             return;
         }
+        // Persist current step edits before starting playback.
+        captureCurrentStep();
         isPlaying = true;
         updatePlayButton();
         playTick();
@@ -370,7 +379,7 @@ if (!is_array($decoded)) {
 
         if (item.type === 'player') el.textContent = item.number ? String(item.number) : '';
         else if (item.type === 'cone') el.innerHTML = `<img src="${coneIconUrl}" alt="Cone">`;
-        else if (item.type === 'ball') el.innerHTML = '⚽';
+        else if (item.type === 'ball') el.innerHTML = 'âš½';
         else if (item.type === 'arrow') el.innerHTML = '<span class="arrow-shaft"></span><span class="arrow-head"></span>';
         else if (item.type === 'goal') el.innerHTML = '<span class="goal-net"></span>';
     }
@@ -395,32 +404,14 @@ if (!is_array($decoded)) {
             const py = (current.y / 100) * rect.height;
             dragging.offsetX = event.clientX - (rect.left + px);
             dragging.offsetY = event.clientY - (rect.top + py);
+            pointerState.id = itemId;
+            pointerState.pointerId = event.pointerId;
+            pointerState.startX = event.clientX;
+            pointerState.startY = event.clientY;
+            pointerState.moved = false;
             el.setPointerCapture(event.pointerId);
         });
-
-        el.addEventListener('click', () => {
-            const id = el.dataset.id;
-            const item = byId(id);
-            if (!item) return;
-            selectItem(id);
-            if (canEdit && item.type === 'goal') {
-                item.rotation = (Number(item.rotation || 0) + 90) % 360;
-                renderAll();
-            }
-        });
         return el;
-    }
-
-    function renderList() {
-        const prev = listEl.value;
-        listEl.innerHTML = '';
-        state.items.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = `${itemText(item)} (${Math.round(item.x)}%, ${Math.round(item.y)}%)`;
-            if (item.id === selectedId || item.id === prev) option.selected = true;
-            listEl.appendChild(option);
-        });
     }
 
     function renderField() {
@@ -444,41 +435,40 @@ if (!is_array($decoded)) {
     function renderProperties() {
         const item = byId(selectedId);
         if (!item) {
-            propType.value = '';
-            propNumber.value = '';
-            propLabel.value = '';
-            propColor.value = 'wine';
-            propGoalDirection.value = '0';
-            propGoalDirection.disabled = true;
-            groupPropNumber.style.display = '';
-            groupPropColor.style.display = '';
-            groupPropGoalDirection.style.display = 'none';
+            mPropType.value = '';
+            mPropNumber.value = '';
+            mPropLabel.value = '';
+            mPropColor.value = 'wine';
+            mPropGoalDirection.value = '0';
+            mPropGoalDirection.disabled = true;
+            mGroupPropNumber.style.display = '';
+            mGroupPropColor.style.display = '';
+            mGroupPropGoalDirection.style.display = 'none';
             return;
         }
-        propType.value = item.type;
-        propNumber.value = item.type === 'player' ? (item.number ?? '') : '';
-        propLabel.value = item.label ?? '';
-        propColor.value = item.color ?? 'wine';
-        groupPropNumber.style.display = item.type === 'goal' ? 'none' : '';
-        groupPropColor.style.display = item.type === 'goal' ? 'none' : '';
-        groupPropGoalDirection.style.display = item.type === 'goal' ? '' : 'none';
+        mPropType.value = item.type;
+        mPropNumber.value = item.type === 'player' ? (item.number ?? '') : '';
+        mPropLabel.value = item.label ?? '';
+        mPropColor.value = item.color ?? 'wine';
+        mGroupPropNumber.style.display = item.type === 'goal' ? 'none' : '';
+        mGroupPropColor.style.display = item.type === 'goal' ? 'none' : '';
+        mGroupPropGoalDirection.style.display = item.type === 'goal' ? '' : 'none';
         if (item.type === 'goal') {
-            propGoalDirection.disabled = !canEdit;
+            mPropGoalDirection.disabled = !canEdit;
             const rotation = Number(item.rotation || 0);
             const nearest = [0, 90, 180, 270].reduce((prev, cur) =>
                 Math.abs(cur - rotation) < Math.abs(prev - rotation) ? cur : prev
             , 0);
-            propGoalDirection.value = String(nearest);
+            mPropGoalDirection.value = String(nearest);
         } else {
-            propGoalDirection.value = '0';
-            propGoalDirection.disabled = true;
+            mPropGoalDirection.value = '0';
+            mPropGoalDirection.disabled = true;
         }
     }
 
     function renderAll() {
         applyFieldBackground();
         renderField();
-        renderList();
         renderProperties();
         fieldEl.classList.toggle('drawing-arrow', drawArrowMode);
     }
@@ -507,6 +497,53 @@ if (!is_array($decoded)) {
         selectItem(item.id);
     }
 
+    function buildTeam433(teamName, color, side) {
+        const isLeft = side === 'left';
+        const xGK = isLeft ? 10 : 90;
+        const xDEF = isLeft ? 22 : 78;
+        const xMID = isLeft ? 38 : 62;
+        const xFWD = isLeft ? 46 : 54;
+        const players = [];
+
+        const pushPlayer = (number, x, y) => {
+            players.push({
+                id: uuid(),
+                type: 'player',
+                x,
+                y,
+                number,
+                label: teamName,
+                color,
+                size: PLAYER_SIZE,
+                angle: null,
+                length: null,
+                rotation: null,
+            });
+        };
+
+        pushPlayer(1, xGK, 50);
+        [20, 40, 60, 80].forEach((y, idx) => pushPlayer(idx + 2, xDEF, y));
+        [30, 50, 70].forEach((y, idx) => pushPlayer(idx + 6, xMID, y));
+        [25, 50, 75].forEach((y, idx) => pushPlayer(idx + 9, xFWD, y));
+
+        return players;
+    }
+
+    function applyTwoTeams433() {
+        if (!canEdit) return;
+        if (!confirm('Aplicar 2 times em 4-3-3 na etapa atual? Isso substitui os itens desta etapa.')) return;
+
+        const leftTeam = buildTeam433('Time A', 'wine', 'left');
+        const rightTeam = buildTeam433('Time B', 'white', 'right');
+        state.items = [...leftTeam, ...rightTeam];
+        selectedId = state.items.length ? state.items[0].id : null;
+        if (steps.length) {
+            steps[currentStepIndex] = { items: JSON.parse(JSON.stringify(state.items)) };
+            renderSteps();
+        }
+        renderAll();
+    }
+
     function toPercent(clientX, clientY) {
         const rect = fieldEl.getBoundingClientRect();
         return {
@@ -525,9 +562,7 @@ if (!is_array($decoded)) {
 
     function resetState() {
         state.items = Array.isArray(initialState.items) ? JSON.parse(JSON.stringify(initialState.items)) : [];
-        state.meta = initialState.meta ? JSON.parse(JSON.stringify(initialState.meta)) : {formation: '', notes: ''};
-        metaFormation.value = state.meta.formation || '';
-        metaNotes.value = state.meta.notes || '';
+        state.meta = initialState.meta ? JSON.parse(JSON.stringify(initialState.meta)) : {};
         selectedId = state.items.length ? state.items[0].id : null;
         renderAll();
     }
@@ -551,6 +586,12 @@ if (!is_array($decoded)) {
         if (!canEdit || !dragging.id) return;
         const item = byId(dragging.id);
         if (!item) return;
+        if (pointerState.id === dragging.id && pointerState.pointerId === event.pointerId) {
+            const distance = Math.hypot(event.clientX - pointerState.startX, event.clientY - pointerState.startY);
+            if (distance > 4) {
+                pointerState.moved = true;
+            }
+        }
 
         const rect = fieldEl.getBoundingClientRect();
         const xPx = event.clientX - rect.left - dragging.offsetX;
@@ -564,7 +605,16 @@ if (!is_array($decoded)) {
         renderAll();
     });
 
-    fieldEl.addEventListener('pointerup', () => {
+    fieldEl.addEventListener('pointerup', (event) => {
+        if (pointerState.id && pointerState.pointerId === event.pointerId) {
+            if (!pointerState.moved) {
+                selectItem(pointerState.id);
+                openItemModal();
+            }
+            pointerState.id = null;
+            pointerState.pointerId = null;
+            pointerState.moved = false;
+        }
         dragging.id = null;
         dragging.pointerId = null;
         if (drawingArrow) {
@@ -575,6 +625,9 @@ if (!is_array($decoded)) {
     });
 
     fieldEl.addEventListener('pointercancel', () => {
+        pointerState.id = null;
+        pointerState.pointerId = null;
+        pointerState.moved = false;
         dragging.id = null;
         dragging.pointerId = null;
         if (drawingArrow) {
@@ -614,39 +667,38 @@ if (!is_array($decoded)) {
         renderAll();
     });
 
-    listEl.addEventListener('change', () => listEl.value && selectItem(listEl.value));
-
-    propNumber.addEventListener('input', () => {
+    mPropNumber?.addEventListener('input', () => {
         const item = byId(selectedId);
         if (!item || item.type !== 'player' || !canEdit) return;
-        item.number = Number(propNumber.value || 0);
+        item.number = Number(mPropNumber.value || 0);
         renderAll();
     });
-
-    propLabel.addEventListener('input', () => {
+    mPropLabel?.addEventListener('input', () => {
         const item = byId(selectedId);
         if (!item || !canEdit) return;
-        item.label = propLabel.value || '';
+        item.label = mPropLabel.value || '';
         renderAll();
     });
-
-    propColor.addEventListener('change', () => {
+    mPropColor?.addEventListener('change', () => {
         const item = byId(selectedId);
         if (!item || !canEdit) return;
-        item.color = propColor.value || 'wine';
+        item.color = mPropColor.value || 'wine';
         renderAll();
     });
-    propGoalDirection.addEventListener('change', () => {
+    mPropGoalDirection?.addEventListener('change', () => {
         const item = byId(selectedId);
         if (!item || item.type !== 'goal' || !canEdit) return;
-        const value = Number(propGoalDirection.value || 0);
+        const value = Number(mPropGoalDirection.value || 0);
         item.rotation = value;
         renderAll();
     });
-    fieldBackground?.addEventListener('change', () => {
-        if (!canEdit) return;
-        state.field.background = fieldBackground.value || 'soccer_field_v1';
-        applyFieldBackground();
+    fieldTypeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            if (!canEdit) return;
+            const nextBackground = button.dataset.fieldBg || 'soccer_field_v1';
+            state.field.background = nextBackground;
+            applyFieldBackground();
+        });
     });
 
     document.getElementById('add-player')?.addEventListener('click', () => canEdit && addItem('player'));
@@ -658,13 +710,35 @@ if (!is_array($decoded)) {
         drawArrowMode = !drawArrowMode;
         renderAll();
     });
+    document.getElementById('apply-433')?.addEventListener('click', applyTwoTeams433);
     document.getElementById('remove-selected')?.addEventListener('click', () => canEdit && removeSelected());
     document.getElementById('reset-board')?.addEventListener('click', () => canEdit && resetState());
+    document.getElementById('m-remove-selected')?.addEventListener('click', () => {
+        if (!canEdit) return;
+        removeSelected();
+        closeItemModal();
+    });
+    document.getElementById('m-reset-board')?.addEventListener('click', () => {
+        if (!canEdit) return;
+        resetState();
+    });
+    document.getElementById('m-save-item')?.addEventListener('click', () => {
+        renderAll();
+        closeItemModal();
+    });
+    itemModalClose?.addEventListener('click', closeItemModal);
+    itemModal?.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.dataset.closeModal === '1') {
+            closeItemModal();
+        }
+    });
     document.getElementById('step-add')?.addEventListener('click', () => {
         if (!canEdit) return;
         captureCurrentStep();
         const insertAt = currentStepIndex + 1;
-        steps.splice(insertAt, 0, getStepSnapshot());
+        steps.splice(insertAt, 0, { items: [] });
         applyStep(insertAt);
     });
     document.getElementById('step-duplicate')?.addEventListener('click', () => {
@@ -723,13 +797,10 @@ if (!is_array($decoded)) {
     });
 
     document.getElementById('save-form')?.addEventListener('submit', (event) => {
-        ensureMeta();
         captureCurrentStep();
         state.meta.steps = steps;
         state.meta.current_step = currentStepIndex;
         state.items = JSON.parse(JSON.stringify(steps[currentStepIndex].items || []));
-        state.meta.formation = steps[currentStepIndex].formation || '';
-        state.meta.notes = steps[currentStepIndex].notes || '';
         const payload = JSON.stringify(state);
         if (!payload) {
             event.preventDefault();
@@ -738,9 +809,6 @@ if (!is_array($decoded)) {
         stateInput.value = payload;
     });
 
-    metaFormation.value = state.meta.formation || '';
-    metaNotes.value = state.meta.notes || '';
-    fieldBackground.value = state.field.background || 'soccer_field_v1';
     selectedId = state.items.length ? state.items[0].id : null;
     steps = normalizeSteps();
     if (!canEdit) {
@@ -753,3 +821,4 @@ if (!is_array($decoded)) {
 })();
 </script>
 <?= $this->endSection() ?>
+

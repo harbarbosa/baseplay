@@ -59,13 +59,13 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>TÃ­tulo</th>
+                    <th>Título</th>
                     <th>Equipe</th>
                     <th>Categoria</th>
                     <th>Data</th>
                     <th>Status</th>
                     <th>Total (min)</th>
-                    <th>AÃ§Ãµes</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>

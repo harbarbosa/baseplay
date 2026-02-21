@@ -5,7 +5,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
             <h1>Agenda</h1>
-            <p style="color:var(--muted);">Eventos, convocaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes e presenÃƒÆ’Ã‚Â§a.</p>
+            <p style="color:var(--muted);">Eventos, convocaÃ§Ãµes e presenÃ§a.</p>
         </div>
         <?php if (has_permission('events.create')): ?>
             <a href="<?= base_url('/events/create') ?>" class="button">Novo evento</a>
@@ -14,7 +14,7 @@
 
     <div style="margin-top:12px;">
         <a href="<?= base_url('/events?view=list') ?>" class="button secondary">Lista</a>
-        <a href="<?= base_url('/events?view=calendar') ?>" class="button secondary">CalendÃƒÆ’Ã‚Â¡rio</a>
+        <a href="<?= base_url('/events?view=calendar') ?>" class="button secondary">CalendÃ¡rio</a>
     </div>
 
     <form method="get" action="<?= base_url('/events') ?>" style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">
@@ -49,7 +49,7 @@
             <option value="">Status</option>
             <option value="scheduled" <?= ($filters['status'] ?? '') === 'scheduled' ? 'selected' : '' ?>>Agendado</option>
             <option value="cancelled" <?= ($filters['status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelado</option>
-            <option value="completed" <?= ($filters['status'] ?? '') === 'completed' ? 'selected' : '' ?>>ConcluÃƒÆ’Ã‚Â­do</option>
+            <option value="completed" <?= ($filters['status'] ?? '') === 'completed' ? 'selected' : '' ?>>ConcluÃ­do</option>
         </select>
         <input type="date" name="from_date" value="<?= esc($filters['from_date'] ?? '') ?>">
         <input type="date" name="to_date" value="<?= esc($filters['to_date'] ?? '') ?>">
@@ -67,7 +67,7 @@
             $daysInMonth = (int) $monthEnd->format('j');
         ?>
         <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:8px;">
-            <?php foreach (['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃƒÆ’Ã‚Â¡b', 'Dom'] as $dayLabel): ?>
+            <?php foreach (['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b', 'Dom'] as ): ?>
                 <div style="font-weight:600; text-align:center;"><?= esc($dayLabel) ?></div>
             <?php endforeach; ?>
             <?php for ($i = 1; $i < $startDay; $i++): ?>

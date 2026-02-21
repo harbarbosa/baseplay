@@ -318,6 +318,14 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->post('training-sessions/(:num)/athletes', 'TrainingSessions::saveAthlete/$1', ['filter' => ['csrf', 'permission:training_sessions.update']]);
 
     $routes->get('tactical-boards', 'TacticalBoards::index', ['filter' => 'permission:tactical_board.view']);
+    $routes->get('tactical-boards/templates', 'TacticalBoards::templates', ['filter' => 'permission:templates.view']);
+    $routes->get('tactical-boards/templates/create', 'TacticalBoards::templateCreate', ['filter' => 'permission:templates.manage']);
+    $routes->post('tactical-boards/templates', 'TacticalBoards::templateStore', ['filter' => ['csrf', 'permission:templates.manage']]);
+    $routes->get('tactical-boards/templates/(:num)/edit', 'TacticalBoards::templateEdit/$1', ['filter' => 'permission:templates.manage']);
+    $routes->post('tactical-boards/templates/(:num)', 'TacticalBoards::templateUpdate/$1', ['filter' => ['csrf', 'permission:templates.manage']]);
+    $routes->post('tactical-boards/templates/(:num)/delete', 'TacticalBoards::templateDelete/$1', ['filter' => ['csrf', 'permission:templates.manage']]);
+    $routes->get('tactical-boards/templates/(:num)/editor', 'TacticalBoards::templateEditor/$1', ['filter' => 'permission:templates.manage']);
+    $routes->post('tactical-boards/templates/(:num)/save', 'TacticalBoards::templateSave/$1', ['filter' => ['csrf', 'permission:templates.manage']]);
     $routes->get('tactical-boards/create', 'TacticalBoards::create', ['filter' => 'permission:tactical_board.create']);
     $routes->post('tactical-boards', 'TacticalBoards::store', ['filter' => ['csrf', 'permission:tactical_board.create']]);
     $routes->get('tactical-boards/(:num)', 'TacticalBoards::show/$1', ['filter' => 'permission:tactical_board.view']);

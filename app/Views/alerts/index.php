@@ -8,14 +8,14 @@
     <form method="get" action="<?= base_url('/alerts') ?>" style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">
         <select name="is_read">
             <option value="">Todos</option>
-            <option value="0" <?= ((string)($filters['is_read'] ?? '') === '0') ? 'selected' : '' ?>>Nao lidos</option>
+            <option value="0" <?= ((string)($filters['is_read'] ?? '') === '0') ? 'selected' : '' ?>>Não lidos</option>
             <option value="1" <?= ((string)($filters['is_read'] ?? '') === '1') ? 'selected' : '' ?>>Lidos</option>
         </select>
         <select name="severity">
             <option value="">Severidade</option>
-            <option value="info" <?= (($filters['severity'] ?? '') === 'info') ? 'selected' : '' ?>>Info</option>
-            <option value="warning" <?= (($filters['severity'] ?? '') === 'warning') ? 'selected' : '' ?>>Warning</option>
-            <option value="critical" <?= (($filters['severity'] ?? '') === 'critical') ? 'selected' : '' ?>>Critical</option>
+            <option value="info" <?= (($filters['severity'] ?? '') === 'info') ? 'selected' : '' ?>>Informativo</option>
+            <option value="warning" <?= (($filters['severity'] ?? '') === 'warning') ? 'selected' : '' ?>>Aviso</option>
+            <option value="critical" <?= (($filters['severity'] ?? '') === 'critical') ? 'selected' : '' ?>>Crítico</option>
         </select>
         <button type="submit">Filtrar</button>
         <a href="<?= base_url('/alerts') ?>" class="button secondary">Limpar</a>
@@ -24,12 +24,12 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Titulo</th>
+                <th>Título</th>
                 <th>Tipo</th>
                 <th>Severidade</th>
                 <th>Criado em</th>
                 <th>Status</th>
-                <th>Acoes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>

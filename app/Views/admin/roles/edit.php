@@ -15,7 +15,7 @@
                     <input id="name" name="name" type="text" class="bp-input" value="<?= esc(old('name') ?: $role['name']) ?>" required>
                 </div>
                 <div>
-                    <label for="description">Descricao</label>
+                    <label for="description">DescriÃ§Ã£o</label>
                     <input id="description" name="description" type="text" class="bp-input" value="<?= esc(old('description') ?: $role['description']) ?>">
                 </div>
                 <?php if (!empty($teams)): ?>
@@ -47,31 +47,32 @@
                     'athletes' => 'Atletas',
                     'teams' => 'Equipes',
                     'categories' => 'Categorias',
-                    'guardians' => 'Responsaveis',
+                    'guardians' => 'ResponsÃ¡veis',
                     'events' => 'Eventos',
-                    'callups' => 'Convocacoes',
-                    'attendance' => 'Presenca',
+                    'callups' => 'ConvocaÃ§Ãµes',
+                    'attendance' => 'PresenÃ§a',
                     'notices' => 'Avisos',
                     'alerts' => 'Alertas',
                     'documents' => 'Documentos',
                     'document_types' => 'Tipos de documento',
-                    'exercises' => 'Exercicios',
+                    'exercises' => 'ExercÃ­cios',
                     'training_plans' => 'Planos de treino',
-                    'training_sessions' => 'Sessoes realizadas',
+                    'training_sessions' => 'SessÃµes de treinos',
                     'matches' => 'Jogos',
                     'match_stats' => 'Estatisticas de jogo',
-                    'match_lineup' => 'Escalacao',
-                    'match_reports' => 'Relatorios de jogo',
-                    'tactical_boards' => 'Quadro tatico',
+                    'match_lineup' => 'EscalaÃ§Ã£o',
+                    'match_reports' => 'RelatÃ³rios de jogo',
+                    'tactical_boards' => 'Quadro tÃ¡tico',
                     'tactical_sequences' => 'Sequencias taticas',
-                    'reports' => 'Relatorios',
-                    'dashboard' => 'Dashboard',
+                    'templates' => 'Modelos táticos',
+                    'reports' => 'RelatÃ³rios',
+                    'dashboard' => 'Painel',
                     'profile' => 'Perfil',
-                    'admin' => 'Administracao',
-                    'users' => 'Usuarios',
-                    'roles' => 'Papeis',
-                    'settings' => 'Configuracoes',
-                    'invitations' => 'Convocacoes',
+                    'admin' => 'AdministraÃ§Ã£o',
+                    'users' => 'UsuÃ¡rios',
+                    'roles' => 'PapÃ©is',
+                    'settings' => 'ConfiguraÃ§Ãµes',
+                    'invitations' => 'ConvocaÃ§Ãµes',
                 ];
                 $groupAliases = [
                     'tactical_board' => 'tactical_boards',

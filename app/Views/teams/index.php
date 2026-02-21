@@ -5,7 +5,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
             <h1>Equipes</h1>
-            <p style="color:var(--muted);">GestÃ£o de equipes e categorias.</p>
+            <p style="color:var(--muted);">Gestão de equipes e categorias.</p>
         </div>
         <?php if (has_permission('teams.create')): ?>
             <a href="<?= base_url('/teams/create') ?>" class="button">Nova equipe</a>
@@ -30,7 +30,7 @@
                 <th>Nome</th>
                 <th>Apelido</th>
                 <th>Status</th>
-                <th>AÃ§Ãµes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>

@@ -275,6 +275,26 @@ class Events extends BaseController
         return redirect()->back()->with('success', 'Atleta convocado.');
     }
 
+    public function addParticipantsCategory(int $eventId)
+    {
+        $event = $this->events->find($eventId);
+        if (!$event) {
+            return redirect()->back()->with('error', 'Evento nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
+            return $response;
+        }
+
+        $categoryId = (int) ($event['category_id'] ?? 0);
+        if ($categoryId <= 0) {
+            return redirect()->back()->with('error', 'Categoria invalida para o evento.');
+        }
+
+        $count = $this->participants->addFromCategory($eventId, $categoryId);
+        return redirect()->back()->with('success', $count . ' atletas convocados.');
+    }
+
     public function updateParticipant(int $id)
     {
         $participant = $this->participants->find($id);

@@ -1,4 +1,4 @@
-﻿<?= $this->extend('layouts/base') ?>
+<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <?php
@@ -11,6 +11,7 @@ if (!is_array($decoded)) {
     ];
 }
 ?>
+<?php $isTemplateMode = $templateMode ?? false; ?>
 <div class="card tactical-board-page">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
         <div>
@@ -24,19 +25,21 @@ if (!is_array($decoded)) {
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <?php if ($canEdit): ?>
-                <button type="button" id="presentation-toggle" class="secondary">ApresentaÃ§Ã£o</button>
+                <button type="button" id="presentation-toggle" class="secondary">Apresentacao</button>
                 <button type="button" id="export-image" class="secondary">Exportar imagem</button>
-                <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/duplicate') ?>" style="display:inline;">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="secondary">Duplicar prancheta</button>
-                </form>
-                <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/save') ?>" id="save-form" style="display:inline;">
+                <?php if (!$isTemplateMode): ?>
+                    <form method="post" action="<?= base_url('/tactical-boards/' . $board['id'] . '/duplicate') ?>" style="display:inline;">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="secondary">Duplicar prancheta</button>
+                    </form>
+                <?php endif; ?>
+                <form method="post" action="<?= $isTemplateMode ? base_url('/tactical-boards/templates/' . (int) ($templateId ?? 0) . '/save') : base_url('/tactical-boards/' . $board['id'] . '/save') ?>" id="save-form" style="display:inline;">
                     <?= csrf_field() ?>
                     <input type="hidden" name="state_json" id="state_json">
-                    <button type="submit">Salvar</button>
+                    <button type="submit"><?= $isTemplateMode ? 'Salvar modelo' : 'Salvar' ?></button>
                 </form>
             <?php endif; ?>
-            <a href="<?= base_url('/tactical-boards') ?>" class="button secondary">Voltar</a>
+            <a href="<?= $isTemplateMode ? base_url('/tactical-boards/templates') : base_url('/tactical-boards') ?>" class="button secondary">Voltar</a>
         </div>
     </div>
 
@@ -92,14 +95,14 @@ if (!is_array($decoded)) {
                                 <button type="button" id="step-duplicate" <?= !$canEdit ? 'disabled' : '' ?>>Duplicar</button>
                                 <button type="button" id="step-delete" <?= !$canEdit ? 'disabled' : '' ?>>Excluir</button>
                                 <button type="button" id="step-prev">Prev</button>
-                                <button type="button" id="step-next">Next</button>
+                                <button type="button" id="step-next">Próximo</button>
                             </div>
                         </div>
                         <div id="step-timeline" class="frame-timeline"></div>
                     </div>
                 </div>
             </div>
-            <div id="tactical-field" class="tactical-field" aria-label="Campo tatico"></div>
+            <div id="tactical-field" class="tactical-field" aria-label="Campo tático"></div>
             <div class="viewer-controls">
                 <div class="viewer-nav">
                     <button type="button" id="viewer-prev" class="viewer-nav-btn" aria-label="Etapa anterior">&larr;</button>
@@ -148,7 +151,7 @@ if (!is_array($decoded)) {
             </div>
         </div>
         <div class="tactical-item-modal-footer">
-            <button type="button" id="m-save-item" <?= !$canEdit ? 'disabled' : '' ?>>Salvar alteracao</button>
+            <button type="button" id="m-save-item" <?= !$canEdit ? 'disabled' : '' ?>>Salvar alteração</button>
             <button type="button" id="m-remove-selected" <?= !$canEdit ? 'disabled' : '' ?>>Remover</button>
             <button type="button" id="m-reset-board" <?= !$canEdit ? 'disabled' : '' ?>>Resetar</button>
         </div>
@@ -379,7 +382,7 @@ if (!is_array($decoded)) {
 
         if (item.type === 'player') el.textContent = item.number ? String(item.number) : '';
         else if (item.type === 'cone') el.innerHTML = `<img src="${coneIconUrl}" alt="Cone">`;
-        else if (item.type === 'ball') el.innerHTML = 'âš½';
+        else if (item.type === 'ball') el.innerHTML = '⚽';
         else if (item.type === 'arrow') el.innerHTML = '<span class="arrow-shaft"></span><span class="arrow-head"></span>';
         else if (item.type === 'goal') el.innerHTML = '<span class="goal-net"></span>';
     }
@@ -821,4 +824,7 @@ if (!is_array($decoded)) {
 })();
 </script>
 <?= $this->endSection() ?>
+
+
+
 

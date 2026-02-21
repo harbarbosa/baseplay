@@ -14,15 +14,15 @@
             <thead>
                 <tr>
                     <th>Atleta</th>
-                    <th>PrimÃ¡rio</th>
-                    <th>ObservaÃ§Ãµes</th>
+                    <th>Primário</th>
+                    <th>Observações</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($athletes as $athlete): ?>
                 <tr>
                     <td><?= esc(trim($athlete['first_name'] . ' ' . ($athlete['last_name'] ?? ''))) ?></td>
-                    <td><?= $athlete['is_primary'] ? 'Sim'  : 'NÃ£o'  ?></td>
+                    <td><?= $athlete['is_primary'] ? 'Sim'  : 'Não'  ?></td>
                     <td><?= esc($athlete['notes'] ?? '-') ?></td>
                 </tr>
             <?php endforeach; ?>

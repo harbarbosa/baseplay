@@ -4,7 +4,7 @@
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-            <h1>Sessões realizadas</h1>
+            <h1>Sessões de treinos</h1>
             <p style="color:var(--muted);">Histórico de treinos.</p>
         </div>
         <?php if (has_permission('training_sessions.create')): ?>

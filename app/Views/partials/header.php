@@ -34,13 +34,13 @@ $quickAction = $quickAction ?? null;
         <details class="bp-user">
             <summary class="bp-user-toggle">
                 <span class="bp-user-avatar"><?= esc(strtoupper(substr((string) (session('user_name') ?? 'V'), 0, 1))) ?></span>
-                <span class="bp-user-name"><?= esc(session('user_name') ?? 'Usuario') ?></span>
+                <span class="bp-user-name"><?= esc(session('user_name') ?? 'Usuário') ?></span>
                 <span class="bp-user-caret"></span>
             </summary>
             <div class="bp-user-menu">
                 <a href="<?= base_url('/') ?>" class="bp-user-item">Perfil</a>
                 <?php if (has_permission('admin.access') || has_permission('users.manage') || has_permission('roles.manage')): ?>
-                    <a href="<?= base_url('/admin/users') ?>" class="bp-user-item">Configuracoes</a>
+                    <a href="<?= base_url('/admin/users') ?>" class="bp-user-item">Configurações</a>
                 <?php endif; ?>
                 <a href="<?= base_url('/logout') ?>" class="bp-user-item">Sair</a>
             </div>

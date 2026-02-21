@@ -38,6 +38,7 @@ class RolePermissionsSeeder extends Seeder
             'match_stats.manage', 'match_lineup.manage', 'match_reports.manage',
             'tactical_boards.view', 'tactical_boards.create', 'tactical_boards.update', 'tactical_boards.delete', 'tactical_boards.export',
             'tactical_sequences.manage',
+            'templates.view',
             'tactical_board.view', 'tactical_board.create', 'tactical_board.update', 'tactical_board.delete', 'tactical_sequence.manage',
             'reports.view',
         ];
@@ -66,7 +67,7 @@ class RolePermissionsSeeder extends Seeder
             'training_sessions.view', 'training_sessions.create', 'training_sessions.update',
             'matches.view',
             'match_stats.manage', 'match_lineup.manage',
-            'tactical_boards.view', 'tactical_board.view',
+            'tactical_boards.view', 'tactical_board.view', 'templates.view',
             'reports.view',
         ];
 
@@ -77,7 +78,7 @@ class RolePermissionsSeeder extends Seeder
             'callups.view',
             'notices.view',
             'documents.view',
-            'tactical_boards.view', 'tactical_board.view',
+            'tactical_boards.view', 'tactical_board.view', 'templates.view',
             'matches.view',
             'reports.view',
         ];
@@ -89,7 +90,7 @@ class RolePermissionsSeeder extends Seeder
             'callups.view', 'callups.confirm',
             'notices.view',
             'documents.view', 'documents.upload',
-            'tactical_boards.view', 'tactical_board.view',
+            'tactical_boards.view', 'tactical_board.view', 'templates.view',
             'matches.view',
             'reports.view',
         ];

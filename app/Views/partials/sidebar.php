@@ -30,10 +30,10 @@ if (has_permission('alerts.view')) {
     <nav class="bp-nav">
         <div class="bp-nav-section">Visao Geral</div>
         <?php if (has_permission('dashboard.view')): ?>
-            <a href="<?= base_url('/') ?>" class="bp-nav-link menu-item dashboard <?= $isActive('') ? 'active' : '' ?>"><span class="menu-icon"></span>Dashboard</a>
+            <a href="<?= base_url('/') ?>" class="bp-nav-link menu-item dashboard <?= $isActive('') ? 'active' : '' ?>"><span class="menu-icon"></span>Painel</a>
         <?php endif; ?>
         <?php if (has_permission('alerts.view')): ?>
-            <a href="<?= base_url('/pending-center') ?>" class="bp-nav-link menu-item pending-center <?= $isActive('pending-center') ? 'active' : '' ?>"><span class="menu-icon"></span>Central de pendencias</a>
+            <a href="<?= base_url('/pending-center') ?>" class="bp-nav-link menu-item pending-center <?= $isActive('pending-center') ? 'active' : '' ?>"><span class="menu-icon"></span>Central de pendências</a>
             <a href="<?= base_url('/alerts') ?>" class="bp-nav-link menu-item alerts <?= $isActive('alerts') ? 'active' : '' ?>">
                 <span class="menu-icon"></span>Alertas
                 <?php if ($alertsUnread > 0): ?>
@@ -42,7 +42,7 @@ if (has_permission('alerts.view')) {
             </a>
         <?php endif; ?>
 
-        <div class="bp-nav-section">Gestao</div>
+        <div class="bp-nav-section">Gestão</div>
         <?php if (has_permission('teams.view')): ?>
             <a href="<?= base_url('/teams') ?>" class="bp-nav-link menu-item teams <?= $isActive('teams') ? 'active' : '' ?>"><span class="menu-icon"></span>Equipes</a>
         <?php endif; ?>
@@ -50,21 +50,24 @@ if (has_permission('alerts.view')) {
             <a href="<?= base_url('/athletes') ?>" class="bp-nav-link menu-item athletes <?= $isActive('athletes') ? 'active' : '' ?>"><span class="menu-icon"></span>Atletas</a>
         <?php endif; ?>
         <?php if (has_permission('guardians.view')): ?>
-            <a href="<?= base_url('/guardians') ?>" class="bp-nav-link menu-item guardians <?= $isActive('guardians') ? 'active' : '' ?>"><span class="menu-icon"></span>Responsaveis</a>
+            <a href="<?= base_url('/guardians') ?>" class="bp-nav-link menu-item guardians <?= $isActive('guardians') ? 'active' : '' ?>"><span class="menu-icon"></span>Responsáveis</a>
         <?php endif; ?>
 
         <div class="bp-nav-section">Treinos</div>
         <?php if (has_permission('exercises.view')): ?>
-            <a href="<?= base_url('/exercises') ?>" class="bp-nav-link menu-item exercises <?= $isActive('exercises') ? 'active' : '' ?>"><span class="menu-icon"></span>Exercicios</a>
+            <a href="<?= base_url('/exercises') ?>" class="bp-nav-link menu-item exercises <?= $isActive('exercises') ? 'active' : '' ?>"><span class="menu-icon"></span>Exercícios</a>
         <?php endif; ?>
         <?php if (has_permission('training_plans.view')): ?>
             <a href="<?= base_url('/training-plans') ?>" class="bp-nav-link menu-item training-plans <?= $isActive('training-plans') ? 'active' : '' ?>"><span class="menu-icon"></span>Planos de treino</a>
         <?php endif; ?>
         <?php if (has_permission('training_sessions.view')): ?>
-            <a href="<?= base_url('/training-sessions') ?>" class="bp-nav-link menu-item training-sessions <?= $isActive('training-sessions') ? 'active' : '' ?>"><span class="menu-icon"></span>Sessoes realizadas</a>
+            <a href="<?= base_url('/training-sessions') ?>" class="bp-nav-link menu-item training-sessions <?= $isActive('training-sessions') ? 'active' : '' ?>"><span class="menu-icon"></span>Sessões de treinos</a>
         <?php endif; ?>
         <?php if (has_permission('tactical_boards.view') || has_permission('tactical_board.view')): ?>
-            <a href="<?= base_url('/tactical-boards') ?>" class="bp-nav-link menu-item tactical-boards <?= $isActive('tactical-boards') ? 'active' : '' ?>"><span class="menu-icon"></span>Quadro tatico</a>
+            <a href="<?= base_url('/tactical-boards') ?>" class="bp-nav-link menu-item tactical-boards <?= $isActive('tactical-boards') ? 'active' : '' ?>"><span class="menu-icon"></span>Quadro tático</a>
+        <?php if (has_permission('templates.view')): ?>
+            <a href="<?= base_url('/tactical-boards/templates') ?>" class="bp-nav-link menu-item tactical-boards-templates <?= $isActive('tactical-boards/templates') ? 'active' : '' ?>"><span class="menu-icon"></span>Modelos táticos</a>
+        <?php endif; ?>
         <?php endif; ?>
 
         <div class="bp-nav-section">Jogos e Agenda</div>
@@ -89,9 +92,9 @@ if (has_permission('alerts.view')) {
         <?php endif; ?>
         <?php if (has_permission('reports.view')): ?>
             <details class="bp-subnav-group" <?= $isActive('reports') ? 'open' : '' ?>>
-                <summary class="bp-subnav-title"><span class="menu-icon"></span>Relatorios</summary>
+                <summary class="bp-subnav-title"><span class="menu-icon"></span>Relatórios</summary>
                 <div class="bp-subnav">
-                    <a href="<?= base_url('/reports/attendance') ?>" class="menu-item reports-attendance <?= $isActive('reports/attendance') ? 'active' : '' ?>">Presenca</a>
+                    <a href="<?= base_url('/reports/attendance') ?>" class="menu-item reports-attendance <?= $isActive('reports/attendance') ? 'active' : '' ?>">Presença</a>
                     <a href="<?= base_url('/reports/trainings') ?>" class="menu-item reports-trainings <?= $isActive('reports/trainings') ? 'active' : '' ?>">Treinos</a>
                     <a href="<?= base_url('/reports/matches') ?>" class="menu-item reports-matches <?= $isActive('reports/matches') ? 'active' : '' ?>">Jogos</a>
                     <a href="<?= base_url('/reports/documents') ?>" class="menu-item reports-documents <?= $isActive('reports/documents') ? 'active' : '' ?>">Documentos</a>
@@ -100,9 +103,10 @@ if (has_permission('alerts.view')) {
         <?php endif; ?>
 
         <?php if (has_permission('admin.access') || has_permission('users.manage') || has_permission('roles.manage')): ?>
-            <div class="bp-nav-section">Administracao</div>
-            <a href="<?= base_url('/admin/users') ?>" class="bp-nav-link menu-item admin-users <?= $isActive('admin/users') ? 'active' : '' ?>"><span class="menu-icon"></span>Usuarios</a>
-            <a href="<?= base_url('/admin/roles') ?>" class="bp-nav-link menu-item admin-roles <?= $isActive('admin/roles') ? 'active' : '' ?>"><span class="menu-icon"></span>Papeis</a>
+            <div class="bp-nav-section">Administração</div>
+            <a href="<?= base_url('/admin/users') ?>" class="bp-nav-link menu-item admin-users <?= $isActive('admin/users') ? 'active' : '' ?>"><span class="menu-icon"></span>Usuários</a>
+            <a href="<?= base_url('/admin/roles') ?>" class="bp-nav-link menu-item admin-roles <?= $isActive('admin/roles') ? 'active' : '' ?>"><span class="menu-icon"></span>Papéis</a>
         <?php endif; ?>
     </nav>
 </aside>
+

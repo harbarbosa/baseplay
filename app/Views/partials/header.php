@@ -4,6 +4,9 @@ $quickAction = $quickAction ?? null;
 <header class="bp-topbar">
     <div class="bp-topbar-left">
         <button type="button" class="bp-icon-btn bp-mobile-toggle" id="bp-sidebar-toggle" aria-label="Abrir menu">☰</button>
+        <?php $team = current_team(); ?>
+        <?php $teamLogo = !empty($team['logo_path']) ? base_url($team['logo_path']) : base_url('assets/images/baseplay-logo.png'); ?>
+        <img src="<?= esc($teamLogo) ?>" alt="Logo" class="bp-topbar-logo">
         <div class="bp-topbar-title">
             <strong><?= esc($title ?? 'Painel') ?></strong>
             <?= $this->include('partials/breadcrumbs') ?>
@@ -36,7 +39,7 @@ $quickAction = $quickAction ?? null;
             </summary>
             <div class="bp-user-menu">
                 <a href="<?= base_url('/') ?>" class="bp-user-item">Perfil</a>
-                <?php if (has_permission('admin.access')): ?>
+                <?php if (has_permission('admin.access') || has_permission('users.manage') || has_permission('roles.manage')): ?>
                     <a href="<?= base_url('/admin/users') ?>" class="bp-user-item">Configuracoes</a>
                 <?php endif; ?>
                 <a href="<?= base_url('/logout') ?>" class="bp-user-item">Sair</a>
@@ -44,3 +47,4 @@ $quickAction = $quickAction ?? null;
         </details>
     </div>
 </header>
+

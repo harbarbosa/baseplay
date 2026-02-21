@@ -18,6 +18,27 @@
                     <label for="description">Descricao</label>
                     <input id="description" name="description" type="text" class="bp-input" value="<?= esc(old('description') ?: $role['description']) ?>">
                 </div>
+                <?php if (!empty($teams)): ?>
+                    <?php if (!empty($showTeamSelect)): ?>
+                        <div>
+                            <label for="team_id">Equipe</label>
+                            <select id="team_id" name="team_id" class="bp-select">
+                                <option value="">Sistema (todas as equipes)</option>
+                                <?php foreach ($teams as $team): ?>
+                                    <option value="<?= esc($team['id']) ?>" <?= (string) ($selectedTeamId ?? '') === (string) $team['id'] ? 'selected' : '' ?>>
+                                        <?= esc($team['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php else: ?>
+                        <div>
+                            <label>Equipe</label>
+                            <input type="text" class="bp-input" value="<?= esc($teams[0]['name'] ?? 'Equipe') ?>" disabled>
+                            <input type="hidden" name="team_id" value="<?= esc($selectedTeamId) ?>">
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
             <div style="margin-top:16px;">
                 <label>Permissoes</label>

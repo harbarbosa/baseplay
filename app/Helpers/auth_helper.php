@@ -39,3 +39,33 @@ if (!function_exists('has_permission')) {
         return Services::rbac()->userHasPermission($userId, $permission);
     }
 }
+
+if (!function_exists('current_team')) {
+    function current_team(): ?array
+    {
+        static $cached = false;
+        if ($cached !== false) {
+            return $cached;
+        }
+
+        $userId = (int) session('user_id');
+        if ($userId <= 0) {
+            return $cached = null;
+        }
+
+        if (function_exists('has_permission') && has_permission('admin.access')) {
+            return $cached = null;
+        }
+
+        $row = db_connect()->table('user_team_links utl')
+            ->select('t.*')
+            ->join('teams t', 't.id = utl.team_id', 'inner')
+            ->where('utl.user_id', $userId)
+            ->where('t.deleted_at', null)
+            ->orderBy('utl.id', 'ASC')
+            ->get()
+            ->getRowArray();
+
+        return $cached = ($row ?: null);
+    }
+}

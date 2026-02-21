@@ -78,12 +78,9 @@ if (has_permission('alerts.view')) {
         <div class="bp-nav-section">Documentos</div>
         <?php if (has_permission('documents.view')): ?>
             <a href="<?= base_url('/documents') ?>" class="bp-nav-link menu-item documents <?= $isActive('documents') ? 'active' : '' ?>"><span class="menu-icon"></span>Documentos</a>
-            <div class="bp-subnav">
-                <a href="<?= base_url('/documents/overview') ?>" class="<?= $isActive('documents/overview') ? 'active' : '' ?>">Visão geral</a>
-                <?php if (has_permission('document_types.manage')): ?>
-                    <a href="<?= base_url('/document-types') ?>" class="<?= $isActive('document-types') ? 'active' : '' ?>">Tipos de documento</a>
-                <?php endif; ?>
-            </div>
+        <?php endif; ?>
+        <?php if (has_permission('document_types.manage')): ?>
+            <a href="<?= base_url('/document-types') ?>" class="bp-nav-link menu-item document-types <?= $isActive('document-types') ? 'active' : '' ?>"><span class="menu-icon"></span>Tipos de documento</a>
         <?php endif; ?>
 
         <div class="bp-nav-section">Ferramentas</div>
@@ -102,7 +99,7 @@ if (has_permission('alerts.view')) {
             </details>
         <?php endif; ?>
 
-        <?php if (has_permission('admin.access')): ?>
+        <?php if (has_permission('admin.access') || has_permission('users.manage') || has_permission('roles.manage')): ?>
             <div class="bp-nav-section">Administracao</div>
             <a href="<?= base_url('/admin/users') ?>" class="bp-nav-link menu-item admin-users <?= $isActive('admin/users') ? 'active' : '' ?>"><span class="menu-icon"></span>Usuarios</a>
             <a href="<?= base_url('/admin/roles') ?>" class="bp-nav-link menu-item admin-roles <?= $isActive('admin/roles') ? 'active' : '' ?>"><span class="menu-icon"></span>Papeis</a>

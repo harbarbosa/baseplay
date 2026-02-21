@@ -9,7 +9,13 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/baseplay-theme.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/baseplay-ui.css') ?>">
 </head>
-<body class="bp-body">
+<?php $team = current_team(); ?>
+<?php
+    $teamPrimary = $team['primary_color'] ?? '#7A1126';
+    $teamSecondary = $team['secondary_color'] ?? '#F4D6DB';
+    $teamLogo = !empty($team['logo_path']) ? base_url($team['logo_path']) : '';
+?>
+<body class="bp-body<?= $team ? ' bp-team-theme' : '' ?>" style="<?= $team ? '--team-primary:' . esc($teamPrimary) . '; --team-secondary:' . esc($teamSecondary) . '; --team-logo:url(' . esc($teamLogo) . '); --primary:' . esc($teamPrimary) . '; --primary-hover:' . esc($teamSecondary) . ';' : '' ?>">
 <div class="bp-layout">
     <?= $this->include('partials/sidebar') ?>
     <div class="bp-main">
@@ -56,6 +62,17 @@
             setTimeout(() => toast.remove(), 300);
         }, timeout);
     };
+
+    const colorInputs = document.querySelectorAll('.bp-color-input');
+    const syncColorInput = (input) => {
+        if (!input) return;
+        input.style.backgroundColor = input.value || '#ffffff';
+    };
+    colorInputs.forEach((input) => {
+        syncColorInput(input);
+        input.addEventListener('input', () => syncColorInput(input));
+        input.addEventListener('change', () => syncColorInput(input));
+    });
 })();
 </script>
 </body>

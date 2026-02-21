@@ -26,6 +26,8 @@
 .bp-layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 .bp-main {
@@ -37,6 +39,20 @@
 
 .bp-container {
   padding: 24px 28px 32px;
+  position: relative;
+}
+
+.bp-body.bp-team-theme::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--team-logo);
+  background-repeat: no-repeat;
+  background-position: center 80px;
+  background-size: min(420px, 60vw) auto;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .bp-card,
@@ -209,6 +225,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.bp-topbar-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .bp-topbar-title strong {
@@ -444,6 +466,25 @@
   border: 1px solid var(--border);
   background: var(--bg);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bp-color-input {
+  width: 54px;
+  height: 42px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+}
+
+.bp-color-input::-webkit-color-swatch-wrapper {
+  padding: 6px;
+}
+
+.bp-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
 }
 
 .bp-input:focus,

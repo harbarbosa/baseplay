@@ -496,7 +496,9 @@ class Mimes
             return null;
         }
 
-        return is_array(static::$mimes[$extension]) ? static : :$mimes[$extension][0] : static::$mimes[$extension];
+        return is_array(static::$mimes[$extension])
+            ? static::$mimes[$extension][0]
+            : static::$mimes[$extension];
     }
 
     /**
@@ -514,7 +516,8 @@ class Mimes
 
         if (
             $proposedExtension !== ''
-            && array_key_exists($proposedExtension, static::$mimes) ? && in_array($type, (array) static : :$mimes[$proposedExtension], true)
+            && array_key_exists($proposedExtension, static::$mimes)
+            && in_array($type, (array) static::$mimes[$proposedExtension], true)
         ) {
             // The detected mime type matches with the proposed extension.
             return $proposedExtension;

@@ -27,7 +27,17 @@ class RbacService
     public function userHasPermission(int $userId, string $permission): bool
     {
         $permissions = $this->getUserPermissions($userId);
-        return in_array($permission, $permissions, true);
+        if (in_array($permission, $permissions, true)) {
+            return true;
+        }
+
+        foreach ($this->expandPermissionAliases($permission) as $alias) {
+            if (in_array($alias, $permissions, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getUserPermissions(int $userId): array
@@ -90,5 +100,17 @@ class RbacService
         );
 
         return $this->roleCache[$userId] = $roles;
+    }
+
+    protected function expandPermissionAliases(string $permission): array
+    {
+        $aliases = [];
+        if (str_starts_with($permission, 'tactical_board.')) {
+            $aliases[] = 'tactical_boards.' . substr($permission, strlen('tactical_board.'));
+        } elseif (str_starts_with($permission, 'tactical_boards.')) {
+            $aliases[] = 'tactical_board.' . substr($permission, strlen('tactical_boards.'));
+        }
+
+        return $aliases;
     }
 }

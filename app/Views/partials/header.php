@@ -39,7 +39,7 @@ $quickAction = $quickAction ?? null;
             </summary>
             <div class="bp-user-menu">
                 <a href="<?= base_url('/') ?>" class="bp-user-item">Perfil</a>
-                <?php if (has_permission('admin.access')): ?>
+                <?php if (has_permission('admin.access') || has_permission('users.manage') || has_permission('roles.manage')): ?>
                     <a href="<?= base_url('/admin/users') ?>" class="bp-user-item">Configuracoes</a>
                 <?php endif; ?>
                 <a href="<?= base_url('/logout') ?>" class="bp-user-item">Sair</a>

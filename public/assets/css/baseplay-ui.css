@@ -468,6 +468,25 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.bp-color-input {
+  width: 54px;
+  height: 42px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+}
+
+.bp-color-input::-webkit-color-swatch-wrapper {
+  padding: 6px;
+}
+
+.bp-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
 .bp-input:focus,
 .bp-select:focus,
 .bp-textarea:focus {

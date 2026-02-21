@@ -9,7 +9,7 @@ class RoleModel extends Model
     protected $table = 'roles';
     protected $primaryKey = 'id';
     protected $returnType = 'array';
-    protected $allowedFields = ['name', 'description'];
+    protected $allowedFields = ['name', 'description', 'team_id'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';

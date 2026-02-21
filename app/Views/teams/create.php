@@ -26,11 +26,11 @@
         </div>
         <div class="form-group">
             <label for="primary_color">Cor primaria</label>
-            <input id="primary_color" name="primary_color" type="color" value="<?= esc(old('primary_color') ?: '#7A1126') ?>">
+            <input id="primary_color" name="primary_color" type="color" class="bp-color-input" value="<?= esc(old('primary_color') ?: '#7A1126') ?>">
         </div>
         <div class="form-group">
             <label for="secondary_color">Cor secundaria</label>
-            <input id="secondary_color" name="secondary_color" type="color" value="<?= esc(old('secondary_color') ?: '#F4D6DB') ?>">
+            <input id="secondary_color" name="secondary_color" type="color" class="bp-color-input" value="<?= esc(old('secondary_color') ?: '#F4D6DB') ?>">
         </div>
         <div class="form-group">
             <label for="team_logo">Logo da equipe</label>

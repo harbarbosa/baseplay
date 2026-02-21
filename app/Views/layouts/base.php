@@ -62,6 +62,17 @@
             setTimeout(() => toast.remove(), 300);
         }, timeout);
     };
+
+    const colorInputs = document.querySelectorAll('.bp-color-input');
+    const syncColorInput = (input) => {
+        if (!input) return;
+        input.style.backgroundColor = input.value || '#ffffff';
+    };
+    colorInputs.forEach((input) => {
+        syncColorInput(input);
+        input.addEventListener('input', () => syncColorInput(input));
+        input.addEventListener('change', () => syncColorInput(input));
+    });
 })();
 </script>
 </body>

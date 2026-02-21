@@ -7,13 +7,22 @@ use App\Models\PermissionModel;
 use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\UserRoleModel;
+use App\Models\TeamModel;
 use CodeIgniter\I18n\Time;
 
 class Roles extends BaseController
 {
     public function index()
     {
-        $roles = (new RoleModel())->orderBy('id', 'DESC')->findAll();
+        $roleModel = new RoleModel();
+        if ($this->scopedTeamIds !== []) {
+            $roleModel->groupStart()
+                ->where('team_id', null)
+                ->orWhereIn('team_id', $this->scopedTeamIds)
+                ->groupEnd();
+        }
+
+        $roles = $roleModel->orderBy('id', 'DESC')->findAll();
 
         return view('admin/roles/index', [
             'title' => 'Papeis',
@@ -25,9 +34,24 @@ class Roles extends BaseController
     {
         $permissions = (new PermissionModel())->orderBy('name')->findAll();
 
+        $teamOptions = [];
+        $selectedTeamId = null;
+        $showTeamSelect = $this->scopedTeamIds === [];
+
+        if ($showTeamSelect) {
+            $teamOptions = (new TeamModel())->orderBy('name')->findAll();
+            $selectedTeamId = old('team_id') !== null && old('team_id') !== '' ? (int) old('team_id') : null;
+        } else {
+            $teamOptions = (new TeamModel())->whereIn('id', $this->scopedTeamIds)->orderBy('name')->findAll();
+            $selectedTeamId = $this->scopedTeamIds[0] ?? null;
+        }
+
         return view('admin/roles/create', [
             'title' => 'Novo papel',
             'permissions' => $permissions,
+            'teams' => $teamOptions,
+            'showTeamSelect' => $showTeamSelect,
+            'selectedTeamId' => $selectedTeamId,
         ]);
     }
 
@@ -48,13 +72,38 @@ class Roles extends BaseController
             return redirect()->back()->with('error', 'O papel admin e reservado.')->withInput();
         }
 
-        if ($roleModel->where('name', $name)->first()) {
+        $teamId = null;
+        if ($this->scopedTeamIds !== []) {
+            $teamId = $this->scopedTeamIds[0] ?? null;
+            if (!$teamId) {
+                return redirect()->back()->with('error', 'Nenhuma equipe vinculada.')->withInput();
+            }
+        } else {
+            $postedTeamId = $this->request->getPost('team_id');
+            if ($postedTeamId !== null && $postedTeamId !== '') {
+                $teamId = (int) $postedTeamId;
+                $team = (new TeamModel())->find($teamId);
+                if (!$team) {
+                    return redirect()->back()->with('error', 'Equipe invalida.')->withInput();
+                }
+            }
+        }
+
+        $existsQuery = $roleModel->where('name', $name);
+        if ($teamId === null) {
+            $existsQuery->where('team_id', null);
+        } else {
+            $existsQuery->where('team_id', $teamId);
+        }
+
+        if ($existsQuery->first()) {
             return redirect()->back()->with('error', 'Ja existe um papel com esse nome.')->withInput();
         }
 
         $roleId = (int) $roleModel->insert([
             'name' => $name,
             'description' => $description,
+            'team_id' => $teamId,
         ], true);
 
         $permissionIds = $this->request->getPost('permissions') ?? [];
@@ -91,17 +140,38 @@ class Roles extends BaseController
             return redirect()->to('/admin/roles')->with('error', 'O papel admin nao pode ser editado.');
         }
 
+        if ($this->scopedTeamIds !== []) {
+            if (empty($role['team_id']) || !in_array((int) $role['team_id'], $this->scopedTeamIds, true)) {
+                return redirect()->to('/admin/roles')->with('error', 'Sem permissao para editar este papel.');
+            }
+        }
+
         $permissions = (new PermissionModel())->orderBy('name')->findAll();
         $assigned = array_column(
             (new RolePermissionModel())->where('role_id', (int) $id)->findAll(),
             'permission_id'
         );
 
+        $teamOptions = [];
+        $selectedTeamId = null;
+        $showTeamSelect = $this->scopedTeamIds === [];
+
+        if ($showTeamSelect) {
+            $teamOptions = (new TeamModel())->orderBy('name')->findAll();
+            $selectedTeamId = $role['team_id'] !== null ? (int) $role['team_id'] : null;
+        } else {
+            $teamOptions = (new TeamModel())->whereIn('id', $this->scopedTeamIds)->orderBy('name')->findAll();
+            $selectedTeamId = $role['team_id'] !== null ? (int) $role['team_id'] : null;
+        }
+
         return view('admin/roles/edit', [
             'title' => 'Editar papel',
             'role' => $role,
             'permissions' => $permissions,
             'assigned' => $assigned,
+            'teams' => $teamOptions,
+            'showTeamSelect' => $showTeamSelect,
+            'selectedTeamId' => $selectedTeamId,
         ]);
     }
 
@@ -120,6 +190,12 @@ class Roles extends BaseController
             return redirect()->to('/admin/roles')->with('error', 'O papel admin nao pode ser editado.');
         }
 
+        if ($this->scopedTeamIds !== []) {
+            if (empty($role['team_id']) || !in_array((int) $role['team_id'], $this->scopedTeamIds, true)) {
+                return redirect()->to('/admin/roles')->with('error', 'Sem permissao para editar este papel.');
+            }
+        }
+
         $name = trim((string) $this->request->getPost('name'));
         $description = trim((string) $this->request->getPost('description'));
 
@@ -127,14 +203,35 @@ class Roles extends BaseController
             return redirect()->back()->with('error', 'Nome do papel e obrigatorio.')->withInput();
         }
 
-        $exists = $roleModel->where('name', $name)->where('id !=', (int) $id)->first();
-        if ($exists) {
+        $teamId = $role['team_id'];
+        if ($this->scopedTeamIds === []) {
+            $postedTeamId = $this->request->getPost('team_id');
+            if ($postedTeamId !== null && $postedTeamId !== '') {
+                $teamId = (int) $postedTeamId;
+                $team = (new TeamModel())->find($teamId);
+                if (!$team) {
+                    return redirect()->back()->with('error', 'Equipe invalida.')->withInput();
+                }
+            } else {
+                $teamId = null;
+            }
+        }
+
+        $existsQuery = $roleModel->where('name', $name)->where('id !=', (int) $id);
+        if ($teamId === null) {
+            $existsQuery->where('team_id', null);
+        } else {
+            $existsQuery->where('team_id', $teamId);
+        }
+
+        if ($existsQuery->first()) {
             return redirect()->back()->with('error', 'Ja existe um papel com esse nome.')->withInput();
         }
 
         $roleModel->update((int) $id, [
             'name' => $name,
             'description' => $description,
+            'team_id' => $teamId,
         ]);
 
         $rolePermissionModel->where('role_id', (int) $id)->delete();
@@ -171,6 +268,12 @@ class Roles extends BaseController
 
         if (strtolower((string) $role['name']) === 'admin') {
             return redirect()->to('/admin/roles')->with('error', 'O papel admin nao pode ser removido.');
+        }
+
+        if ($this->scopedTeamIds !== []) {
+            if (empty($role['team_id']) || !in_array((int) $role['team_id'], $this->scopedTeamIds, true)) {
+                return redirect()->to('/admin/roles')->with('error', 'Sem permissao para remover este papel.');
+            }
         }
 
         $userRole = (new UserRoleModel())->where('role_id', (int) $id)->first();

@@ -26,11 +26,11 @@
         </div>
         <div class="form-group">
             <label for="primary_color">Cor primaria</label>
-            <input id="primary_color" name="primary_color" type="color" value="<?= esc(old('primary_color') ?? ($team['primary_color'] ?? '#7A1126')) ?>">
+            <input id="primary_color" name="primary_color" type="color" class="bp-color-input" value="<?= esc(old('primary_color') ?? ($team['primary_color'] ?? '#7A1126')) ?>">
         </div>
         <div class="form-group">
             <label for="secondary_color">Cor secundaria</label>
-            <input id="secondary_color" name="secondary_color" type="color" value="<?= esc(old('secondary_color') ?? ($team['secondary_color'] ?? '#F4D6DB')) ?>">
+            <input id="secondary_color" name="secondary_color" type="color" class="bp-color-input" value="<?= esc(old('secondary_color') ?? ($team['secondary_color'] ?? '#F4D6DB')) ?>">
         </div>
         <div class="form-group">
             <label for="team_logo">Logo da equipe</label>
@@ -38,7 +38,7 @@
         </div>
         <?php if (!empty($team['logo_path'])): ?>
             <div class="form-group">
-                <img src="<?= base_url($team['logo_path']) ?>" alt="Logo atual" style="max-height:80px;">
+                <img src="<?= base_url($team['logo_path']) ?>" alt="Logo atual" style="max-width:220px; max-height:120px; width:auto; height:auto; object-fit:contain;">
             </div>
         <?php endif; ?>
         <button type="submit">Salvar</button>

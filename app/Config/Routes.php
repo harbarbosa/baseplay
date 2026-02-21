@@ -16,7 +16,7 @@ $routes->post('password/forgot', 'Password::sendReset', ['filter' => 'csrf']);
 $routes->get('password/reset/(:segment)', 'Password::resetForm/$1');
 $routes->post('password/reset', 'Password::reset', ['filter' => 'csrf']);
 
-$routes->group('admin', ['filter' => 'permission:admin.access'], static function ($routes) {
+$routes->group('admin', ['filter' => 'auth'], static function ($routes) {
     $routes->get('users', 'Admin\\Users::index', ['filter' => 'permission:users.manage']);
     $routes->get('users/create', 'Admin\\Users::create', ['filter' => 'permission:users.manage']);
     $routes->post('users', 'Admin\\Users::store', ['filter' => ['csrf', 'permission:users.manage']]);

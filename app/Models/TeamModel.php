@@ -15,6 +15,9 @@ class TeamModel extends Model
         'short_name',
         'description',
         'status',
+        'primary_color',
+        'secondary_color',
+        'logo_path',
     ];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';

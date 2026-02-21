@@ -56,6 +56,9 @@ class TeamService
             'short_name'  => $data['short_name'] ?? null,
             'description' => $data['description'] ?? null,
             'status'      => $data['status'] ?? 'active',
+            'primary_color' => $data['primary_color'] ?? null,
+            'secondary_color' => $data['secondary_color'] ?? null,
+            'logo_path' => $data['logo_path'] ?? null,
             'created_at'  => Time::now()->toDateTimeString(),
             'updated_at'  => Time::now()->toDateTimeString(),
         ];
@@ -70,6 +73,9 @@ class TeamService
             'short_name'  => $data['short_name'] ?? null,
             'description' => $data['description'] ?? null,
             'status'      => $data['status'] ?? 'active',
+            'primary_color' => $data['primary_color'] ?? null,
+            'secondary_color' => $data['secondary_color'] ?? null,
+            'logo_path' => $data['logo_path'] ?? null,
             'updated_at'  => Time::now()->toDateTimeString(),
         ];
 

@@ -90,6 +90,17 @@ class Teams extends BaseController
         }
 
         $payload = $this->request->getPost();
+        $payload['primary_color'] = $this->normalizeColor($payload['primary_color'] ?? null);
+        $payload['secondary_color'] = $this->normalizeColor($payload['secondary_color'] ?? null);
+
+        $upload = $this->handleTeamLogoUpload();
+        if (!empty($upload['error'])) {
+            return redirect()->back()->withInput()->with('error', $upload['error']);
+        }
+        if (!empty($upload['path'])) {
+            $payload['logo_path'] = $upload['path'];
+        }
+
         $teamId = $this->teams->create($payload);
         Services::audit()->log(session('user_id'), 'team_created', ['team_id' => $teamId]);
 
@@ -177,7 +188,21 @@ class Teams extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $this->teams->update($id, $this->request->getPost());
+        $payload = $this->request->getPost();
+        $payload['primary_color'] = $this->normalizeColor($payload['primary_color'] ?? null);
+        $payload['secondary_color'] = $this->normalizeColor($payload['secondary_color'] ?? null);
+
+        $upload = $this->handleTeamLogoUpload();
+        if (!empty($upload['error'])) {
+            return redirect()->back()->withInput()->with('error', $upload['error']);
+        }
+        if (!empty($upload['path'])) {
+            $payload['logo_path'] = $upload['path'];
+        } else {
+            $payload['logo_path'] = $team['logo_path'] ?? null;
+        }
+
+        $this->teams->update($id, $payload);
         Services::audit()->log(session('user_id'), 'team_updated', ['team_id' => $id]);
 
         return redirect()->to('/teams/' . $id)->with('success', 'Equipe atualizada.');
@@ -212,6 +237,63 @@ class Teams extends BaseController
         Services::audit()->log(session('user_id'), 'team_deleted', ['team_id' => $id]);
 
         return redirect()->to('/teams')->with('success', 'Equipe removida.');
+    }
+
+    protected function normalizeColor($value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = strtoupper(trim((string) $value));
+        if (preg_match('/^#([0-9A-F]{6})$/', $value)) {
+            return $value;
+        }
+        if (preg_match('/^#([0-9A-F]{3})$/', $value)) {
+            return $value;
+        }
+
+        return null;
+    }
+
+    protected function handleTeamLogoUpload(): array
+    {
+        $file = $this->request->getFile('team_logo');
+        if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
+            return ['error' => null, 'path' => null];
+        }
+        if (!$file->isValid()) {
+            return ['error' => 'Falha no upload do logo.', 'path' => null];
+        }
+
+        if ($file->getSizeByUnit('mb') > 4) {
+            return ['error' => 'Logo maior que 4MB.', 'path' => null];
+        }
+
+        $mime = (string) $file->getMimeType();
+        if ($mime === '') {
+            $mime = (string) $file->getClientMimeType();
+        }
+
+        $allowed = [
+            'image/png',
+            'image/jpeg',
+            'image/webp',
+            'image/svg+xml',
+        ];
+        if (!in_array($mime, $allowed, true)) {
+            return ['error' => 'Formato de logo invalido. Use PNG, JPG, WEBP ou SVG.', 'path' => null];
+        }
+
+        $publicDir = FCPATH . 'uploads/teams';
+        if (!is_dir($publicDir)) {
+            mkdir($publicDir, 0775, true);
+        }
+
+        $newName = $file->getRandomName();
+        $file->move($publicDir, $newName);
+
+        return ['error' => null, 'path' => 'uploads/teams/' . $newName];
     }
 
     protected function copyTrainerPermissionsToRole(int $roleId): void

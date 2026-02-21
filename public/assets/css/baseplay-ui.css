@@ -26,6 +26,8 @@
 .bp-layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 .bp-main {
@@ -37,6 +39,20 @@
 
 .bp-container {
   padding: 24px 28px 32px;
+  position: relative;
+}
+
+.bp-body.bp-team-theme::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--team-logo);
+  background-repeat: no-repeat;
+  background-position: center 80px;
+  background-size: min(420px, 60vw) auto;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .bp-card,
@@ -209,6 +225,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.bp-topbar-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .bp-topbar-title strong {

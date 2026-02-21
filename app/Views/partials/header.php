@@ -4,6 +4,9 @@ $quickAction = $quickAction ?? null;
 <header class="bp-topbar">
     <div class="bp-topbar-left">
         <button type="button" class="bp-icon-btn bp-mobile-toggle" id="bp-sidebar-toggle" aria-label="Abrir menu">☰</button>
+        <?php $team = current_team(); ?>
+        <?php $teamLogo = !empty($team['logo_path']) ? base_url($team['logo_path']) : base_url('assets/images/baseplay-logo.png'); ?>
+        <img src="<?= esc($teamLogo) ?>" alt="Logo" class="bp-topbar-logo">
         <div class="bp-topbar-title">
             <strong><?= esc($title ?? 'Painel') ?></strong>
             <?= $this->include('partials/breadcrumbs') ?>
@@ -44,3 +47,4 @@ $quickAction = $quickAction ?? null;
         </details>
     </div>
 </header>
+

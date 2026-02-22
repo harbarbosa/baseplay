@@ -13,6 +13,7 @@
                 <th>Nome</th>
                 <th>E-mail</th>
                 <th>Status</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -22,6 +23,9 @@
                 <td><?= esc($user['name']) ?></td>
                 <td><?= esc($user['email']) ?></td>
                 <td><?= esc(enum_label($user['status'], 'status')) ?></td>
+                <td>
+                    <a href="<?= base_url('/admin/users/' . $user['id'] . '/edit') ?>" class="button secondary">Editar</a>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>

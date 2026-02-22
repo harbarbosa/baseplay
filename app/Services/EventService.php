@@ -32,6 +32,19 @@ class EventService
         if (!empty($filters['category_id'])) {
             $model = $model->where('events.category_id', (int) $filters['category_id']);
         }
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('events.category_id', $ids);
+            }
+        }
+
+        if (!empty($filters['exclude_types']) && empty($filters['type']) && is_array($filters['exclude_types'])) {
+            $exclude = array_values(array_filter($filters['exclude_types']));
+            if ($exclude !== []) {
+                $model = $model->whereNotIn('events.type', $exclude);
+            }
+        }
 
         if (!empty($filters['type'])) {
             $model = $model->where('events.type', $filters['type']);

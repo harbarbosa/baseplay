@@ -21,6 +21,7 @@ use Psr\Log\LoggerInterface;
 abstract class BaseController extends Controller
 {
     protected array $scopedTeamIds = [];
+    protected array $scopedCategoryIds = [];
 
     /**
      * Be sure to declare properties for any property fetch you initialized.
@@ -45,6 +46,7 @@ abstract class BaseController extends Controller
         // $this->session = service('session');
 
         $this->scopedTeamIds = $this->resolveScopedTeamIds();
+        $this->scopedCategoryIds = $this->resolveScopedCategoryIds();
     }
 
     protected function resolveScopedTeamIds(): array
@@ -67,6 +69,26 @@ abstract class BaseController extends Controller
         return array_map(static fn($row) => (int) $row['team_id'], $rows);
     }
 
+    protected function resolveScopedCategoryIds(): array
+    {
+        $userId = (int) session('user_id');
+        if ($userId <= 0) {
+            return [];
+        }
+
+        if (function_exists('has_permission') && has_permission('admin.access')) {
+            return [];
+        }
+
+        $rows = db_connect()->table('user_category_links')
+            ->select('category_id')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
+
+        return array_map(static fn($row) => (int) $row['category_id'], $rows);
+    }
+
     protected function pickScopedTeamId(?int $teamId): ?int
     {
         if ($this->scopedTeamIds === []) {
@@ -80,6 +102,19 @@ abstract class BaseController extends Controller
         return $this->scopedTeamIds[0] ?? null;
     }
 
+    protected function pickScopedCategoryId(?int $categoryId): ?int
+    {
+        if ($this->scopedCategoryIds === []) {
+            return $categoryId;
+        }
+
+        if ($categoryId && in_array($categoryId, $this->scopedCategoryIds, true)) {
+            return $categoryId;
+        }
+
+        return $this->scopedCategoryIds[0] ?? null;
+    }
+
     protected function denyIfTeamForbidden(?int $teamId, string $redirectTo = '/')
     {
         if ($this->scopedTeamIds === []) {
@@ -87,6 +122,19 @@ abstract class BaseController extends Controller
         }
 
         if (!$teamId || !in_array($teamId, $this->scopedTeamIds, true)) {
+            return redirect()->to($redirectTo)->with('error', 'Acesso negado.');
+        }
+
+        return null;
+    }
+
+    protected function denyIfCategoryForbidden(?int $categoryId, string $redirectTo = '/')
+    {
+        if ($this->scopedCategoryIds === []) {
+            return null;
+        }
+
+        if (!$categoryId || !in_array($categoryId, $this->scopedCategoryIds, true)) {
             return redirect()->to($redirectTo)->with('error', 'Acesso negado.');
         }
 

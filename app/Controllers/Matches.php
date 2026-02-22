@@ -60,11 +60,18 @@ class Matches extends BaseController
         ];
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
 
         $result = $this->matches->list($filters, 20, 'matches');
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true);
+        $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true, $this->scopedCategoryIds);
 
         return view('matches/index', [
             'title' => 'Jogos',
@@ -85,7 +92,7 @@ class Matches extends BaseController
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true, $this->scopedCategoryIds);
         $events = $this->agenda->list(['type' => 'MATCH'], 200, 'match_events')['items'];
 
         return view('matches/create', [
@@ -106,6 +113,12 @@ class Matches extends BaseController
         }
         if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -137,13 +150,16 @@ class Matches extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($match['category_id'] ?? 0), '/matches')) {
+            return $response;
+        }
 
         $callups = $this->callups->listByMatch($id);
         $lineups = $this->lineups->listByMatch($id);
         $events = $this->events->listByMatch($id);
         $report = $this->reports->findByMatch($id);
         $attachments = $this->attachments->listByMatch($id);
-        $athletes = $this->athletes->listByCategory((int) $match['category_id']);
+        $athletes = $this->athletes->listByCategory((int) $match['category_id'], $this->scopedCategoryIds);
         $linkedBoards = $this->matchBoards
             ->select('match_tactical_boards.tactical_board_id, tactical_boards.title AS board_title, teams.name AS team_name, categories.name AS category_name, tactical_boards.team_id')
             ->join('tactical_boards', 'tactical_boards.id = match_tactical_boards.tactical_board_id', 'inner')
@@ -177,6 +193,9 @@ class Matches extends BaseController
         }
 
         if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($match['category_id'] ?? 0), '/matches')) {
             return $response;
         }
 
@@ -214,6 +233,9 @@ class Matches extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($match['category_id'] ?? 0), '/matches')) {
+            return $response;
+        }
 
         $this->matchBoards
             ->where('match_id', $matchId)
@@ -231,6 +253,9 @@ class Matches extends BaseController
         }
 
         if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($match['category_id'] ?? 0), '/matches')) {
             return $response;
         }
 
@@ -272,6 +297,12 @@ class Matches extends BaseController
         if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
         }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
+        }
 
         $validation = service('validation');
         $validation->setRules(config('Validation')->matchCreate, config('Validation')->matchCreate_errors);
@@ -302,6 +333,9 @@ class Matches extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($match['category_id'] ?? 0), '/matches')) {
+            return $response;
+        }
 
         return view('matches/delete', ['title' => 'Excluir jogo', 'match' => $match]);
     }
@@ -314,6 +348,9 @@ class Matches extends BaseController
         }
 
         if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($match['category_id'] ?? 0), '/matches')) {
             return $response;
         }
 

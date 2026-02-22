@@ -27,6 +27,11 @@ class EventParticipantService
             ->get()->getResultArray();
     }
 
+    public function clearByEvent(int $eventId): void
+    {
+        $this->participants->where('event_id', $eventId)->delete();
+    }
+
     public function addParticipant(int $eventId, int $athleteId, string $status = 'invited', string $notes = null): int
     {
         $existing = $this->participants
@@ -66,6 +71,36 @@ class EventParticipantService
         $athletes = $this->athletes->where('category_id', $categoryId)
             ->where('deleted_at', null)
             ->findAll();
+
+        $count = 0;
+        foreach ($athletes as $athlete) {
+            $this->addParticipant($eventId, (int) $athlete['id']);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    public function addFromTeam(int $eventId, int $teamId, array $categoryIds = []): int
+    {
+        if ($teamId <= 0) {
+            return 0;
+        }
+
+        $builder = $this->athletes->builder();
+        $builder->select('athletes.id')
+            ->join('categories', 'categories.id = athletes.category_id', 'left')
+            ->where('athletes.deleted_at', null)
+            ->where('categories.team_id', $teamId);
+
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $builder->whereIn('categories.id', $ids);
+            }
+        }
+
+        $athletes = $builder->get()->getResultArray();
 
         $count = 0;
         foreach ($athletes as $athlete) {

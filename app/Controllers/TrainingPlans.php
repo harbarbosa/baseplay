@@ -37,11 +37,18 @@ class TrainingPlans extends BaseController
         ];
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
 
         $result = $this->plans->list($filters, 15, 'training_plans');
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll($filters['team_id'] ? (int) $filters['team_id'] : null);
+        $categories = $this->categories->listAll($filters['team_id'] ? (int) $filters['team_id'] : null, false, $this->scopedCategoryIds);
 
         return view('training_plans/index', [
             'title' => 'Planos de treino',
@@ -63,6 +70,9 @@ class TrainingPlans extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($plan['category_id'] ?? 0), '/training-plans')) {
+            return $response;
+        }
 
         $blocks = $this->plans->listBlocks($id);
         $exerciseList = $this->exercises->list([], 200, 'exercise_select')['items'];
@@ -80,7 +90,7 @@ class TrainingPlans extends BaseController
         $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
+        $categories = $this->categories->listAll($teamId > 0 ? $teamId : null, false, $this->scopedCategoryIds);
 
         return view('training_plans/create', [
             'title' => 'Novo plano',
@@ -94,6 +104,12 @@ class TrainingPlans extends BaseController
         $payload = $this->request->getPost();
         if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -119,10 +135,13 @@ class TrainingPlans extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($plan['category_id'] ?? 0), '/training-plans')) {
+            return $response;
+        }
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll((int) $plan['team_id']);
+        $categories = $this->categories->listAll((int) $plan['team_id'], false, $this->scopedCategoryIds);
 
         return view('training_plans/edit', [
             'title' => 'Editar plano',
@@ -142,10 +161,19 @@ class TrainingPlans extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($plan['category_id'] ?? 0), '/training-plans')) {
+            return $response;
+        }
 
         $payload = $this->request->getPost();
         if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -171,6 +199,9 @@ class TrainingPlans extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($plan['category_id'] ?? 0), '/training-plans')) {
+            return $response;
+        }
 
         return view('training_plans/delete', ['title' => 'Excluir plano', 'plan' => $plan]);
     }
@@ -183,6 +214,9 @@ class TrainingPlans extends BaseController
         }
 
         if ($response = $this->denyIfTeamForbidden((int) $plan['team_id'], '/training-plans')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($plan['category_id'] ?? 0), '/training-plans')) {
             return $response;
         }
 

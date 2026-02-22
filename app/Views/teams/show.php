@@ -14,6 +14,30 @@
         </div>
     </div>
 
+    <div style="margin-top:20px;">
+        <h2>Dados adicionais</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+            <div><small style="color:var(--muted);">RazÃ£o social</small><div><?= esc($team['legal_name'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Nome fantasia</small><div><?= esc($team['trade_name'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">CNPJ</small><div><?= esc($team['cnpj'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">FundaÃ§Ã£o</small><div><?= esc($team['foundation_date'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Presidente</small><div><?= esc($team['president_name'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Vice-presidente</small><div><?= esc($team['vice_president_name'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Telefone</small><div><?= esc($team['phone'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Email</small><div><?= esc($team['email'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Site</small><div><?= esc($team['website'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">EndereÃ§o</small><div><?= esc($team['address_street'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">NÃºmero</small><div><?= esc($team['address_number'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Complemento</small><div><?= esc($team['address_complement'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Bairro</small><div><?= esc($team['address_neighborhood'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">Cidade</small><div><?= esc($team['address_city'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">UF</small><div><?= esc($team['address_state'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">CEP</small><div><?= esc($team['address_zip'] ?? '-') ?></div></div>
+            <div><small style="color:var(--muted);">PaÃ­s</small><div><?= esc($team['address_country'] ?? '-') ?></div></div>
+            <div style="grid-column: 1 / -1;"><small style="color:var(--muted);">ObservaÃ§Ãµes</small><div><?= esc($team['notes'] ?? '-') ?></div></div>
+        </div>
+    </div>
+
     <div style="margin-top:24px;">
         <?php
         $genderLabels = [
@@ -32,10 +56,10 @@
                 <tr>
                     <th>Nome</th>
                     <th>Ano</th>
-                    <th>Gênero</th>
+                    <th>GÃªnero</th>
                     <th>Dias</th>
                     <th>Status</th>
-                    <th>Ações</th>
+                    <th>AÃ§Ãµes</th>
                 </tr>
             </thead>
             <tbody>

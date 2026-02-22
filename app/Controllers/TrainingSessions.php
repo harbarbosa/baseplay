@@ -42,11 +42,18 @@ class TrainingSessions extends BaseController
         ];
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
 
         $result = $this->sessions->list($filters, 15, 'training_sessions');
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll($filters['team_id'] ? (int) $filters['team_id'] : null);
+        $categories = $this->categories->listAll($filters['team_id'] ? (int) $filters['team_id'] : null, false, $this->scopedCategoryIds);
 
         return view('training_sessions/index', [
             'title' => 'Sessoes realizadas',
@@ -83,7 +90,7 @@ class TrainingSessions extends BaseController
         $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll($teamId > 0 ? $teamId : null);
+        $categories = $this->categories->listAll($teamId > 0 ? $teamId : null, false, $this->scopedCategoryIds);
         $plans = $this->plans->list([], 200, 'training_plans_select')['items'];
 
         return view('training_sessions/create', [
@@ -104,10 +111,13 @@ class TrainingSessions extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/training-sessions')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($event['category_id'] ?? 0), '/training-sessions')) {
+            return $response;
+        }
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll((int) $event['team_id']);
+        $categories = $this->categories->listAll((int) $event['team_id'], false, $this->scopedCategoryIds);
         $plans = $this->plans->list([], 200, 'training_plans_select')['items'];
 
         return view('training_sessions/create', [
@@ -124,6 +134,12 @@ class TrainingSessions extends BaseController
         $payload = $this->request->getPost();
         if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -149,10 +165,13 @@ class TrainingSessions extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($session['category_id'] ?? 0), '/training-sessions')) {
+            return $response;
+        }
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll((int) $session['team_id']);
+        $categories = $this->categories->listAll((int) $session['team_id'], false, $this->scopedCategoryIds);
         $plans = $this->plans->list([], 200, 'training_plans_select')['items'];
 
         return view('training_sessions/edit', [
@@ -174,10 +193,19 @@ class TrainingSessions extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($session['category_id'] ?? 0), '/training-sessions')) {
+            return $response;
+        }
 
         $payload = $this->request->getPost();
         if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -203,6 +231,9 @@ class TrainingSessions extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($session['category_id'] ?? 0), '/training-sessions')) {
+            return $response;
+        }
 
         return view('training_sessions/delete', ['title' => 'Excluir sessao', 'session' => $session]);
     }
@@ -215,6 +246,9 @@ class TrainingSessions extends BaseController
         }
 
         if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($session['category_id'] ?? 0), '/training-sessions')) {
             return $response;
         }
 
@@ -234,10 +268,13 @@ class TrainingSessions extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $session['team_id'], '/training-sessions')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($session['category_id'] ?? 0), '/training-sessions')) {
+            return $response;
+        }
 
         $athletes = $this->sessions->listAthletes($id);
         if (empty($athletes)) {
-            $athletes = $this->athletes->listByCategory((int) $session['category_id']);
+            $athletes = $this->athletes->listByCategory((int) $session['category_id'], $this->scopedCategoryIds);
         }
 
         return view('training_sessions/field', [

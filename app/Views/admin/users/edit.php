@@ -2,20 +2,20 @@
 
 <?= $this->section('content') ?>
 <div class="card">
-    <h1>Novo usuário</h1>
-    <form method="post" action="<?= base_url('/admin/users') ?>">
+    <h1>Editar usuário</h1>
+    <form method="post" action="<?= base_url('/admin/users/' . $user['id'] . '/update') ?>">
         <?= csrf_field() ?>
         <div class="form-group">
             <label for="name">Nome</label>
-            <input id="name" name="name" type="text" value="<?= esc(old('name')) ?>" required>
+            <input id="name" name="name" type="text" value="<?= esc(old('name') ?? $user['name']) ?>" required>
         </div>
         <div class="form-group">
             <label for="email">E-mail</label>
-            <input id="email" name="email" type="email" value="<?= esc(old('email')) ?>" required>
+            <input id="email" name="email" type="email" value="<?= esc(old('email') ?? $user['email']) ?>" required>
         </div>
         <div class="form-group">
-            <label for="password">Senha</label>
-            <input id="password" name="password" type="password" required>
+            <label for="password">Nova senha (opcional)</label>
+            <input id="password" name="password" type="password">
         </div>
         <?php if (!empty($teams)): ?>
             <?php if (!empty($showTeamSelect)): ?>
@@ -24,7 +24,8 @@
                     <select id="team_id" name="team_id">
                         <option value="">Sem equipe</option>
                         <?php foreach ($teams as $team): ?>
-                            <option value="<?= esc($team['id']) ?>" <?= (string) old('team_id') === (string) $team['id'] ? 'selected' : '' ?>>
+                            <?php $selected = (string) ($selectedTeamId ?? old('team_id')) === (string) $team['id']; ?>
+                            <option value="<?= esc($team['id']) ?>" <?= $selected ? 'selected' : '' ?>>
                                 <?= esc($team['name']) ?>
                             </option>
                         <?php endforeach; ?>
@@ -43,18 +44,21 @@
             <select id="role_id" name="role_id" required>
                 <option value="">Selecione</option>
                 <?php foreach ($roles as $role): ?>
-                    <option value="<?= esc($role['id']) ?>" <?= old('role_id') == $role['id'] ? 'selected'  : ''  ?>>
+                    <?php $selectedRole = (string) ($selectedRoleId ?? old('role_id')) === (string) $role['id']; ?>
+                    <option value="<?= esc($role['id']) ?>" <?= $selectedRole ? 'selected'  : ''  ?>>
                         <?= esc($role['name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
         </div>
         <?php if (!empty($categories)): ?>
+            <?php $currentCategoryIds = old('category_ids') ?? $selectedCategoryIds; ?>
             <div class="form-group">
                 <label for="category_ids">Categorias (opcional)</label>
                 <select id="category_ids" name="category_ids[]" multiple size="6">
                     <?php foreach ($categories as $category): ?>
-                        <option value="<?= esc($category['id']) ?>" data-team-id="<?= esc($category['team_id']) ?>">
+                        <?php $selected = in_array((int) $category['id'], array_map('intval', (array) $currentCategoryIds), true); ?>
+                        <option value="<?= esc($category['id']) ?>" data-team-id="<?= esc($category['team_id']) ?>" <?= $selected ? 'selected' : '' ?>>
                             <?= esc($category['name']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -62,7 +66,7 @@
                 <small>Se não selecionar, o usuário acessa todas as categorias da equipe.</small>
             </div>
         <?php endif; ?>
-        <button type="submit">Criar</button>
+        <button type="submit">Salvar</button>
         <a href="<?= base_url('/admin/users') ?>" class="button secondary">Cancelar</a>
     </form>
 </div>

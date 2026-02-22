@@ -19,6 +19,9 @@ if (has_permission('alerts.view')) {
         + count($pendingData['missing_required_documents'] ?? [])
         + count($pendingData['upcoming_events_without_callups'] ?? []);
 }
+
+$roleNames = array_map(static fn($role) => mb_strtolower(trim((string) $role)), user_roles());
+$isTeamAdmin = in_array('admin_equipe', $roleNames, true);
 ?>
 <div class="bp-sidebar-overlay" id="bp-sidebar-overlay"></div>
 <aside class="bp-sidebar" id="bp-sidebar">
@@ -54,7 +57,7 @@ if (has_permission('alerts.view')) {
         <?php endif; ?>
 
         <div class="bp-nav-section">Gestão</div>
-        <?php if (has_permission('teams.view')): ?>
+        <?php if (has_permission('teams.view') && !$isTeamAdmin): ?>
             <a href="<?= base_url('/teams') ?>" class="bp-nav-link menu-item teams <?= $isActive('teams') ? 'active' : '' ?>"><span class="menu-icon"></span>Equipes</a>
         <?php endif; ?>
         <?php if (has_permission('athletes.view')): ?>

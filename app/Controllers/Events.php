@@ -8,6 +8,8 @@ use App\Services\AttendanceService;
 use App\Services\TeamService;
 use App\Services\CategoryService;
 use App\Services\AthleteService;
+use App\Services\EventRecipientService;
+use App\Models\RoleModel;
 use Config\Services;
 
 class Events extends BaseController
@@ -18,6 +20,7 @@ class Events extends BaseController
     protected TeamService $teams;
     protected CategoryService $categories;
     protected AthleteService $athletes;
+    protected EventRecipientService $recipients;
 
     public function __construct()
     {
@@ -27,6 +30,7 @@ class Events extends BaseController
         $this->teams = new TeamService();
         $this->categories = new CategoryService();
         $this->athletes = new AthleteService();
+        $this->recipients = new EventRecipientService();
     }
 
     public function index()
@@ -41,13 +45,23 @@ class Events extends BaseController
         ];
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        if (empty($filters['type'])) {
+            $filters['exclude_types'] = ['TRAINING', 'MATCH'];
+        }
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
 
         $viewMode = $this->request->getGet('view') ?: 'list';
         $result = $this->events->list($filters, 20, 'events');
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true);
+        $categories = $this->categories->listDistinctByTeam(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, true, $this->scopedCategoryIds);
 
         $eventsByDate = [];
         foreach ($result['items'] as $event) {
@@ -77,7 +91,11 @@ class Events extends BaseController
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true, $this->scopedCategoryIds);
+        $athleteTeamIds = $teamId > 0 ? [$teamId] : ($this->scopedTeamIds !== [] ? $this->scopedTeamIds : []);
+        $athletes = $this->athletes->listAllWithRelations($athleteTeamIds, $this->scopedCategoryIds);
+        $guardians = $this->listGuardiansForEvent($teamId);
+        $staff = $this->listStaffForEvent($teamId);
 
         return view('events/create', [
             'title' => 'Novo evento',
@@ -85,6 +103,9 @@ class Events extends BaseController
             'categories' => $categories,
             'team_id' => $teamId,
             'types' => $this->eventTypes(),
+            'athletes' => $athletes,
+            'guardians' => $guardians,
+            'staff' => $staff,
         ]);
     }
 
@@ -99,6 +120,12 @@ class Events extends BaseController
         }
         if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -115,6 +142,74 @@ class Events extends BaseController
         $eventId = $this->events->create($payload, (int) session('user_id'));
         Services::audit()->log(session('user_id'), 'event_created', ['event_id' => $eventId]);
 
+        $allCategory = (int) ($this->request->getPost('participants_all_category') ?? 0) === 1;
+        $allTeam = (int) ($this->request->getPost('participants_all_team') ?? 0) === 1;
+        $selectedAthletes = $this->request->getPost('participant_athlete_ids');
+        if (!is_array($selectedAthletes)) {
+            $selectedAthletes = $selectedAthletes ? [$selectedAthletes] : [];
+        }
+        $selectedAthletes = array_values(array_filter(array_map('intval', $selectedAthletes)));
+
+        if ($eventId > 0) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            $teamId = (int) ($payload['team_id'] ?? 0);
+            $scopeCategoryIds = $this->scopedCategoryIds !== [] ? $this->scopedCategoryIds : [];
+
+            if ($allCategory && $categoryId > 0) {
+                $this->participants->addFromCategory($eventId, $categoryId);
+            }
+
+            if ($allTeam && $teamId > 0) {
+                $this->participants->addFromTeam($eventId, $teamId, $scopeCategoryIds);
+            }
+
+            if ($selectedAthletes !== []) {
+                $allowedAthletes = $this->athletes->listAllWithRelations(
+                    $teamId > 0 ? [$teamId] : [],
+                    $scopeCategoryIds !== [] ? $scopeCategoryIds : ($categoryId > 0 ? [$categoryId] : [])
+                );
+                $allowedIds = array_map('intval', array_column($allowedAthletes, 'id'));
+                $invalid = array_diff($selectedAthletes, $allowedIds);
+                if ($invalid !== []) {
+                    return redirect()->back()->withInput()->with('error', 'Existem atletas selecionados fora do escopo.');
+                }
+
+                $this->participants->addParticipantsBulk($eventId, $selectedAthletes);
+            }
+
+            $allGuardiansCategory = (int) ($this->request->getPost('participants_guardians_all_category') ?? 0) === 1;
+            $allGuardiansTeam = (int) ($this->request->getPost('participants_guardians_all_team') ?? 0) === 1;
+            $selectedGuardians = $this->request->getPost('participant_guardian_ids');
+            if (!is_array($selectedGuardians)) {
+                $selectedGuardians = $selectedGuardians ? [$selectedGuardians] : [];
+            }
+            $selectedGuardians = array_values(array_filter(array_map('intval', $selectedGuardians)));
+
+            if ($allGuardiansCategory && $categoryId > 0) {
+                $this->recipients->addGuardiansByCategory($eventId, $categoryId);
+            }
+            if ($allGuardiansTeam && $teamId > 0) {
+                $this->recipients->addGuardiansByTeam($eventId, $teamId, $scopeCategoryIds);
+            }
+            if ($selectedGuardians !== []) {
+                $this->recipients->addRecipientsBulk($eventId, 'guardian', $selectedGuardians);
+            }
+
+            $allStaffTeam = (int) ($this->request->getPost('participants_staff_all_team') ?? 0) === 1;
+            $selectedStaff = $this->request->getPost('participant_staff_ids');
+            if (!is_array($selectedStaff)) {
+                $selectedStaff = $selectedStaff ? [$selectedStaff] : [];
+            }
+            $selectedStaff = array_values(array_filter(array_map('intval', $selectedStaff)));
+
+            if ($allStaffTeam && $teamId > 0) {
+                $this->recipients->addStaffByTeam($eventId, $teamId, $this->staffRoleNames());
+            }
+            if ($selectedStaff !== []) {
+                $this->recipients->addRecipientsBulk($eventId, 'staff', $selectedStaff);
+            }
+        }
+
         return redirect()->to('/events/' . $eventId)->with('success', 'Evento criado com sucesso.');
     }
 
@@ -128,22 +223,13 @@ class Events extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
             return $response;
         }
-
-        $participants = $this->participants->listByEvent($id);
-        $attendance = $this->attendance->listByEvent($id);
-        $attendanceMap = [];
-        foreach ($attendance as $item) {
-            $attendanceMap[$item['athlete_id']] = $item;
+        if ($response = $this->denyIfCategoryForbidden((int) ($event['category_id'] ?? 0), '/events')) {
+            return $response;
         }
-
-        $athletes = $this->athletes->listByCategory((int) $event['category_id']);
 
         return view('events/show', [
             'title' => 'Detalhe do evento',
             'event' => $event,
-            'participants' => $participants,
-            'attendanceMap' => $attendanceMap,
-            'athletes' => $athletes,
             'types' => $this->eventTypes(),
         ]);
     }
@@ -158,6 +244,9 @@ class Events extends BaseController
         if ($response = $this->denyIfTeamForbidden((int) $event['team_id'], '/events')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($event['category_id'] ?? 0), '/events')) {
+            return $response;
+        }
 
         $teamId = $this->pickScopedTeamId((int) $this->request->getGet('team_id'));
         if ($teamId <= 0) {
@@ -166,7 +255,19 @@ class Events extends BaseController
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true, $this->scopedCategoryIds);
+        $athleteTeamIds = $teamId > 0 ? [$teamId] : ($this->scopedTeamIds !== [] ? $this->scopedTeamIds : []);
+        $athletes = $this->athletes->listAllWithRelations($athleteTeamIds, $this->scopedCategoryIds);
+        $guardians = $this->listGuardiansForEvent($teamId);
+        $staff = $this->listStaffForEvent($teamId);
+        $selectedAthleteIds = array_map('strval', array_column($this->participants->listByEvent($id), 'athlete_id'));
+        $recipientRows = $this->recipients->listByEvent($id);
+        $selectedGuardianIds = array_map('strval', array_column(array_filter($recipientRows, static function ($row) {
+            return ($row['recipient_type'] ?? '') === 'guardian';
+        }), 'recipient_id'));
+        $selectedStaffIds = array_map('strval', array_column(array_filter($recipientRows, static function ($row) {
+            return ($row['recipient_type'] ?? '') === 'staff';
+        }), 'recipient_id'));
 
         return view('events/edit', [
             'title' => 'Editar evento',
@@ -175,6 +276,12 @@ class Events extends BaseController
             'categories' => $categories,
             'team_id' => $teamId,
             'types' => $this->eventTypes(),
+            'athletes' => $athletes,
+            'guardians' => $guardians,
+            'staff' => $staff,
+            'selectedAthleteIds' => $selectedAthleteIds,
+            'selectedGuardianIds' => $selectedGuardianIds,
+            'selectedStaffIds' => $selectedStaffIds,
         ]);
     }
 
@@ -199,6 +306,12 @@ class Events extends BaseController
         if ($this->scopedTeamIds !== [] && empty($payload['team_id'])) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
         }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if (!in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
+        }
 
         $validation = service('validation');
         $validation->setRules(config('Validation')->eventUpdate, config('Validation')->eventCreate_errors);
@@ -213,6 +326,78 @@ class Events extends BaseController
 
         $this->events->update($id, $payload, (int) session('user_id'));
         Services::audit()->log(session('user_id'), 'event_updated', ['event_id' => $id]);
+
+        $eventId = $id;
+        $this->participants->clearByEvent($eventId);
+        $this->recipients->clearByEvent($eventId);
+
+        $allCategory = (int) ($this->request->getPost('participants_all_category') ?? 0) === 1;
+        $allTeam = (int) ($this->request->getPost('participants_all_team') ?? 0) === 1;
+        $selectedAthletes = $this->request->getPost('participant_athlete_ids');
+        if (!is_array($selectedAthletes)) {
+            $selectedAthletes = $selectedAthletes ? [$selectedAthletes] : [];
+        }
+        $selectedAthletes = array_values(array_filter(array_map('intval', $selectedAthletes)));
+
+        if ($eventId > 0) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            $teamId = (int) ($payload['team_id'] ?? 0);
+            $scopeCategoryIds = $this->scopedCategoryIds !== [] ? $this->scopedCategoryIds : [];
+
+            if ($allCategory && $categoryId > 0) {
+                $this->participants->addFromCategory($eventId, $categoryId);
+            }
+
+            if ($allTeam && $teamId > 0) {
+                $this->participants->addFromTeam($eventId, $teamId, $scopeCategoryIds);
+            }
+
+            if ($selectedAthletes !== []) {
+                $allowedAthletes = $this->athletes->listAllWithRelations(
+                    $teamId > 0 ? [$teamId] : [],
+                    $scopeCategoryIds !== [] ? $scopeCategoryIds : ($categoryId > 0 ? [$categoryId] : [])
+                );
+                $allowedIds = array_map('intval', array_column($allowedAthletes, 'id'));
+                $invalid = array_diff($selectedAthletes, $allowedIds);
+                if ($invalid !== []) {
+                    return redirect()->back()->withInput()->with('error', 'Existem atletas selecionados fora do escopo.');
+                }
+
+                $this->participants->addParticipantsBulk($eventId, $selectedAthletes);
+            }
+
+            $allGuardiansCategory = (int) ($this->request->getPost('participants_guardians_all_category') ?? 0) === 1;
+            $allGuardiansTeam = (int) ($this->request->getPost('participants_guardians_all_team') ?? 0) === 1;
+            $selectedGuardians = $this->request->getPost('participant_guardian_ids');
+            if (!is_array($selectedGuardians)) {
+                $selectedGuardians = $selectedGuardians ? [$selectedGuardians] : [];
+            }
+            $selectedGuardians = array_values(array_filter(array_map('intval', $selectedGuardians)));
+
+            if ($allGuardiansCategory && $categoryId > 0) {
+                $this->recipients->addGuardiansByCategory($eventId, $categoryId);
+            }
+            if ($allGuardiansTeam && $teamId > 0) {
+                $this->recipients->addGuardiansByTeam($eventId, $teamId, $scopeCategoryIds);
+            }
+            if ($selectedGuardians !== []) {
+                $this->recipients->addRecipientsBulk($eventId, 'guardian', $selectedGuardians);
+            }
+
+            $allStaffTeam = (int) ($this->request->getPost('participants_staff_all_team') ?? 0) === 1;
+            $selectedStaff = $this->request->getPost('participant_staff_ids');
+            if (!is_array($selectedStaff)) {
+                $selectedStaff = $selectedStaff ? [$selectedStaff] : [];
+            }
+            $selectedStaff = array_values(array_filter(array_map('intval', $selectedStaff)));
+
+            if ($allStaffTeam && $teamId > 0) {
+                $this->recipients->addStaffByTeam($eventId, $teamId, $this->staffRoleNames());
+            }
+            if ($selectedStaff !== []) {
+                $this->recipients->addRecipientsBulk($eventId, 'staff', $selectedStaff);
+            }
+        }
 
         return redirect()->to('/events/' . $id)->with('success', 'Evento atualizado.');
     }
@@ -386,9 +571,67 @@ class Events extends BaseController
         return [
             'TRAINING' => 'Treino',
             'MATCH' => 'Jogo',
-            'MEETING' => 'Reuniao',
-            'EVALUATION' => 'Avaliacao',
+            'MEETING' => 'ReuniÃ£o',
+            'EVALUATION' => 'AvaliaÃ§Ã£o',
             'TRAVEL' => 'Viagem',
         ];
+    }
+
+    protected function listGuardiansForEvent(int $teamId): array
+    {
+        $builder = db_connect()->table('guardians g')
+            ->select('g.id, g.full_name, g.email, g.phone, MIN(c.team_id) AS team_id')
+            ->join('athlete_guardians ag', 'ag.guardian_id = g.id', 'left')
+            ->join('athletes a', 'a.id = ag.athlete_id', 'left')
+            ->join('categories c', 'c.id = a.category_id', 'left')
+            ->where('g.deleted_at', null)
+            ->groupBy('g.id');
+
+        if ($teamId > 0) {
+            $builder->where('c.team_id', $teamId);
+        } elseif ($this->scopedTeamIds !== []) {
+            $builder->whereIn('c.team_id', $this->scopedTeamIds);
+        }
+
+        if ($this->scopedCategoryIds !== []) {
+            $builder->whereIn('c.id', $this->scopedCategoryIds);
+        }
+
+        return $builder->orderBy('g.full_name', 'ASC')->get()->getResultArray();
+    }
+
+    protected function listStaffForEvent(int $teamId): array
+    {
+        $roleNames = $this->staffRoleNames();
+        $roleIds = [];
+        if ($roleNames !== []) {
+            $roles = (new RoleModel())->whereIn('name', $roleNames)->findAll();
+            $roleIds = array_map('intval', array_column($roles, 'id'));
+        }
+
+        if ($roleIds === []) {
+            return [];
+        }
+
+        $builder = db_connect()->table('users u')
+            ->select('u.id, u.name, u.email, MIN(utl.team_id) AS team_id')
+            ->join('user_roles ur', 'ur.user_id = u.id', 'inner')
+            ->join('user_team_links utl', 'utl.user_id = u.id', 'left')
+            ->where('u.deleted_at', null)
+            ->whereIn('ur.role_id', $roleIds)
+            ->groupBy('u.id');
+
+        if ($teamId > 0) {
+            $builder->where('utl.team_id', $teamId);
+        } elseif ($this->scopedTeamIds !== []) {
+            $builder->whereIn('utl.team_id', $this->scopedTeamIds);
+        }
+
+        return $builder->orderBy('u.name', 'ASC')->get()->getResultArray();
+    }
+
+    protected function staffRoleNames(): array
+    {
+        return ['treinador', 'auxiliar', 'preparador'];
     }
 }

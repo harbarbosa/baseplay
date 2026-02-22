@@ -39,11 +39,18 @@ class Athletes extends BaseController
         ];
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
 
         $result = $this->athletes->list($filters, 15, 'athletes');
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listAll(!empty($filters['team_id']) ? (int) $filters['team_id'] : null);
+        $categories = $this->categories->listAll(!empty($filters['team_id']) ? (int) $filters['team_id'] : null, false, $this->scopedCategoryIds);
 
         return view('athletes/index', [
             'title' => 'Atletas',
@@ -66,7 +73,7 @@ class Athletes extends BaseController
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = [];
         if ($teamId > 0) {
-            $categories = $this->categories->listDistinctByTeam($teamId, true);
+            $categories = $this->categories->listDistinctByTeam($teamId, true, $this->scopedCategoryIds);
         }
 
         return view('athletes/create', [
@@ -85,6 +92,9 @@ class Athletes extends BaseController
             if (!$category || !in_array((int) $category['team_id'], $this->scopedTeamIds, true)) {
                 return redirect()->back()->withInput()->with('error', 'Categoria invalida para sua equipe.');
             }
+        }
+        if ($this->scopedCategoryIds !== [] && !in_array($categoryId, $this->scopedCategoryIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
         }
 
         $validation = service('validation');
@@ -112,6 +122,9 @@ class Athletes extends BaseController
         }
 
         if ($response = $this->denyIfTeamForbidden((int) ($athlete['team_id'] ?? 0), '/athletes')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($athlete['category_id'] ?? 0), '/athletes')) {
             return $response;
         }
 
@@ -145,7 +158,7 @@ class Athletes extends BaseController
         }
 
         // Não criar categorias automaticamente ao editar atleta
-        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
+        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true, $this->scopedCategoryIds);
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
@@ -171,6 +184,9 @@ class Athletes extends BaseController
         if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($athlete['category_id'] ?? 0), '/athletes')) {
+            return $response;
+        }
 
         $categoryId = (int) $this->request->getPost('category_id');
         if ($this->scopedTeamIds !== []) {
@@ -178,6 +194,9 @@ class Athletes extends BaseController
             if (!$category || !in_array((int) $category['team_id'], $this->scopedTeamIds, true)) {
                 return redirect()->back()->withInput()->with('error', 'Categoria invalida para sua equipe.');
             }
+        }
+        if ($this->scopedCategoryIds !== [] && !in_array($categoryId, $this->scopedCategoryIds, true)) {
+            return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
         }
 
         $validation = service('validation');
@@ -209,6 +228,9 @@ class Athletes extends BaseController
         if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
             return $response;
         }
+        if ($response = $this->denyIfCategoryForbidden((int) ($athlete['category_id'] ?? 0), '/athletes')) {
+            return $response;
+        }
 
         return view('athletes/delete', ['title' => 'Excluir atleta', 'athlete' => $athlete]);
     }
@@ -223,6 +245,9 @@ class Athletes extends BaseController
         $currentCategory = $this->categories->find((int) $athlete['category_id']);
         $teamId = $currentCategory ? (int) $currentCategory['team_id'] : 0;
         if ($response = $this->denyIfTeamForbidden($teamId, '/athletes')) {
+            return $response;
+        }
+        if ($response = $this->denyIfCategoryForbidden((int) ($athlete['category_id'] ?? 0), '/athletes')) {
             return $response;
         }
 

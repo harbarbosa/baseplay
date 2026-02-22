@@ -32,6 +32,12 @@ class TrainingPlanService
         if (!empty($filters['category_id'])) {
             $model = $model->where('training_plans.category_id', (int) $filters['category_id']);
         }
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('training_plans.category_id', $ids);
+            }
+        }
 
         if (!empty($filters['planned_date_from'])) {
             $model = $model->where('training_plans.planned_date >=', $filters['planned_date_from']);

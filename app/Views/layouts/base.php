@@ -40,11 +40,25 @@
     const closeSidebar = () => body.classList.remove('bp-sidebar-open');
     const openSidebar = () => body.classList.add('bp-sidebar-open');
 
+    const resetOverlay = () => {
+        body.classList.remove('bp-sidebar-open');
+        overlay?.classList.remove('active');
+    };
+    const safeReset = () => {
+        if (window.matchMedia('(min-width: 1025px)').matches) {
+            resetOverlay();
+        }
+    };
+
     toggle?.addEventListener('click', () => {
         body.classList.contains('bp-sidebar-open') ? closeSidebar() : openSidebar();
     });
     close?.addEventListener('click', closeSidebar);
     overlay?.addEventListener('click', closeSidebar);
+    window.addEventListener('pageshow', resetOverlay);
+    document.addEventListener('DOMContentLoaded', resetOverlay);
+    window.addEventListener('load', resetOverlay);
+    window.addEventListener('resize', safeReset);
 
     window.bpToast = (type, message, timeout = 3200) => {
         const container = document.getElementById('bp-toast-container') || (() => {

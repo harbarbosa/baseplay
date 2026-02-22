@@ -15,6 +15,13 @@
     <div style="margin-top:12px;">
         <a href="<?= base_url('/events?view=list') ?>" class="button secondary">Lista</a>
         <a href="<?= base_url('/events?view=calendar') ?>" class="button secondary">Calendário</a>
+        <div class="event-legend">
+            <span class="event-chip event-training">Treino</span>
+            <span class="event-chip event-match">Jogo</span>
+            <span class="event-chip event-meeting">Reunião</span>
+            <span class="event-chip event-evaluation">Avaliação</span>
+            <span class="event-chip event-travel">Viagem</span>
+        </div>
     </div>
 
     <form method="get" action="<?= base_url('/events') ?>" style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">

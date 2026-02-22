@@ -7,7 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Dashboard::index', ['filter' => 'permission:dashboard.view']);
 
-$routes->get('login', 'Auth::loginForm');
+$routes->get('login', 'Auth::loginForm', ['filter' => 'csrf']);
 $routes->post('login', 'Auth::login', ['filter' => 'csrf']);
 $routes->get('logout', 'Auth::logout', ['filter' => 'auth']);
 
@@ -20,6 +20,8 @@ $routes->group('admin', ['filter' => 'auth'], static function ($routes) {
     $routes->get('users', 'Admin\\Users::index', ['filter' => 'permission:users.manage']);
     $routes->get('users/create', 'Admin\\Users::create', ['filter' => 'permission:users.manage']);
     $routes->post('users', 'Admin\\Users::store', ['filter' => ['csrf', 'permission:users.manage']]);
+    $routes->get('users/(:num)/edit', 'Admin\\Users::edit/$1', ['filter' => 'permission:users.manage']);
+    $routes->post('users/(:num)/update', 'Admin\\Users::update/$1', ['filter' => ['csrf', 'permission:users.manage']]);
 
     $routes->get('roles', 'Admin\\Roles::index', ['filter' => 'permission:roles.manage']);
     $routes->get('roles/create', 'Admin\\Roles::create', ['filter' => 'permission:roles.manage']);

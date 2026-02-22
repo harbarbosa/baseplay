@@ -63,6 +63,30 @@
             <label>Local</label>
             <input type="text" name="location" value="<?= esc(old('location', $match['location'])) ?>">
         </div>
+        <div class="form-group" style="margin-top:6px;">
+            <label>
+                <input type="checkbox" id="travel_required" name="travel_required" value="1" <?= old('travel_required', $match['travel_required'] ?? 0) ? 'checked' : '' ?>>
+                Haverá viagem para este jogo?
+            </label>
+        </div>
+        <div class="travel-fields" id="travel-fields" style="display:none;">
+            <div class="form-group">
+                <label>Saída (data/hora)</label>
+                <input type="datetime-local" name="travel_departure_datetime" value="<?= esc(old('travel_departure_datetime', !empty($match['travel_departure_datetime']) ? date('Y-m-d\TH:i', strtotime($match['travel_departure_datetime'])) : '')) ?>">
+            </div>
+            <div class="form-group">
+                <label>Retorno (data/hora)</label>
+                <input type="datetime-local" name="travel_return_datetime" value="<?= esc(old('travel_return_datetime', !empty($match['travel_return_datetime']) ? date('Y-m-d\TH:i', strtotime($match['travel_return_datetime'])) : '')) ?>">
+            </div>
+            <div class="form-group">
+                <label>Local de saída</label>
+                <input type="text" name="travel_location" value="<?= esc(old('travel_location', $match['travel_location'] ?? '')) ?>">
+            </div>
+            <div class="form-group">
+                <label>Observações da viagem</label>
+                <textarea name="travel_notes" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc(old('travel_notes', $match['travel_notes'] ?? '')) ?></textarea>
+            </div>
+        </div>
         <div class="form-group">
             <label>Mando</label>
             <select name="home_away">
@@ -113,6 +137,18 @@
 
     teamSelect.addEventListener('change', filterCategories);
     filterCategories();
+})();
+</script>
+<script>
+(() => {
+    const checkbox = document.getElementById('travel_required');
+    const fields = document.getElementById('travel-fields');
+    if (!checkbox || !fields) return;
+    const toggle = () => {
+        fields.style.display = checkbox.checked ? 'block' : 'none';
+    };
+    checkbox.addEventListener('change', toggle);
+    toggle();
 })();
 </script>
 <?= $this->endSection() ?>

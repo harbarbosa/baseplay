@@ -8,7 +8,7 @@
             <p style="color:var(--muted);">
                 <?= esc(format_date_br($match['match_date'])) ?>
                 <?= esc($match['start_time'] ?? '') ?>
-                Â· <?= esc($match['category_name'] ?? '') ?>
+                · <?= esc($match['category_name'] ?? '') ?>
             </p>
         </div>
         <div>
@@ -105,7 +105,7 @@
                 <th>Atleta</th>
                 <th>Status</th>
                 <th>Titular</th>
-                <th>AÃ§Ãµes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -113,7 +113,7 @@
             <tr>
                 <td><?= esc(trim($callup['first_name'] . ' ' . ($callup['last_name'] ?? ''))) ?></td>
                 <td><?= esc(enum_label($callup['callup_status'], 'invitation')) ?></td>
-                <td><?= (int) $callup['is_starting'] === 1 ? 'Sim' : 'NÃ£o' ?></td>
+                <td><?= (int) $callup['is_starting'] === 1 ? 'Sim' : 'Não' ?></td>
                 <td>
                     <?php if (has_permission('matches.update')): ?>
                         <form method="post" action="<?= base_url('/match-callups/' . $callup['id'] . '/update') ?>" style="display:inline-flex; gap:6px; align-items:center;">
@@ -144,7 +144,7 @@
 
     <hr style="margin:24px 0;">
 
-    <h2>EscalaÃ§Ã£o</h2>
+    <h2>Escalação</h2>
     <?php
     $lineupMap = [];
     foreach ($lineups as $lineup) {
@@ -155,10 +155,10 @@
         <thead>
             <tr>
                 <th>Atleta</th>
-                <th>FunÃ§Ã£o</th>
-                <th>PosiÃ§Ã£o</th>
+                <th>Função</th>
+                <th>Posição</th>
                 <th>Camisa</th>
-                <th>AÃ§Ãµes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -181,7 +181,7 @@
                                 <option value="starting" <?= $lineupRole === 'starting' ? 'selected' : '' ?>>Titular</option>
                                 <option value="bench" <?= $lineupRole === 'bench' ? 'selected' : '' ?>>Banco</option>
                             </select>
-                            <input type="text" name="position_code" placeholder="PosiÃ§Ã£o" value="<?= esc($lineup['position_code'] ?? '') ?>" style="width:90px;">
+                            <input type="text" name="position_code" placeholder="Posição" value="<?= esc($lineup['position_code'] ?? '') ?>" style="width:90px;">
                             <input type="number" name="shirt_number" placeholder="#" value="<?= esc($lineup['shirt_number'] ?? '') ?>" style="width:70px;">
                             <button type="submit" class="secondary">Salvar</button>
                         </form>
@@ -196,7 +196,7 @@
 
     <hr style="margin:24px 0;">
 
-    <h2>EstatÃ­sticas</h2>
+    <h2>Estatísticas</h2>
     <?php if (has_permission('match_stats.manage')): ?>
         <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/events') ?>" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <?= csrf_field() ?>
@@ -218,7 +218,7 @@
                 <?php endforeach; ?>
             </select>
             <input type="number" name="minute" placeholder="Min" style="width:80px;">
-            <input type="text" name="notes" placeholder="ObservaÃ§Ã£o" style="min-width:200px;">
+            <input type="text" name="notes" placeholder="Observação" style="min-width:200px;">
             <button type="submit">Adicionar</button>
         </form>
     <?php endif; ?>
@@ -231,7 +231,7 @@
                 <th>Atleta</th>
                 <th>Relacionado</th>
                 <th>Notas</th>
-                <th>AÃ§Ãµes</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -259,7 +259,7 @@
 
     <hr style="margin:24px 0;">
 
-    <h2>RelatÃ³rio</h2>
+    <h2>Relatório</h2>
     <?php if (has_permission('match_reports.manage')): ?>
         <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/report') ?>">
             <?= csrf_field() ?>
@@ -276,17 +276,17 @@
                 <textarea name="weaknesses" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc($report['weaknesses'] ?? '') ?></textarea>
             </div>
             <div class="form-group">
-                <label>AÃ§Ãµes para treino</label>
+                <label>Ações para treino</label>
                 <textarea name="next_actions" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc($report['next_actions'] ?? '') ?></textarea>
             </div>
             <div class="form-group">
                 <label>Notas do treinador</label>
                 <textarea name="coach_notes" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc($report['coach_notes'] ?? '') ?></textarea>
             </div>
-            <button type="submit">Salvar relatÃ³rio</button>
+            <button type="submit">Salvar relatório</button>
         </form>
     <?php else: ?>
-        <p style="color:var(--muted);">Sem permissÃ£o para editar o relatÃ³rio.</p>
+        <p style="color:var(--muted);">Sem permissão para editar o relatório.</p>
     <?php endif; ?>
 
     <hr style="margin:24px 0;">
@@ -295,7 +295,7 @@
     <?php if (has_permission('match_reports.manage')): ?>
         <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/attachments') ?>" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <?= csrf_field() ?>
-            <input type="text" name="original_name" placeholder="DescriÃ§Ã£o (opcional)" style="min-width:220px;">
+            <input type="text" name="original_name" placeholder="Descrição (opcional)" style="min-width:220px;">
             <input type="text" name="url" placeholder="Link" style="min-width:260px;">
             <button type="submit">Adicionar</button>
         </form>
@@ -369,5 +369,3 @@
 })();
 </script>
 <?= $this->endSection() ?>
-
-

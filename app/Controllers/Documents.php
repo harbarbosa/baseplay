@@ -56,13 +56,27 @@ class Documents extends BaseController
         }
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
+        $categoryId = (int) ($filters['category_id'] ?? 0);
+        if ($categoryId > 0) {
+            $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $filters['category_ids'] = $this->scopedCategoryIds;
+        }
 
         $result = $this->documents->list($filters, 15, 'documents');
         $types = $this->types->listAllActive();
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds);
-        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
+        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds, $this->scopedCategoryIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds, $this->scopedCategoryIds);
         $statusCounters = $this->documents->statusCounters($filters);
         $complianceByCategory = $this->documents->complianceByCategory(!empty($filters['team_id']) ? (int) $filters['team_id'] : null);
 
@@ -95,7 +109,7 @@ class Documents extends BaseController
         $data = $this->overview->overview((int) session('user_id'), $filters);
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds, $this->scopedCategoryIds);
         $types = $this->types->listAllActive();
 
         return view('documents/overview', [
@@ -122,8 +136,8 @@ class Documents extends BaseController
         $types = $this->types->listAllActive();
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds);
-        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
+        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds, $this->scopedCategoryIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds, $this->scopedCategoryIds);
         $guardianContext = $this->resolveCurrentGuardianContext();
 
         return view('documents/create', [
@@ -184,6 +198,18 @@ class Documents extends BaseController
 
         if ($this->scopedTeamIds !== [] && !empty($payload['team_id']) && !in_array((int) $payload['team_id'], $this->scopedTeamIds, true)) {
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if ($categoryId > 0 && !in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
+        }
+        if ($this->scopedCategoryIds !== []) {
+            $categoryId = (int) ($payload['category_id'] ?? 0);
+            if ($categoryId > 0 && !in_array($categoryId, $this->scopedCategoryIds, true)) {
+                return redirect()->back()->withInput()->with('error', 'Categoria fora do seu escopo.');
+            }
         }
 
         $validation = service('validation');
@@ -247,8 +273,8 @@ class Documents extends BaseController
         $types = $this->types->listAllActive();
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
-        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds);
-        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds);
+        $athletes = $this->athletes->listAllWithRelations($this->scopedTeamIds, $this->scopedCategoryIds);
+        $categories = $this->categories->listDistinctAllByTeam(true, $this->scopedTeamIds, $this->scopedCategoryIds);
 
         return view('documents/edit', [
             'title' => 'Editar documento',

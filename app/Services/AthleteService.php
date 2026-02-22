@@ -42,6 +42,12 @@ class AthleteService
         if (!empty($filters['category_id'])) {
             $model = $model->where('categories.id', (int) $filters['category_id']);
         }
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('categories.id', $ids);
+            }
+        }
 
         if (!empty($filters['status'])) {
             $model = $model->where('athletes.status', $filters['status']);
@@ -120,16 +126,23 @@ class AthleteService
         return $this->athletes->delete($id);
     }
 
-    public function listByCategory(int $categoryId): array
+    public function listByCategory(int $categoryId, array $categoryIds = []): array
     {
-        return $this->athletes
+        $model = $this->athletes
             ->where('category_id', $categoryId)
             ->where('deleted_at', null)
-            ->orderBy('first_name', 'ASC')
-            ->findAll();
+            ->orderBy('first_name', 'ASC');
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $model = $model->whereIn('category_id', $ids);
+            }
+        }
+
+        return $model->findAll();
     }
 
-    public function listAllWithRelations(array $teamIds = []): array
+    public function listAllWithRelations(array $teamIds = [], array $categoryIds = []): array
     {
         $model = $this->athletes
             ->select('athletes.id, athletes.first_name, athletes.last_name, categories.id AS category_id, categories.name AS category_name, teams.id AS team_id, teams.name AS team_name')
@@ -141,6 +154,12 @@ class AthleteService
             $ids = array_values(array_filter(array_map('intval', $teamIds)));
             if ($ids !== []) {
                 $model = $model->whereIn('teams.id', $ids);
+            }
+        }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $model = $model->whereIn('categories.id', $ids);
             }
         }
 

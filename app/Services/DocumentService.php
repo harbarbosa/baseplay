@@ -49,6 +49,12 @@ class DocumentService
         if (!empty($filters['category_id'])) {
             $model = $model->where('athlete_categories.id', (int) $filters['category_id']);
         }
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('athlete_categories.id', $ids);
+            }
+        }
         if (!empty($filters['document_type_id'])) {
             $model = $model->where('documents.document_type_id', (int) $filters['document_type_id']);
         }

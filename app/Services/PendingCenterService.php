@@ -8,13 +8,14 @@ class PendingCenterService
     {
         $teamId = !empty($filters['team_id']) ? (int) $filters['team_id'] : null;
         $categoryId = !empty($filters['category_id']) ? (int) $filters['category_id'] : null;
+        $categoryIds = !empty($filters['category_ids']) && is_array($filters['category_ids']) ? $filters['category_ids'] : [];
         $type = (string) ($filters['type'] ?? '');
 
         $data = [
-            'expired_documents' => $this->expiredDocuments($teamId, $categoryId),
-            'expiring_documents' => $this->expiringDocuments($teamId, $categoryId, 30),
-            'missing_required_documents' => $this->missingRequiredDocuments($teamId, $categoryId),
-            'upcoming_events_without_callups' => $this->upcomingEventsWithoutCallups($teamId, $categoryId),
+            'expired_documents' => $this->expiredDocuments($teamId, $categoryId, $categoryIds),
+            'expiring_documents' => $this->expiringDocuments($teamId, $categoryId, 30, $categoryIds),
+            'missing_required_documents' => $this->missingRequiredDocuments($teamId, $categoryId, $categoryIds),
+            'upcoming_events_without_callups' => $this->upcomingEventsWithoutCallups($teamId, $categoryId, $categoryIds),
         ];
 
         if ($type === '') {
@@ -29,7 +30,7 @@ class PendingCenterService
         ];
     }
 
-    protected function expiredDocuments(?int $teamId, ?int $categoryId): array
+    protected function expiredDocuments(?int $teamId, ?int $categoryId, array $categoryIds = []): array
     {
         $builder = db_connect()->table('documents d')
             ->select('d.id, d.athlete_id, d.document_type_id, d.expires_at, d.original_name, dt.name AS type_name, t.name AS team_name, c.name AS category_name, a.first_name, a.last_name')
@@ -48,11 +49,17 @@ class PendingCenterService
         if ($categoryId) {
             $builder->where('c.id', $categoryId);
         }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $builder->whereIn('c.id', $ids);
+            }
+        }
 
         return $builder->get()->getResultArray();
     }
 
-    protected function expiringDocuments(?int $teamId, ?int $categoryId, int $days): array
+    protected function expiringDocuments(?int $teamId, ?int $categoryId, int $days, array $categoryIds = []): array
     {
         $today = date('Y-m-d');
         $limit = date('Y-m-d', strtotime("+{$days} days"));
@@ -75,11 +82,17 @@ class PendingCenterService
         if ($categoryId) {
             $builder->where('c.id', $categoryId);
         }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $builder->whereIn('c.id', $ids);
+            }
+        }
 
         return $builder->get()->getResultArray();
     }
 
-    protected function upcomingEventsWithoutCallups(?int $teamId, ?int $categoryId): array
+    protected function upcomingEventsWithoutCallups(?int $teamId, ?int $categoryId, array $categoryIds = []): array
     {
         $from = date('Y-m-d H:i:s');
         $to = date('Y-m-d H:i:s', strtotime('+7 days'));
@@ -102,11 +115,17 @@ class PendingCenterService
         if ($categoryId) {
             $builder->where('e.category_id', $categoryId);
         }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $builder->whereIn('e.category_id', $ids);
+            }
+        }
 
         return $builder->get()->getResultArray();
     }
 
-    protected function missingRequiredDocuments(?int $teamId, ?int $categoryId): array
+    protected function missingRequiredDocuments(?int $teamId, ?int $categoryId, array $categoryIds = []): array
     {
         $db = db_connect();
         if (! $db->tableExists('category_required_documents')) {
@@ -124,6 +143,12 @@ class PendingCenterService
         }
         if ($categoryId) {
             $reqBuilder->where('c.id', $categoryId);
+        }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $reqBuilder->whereIn('c.id', $ids);
+            }
         }
 
         $requirements = $reqBuilder->get()->getResultArray();

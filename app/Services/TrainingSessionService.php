@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\TrainingSessionModel;
 use App\Models\TrainingSessionAthleteModel;
 use App\Models\EventModel;
+use App\Services\EventService;
 use CodeIgniter\I18n\Time;
 
 class TrainingSessionService
@@ -12,12 +13,14 @@ class TrainingSessionService
     protected TrainingSessionModel $sessions;
     protected TrainingSessionAthleteModel $sessionAthletes;
     protected EventModel $events;
+    protected EventService $eventService;
 
     public function __construct()
     {
         $this->sessions = new TrainingSessionModel();
         $this->sessionAthletes = new TrainingSessionAthleteModel();
         $this->events = new EventModel();
+        $this->eventService = new EventService();
     }
 
     public function list(array $filters = [], int $perPage = 15, string $group = 'training_sessions'): array
@@ -34,6 +37,12 @@ class TrainingSessionService
 
         if (!empty($filters['category_id'])) {
             $model = $model->where('training_sessions.category_id', (int) $filters['category_id']);
+        }
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('training_sessions.category_id', $ids);
+            }
         }
 
         if (!empty($filters['date_from'])) {
@@ -90,12 +99,37 @@ class TrainingSessionService
             'end_datetime' => $data['end_datetime'] ?? null,
             'location' => $data['location'] ?? null,
             'general_notes' => $data['general_notes'] ?? null,
+            'travel_required' => (int) ($data['travel_required'] ?? 0),
+            'travel_event_id' => !empty($data['travel_event_id']) ? (int) $data['travel_event_id'] : null,
+            'travel_departure_datetime' => $this->normalizeDateTime($data['travel_departure_datetime'] ?? null),
+            'travel_return_datetime' => $this->normalizeDateTime($data['travel_return_datetime'] ?? null),
+            'travel_location' => $data['travel_location'] ?? null,
+            'travel_notes' => $data['travel_notes'] ?? null,
             'created_by' => $userId,
             'created_at' => Time::now()->toDateTimeString(),
             'updated_at' => Time::now()->toDateTimeString(),
         ];
 
-        return (int) $this->sessions->insert($payload);
+        $sessionId = (int) $this->sessions->insert($payload);
+        if ($sessionId <= 0) {
+            return $sessionId;
+        }
+
+        if (empty($payload['event_id'])) {
+            $eventId = $this->createOrUpdateEventFromSession($payload, $userId);
+            if ($eventId) {
+                $this->sessions->update($sessionId, ['event_id' => $eventId]);
+            }
+        }
+
+        if (!empty($payload['travel_required'])) {
+            $travelEventId = $this->createOrUpdateTravelEventFromSession($payload, $userId, $payload['travel_event_id'] ?? null);
+            if ($travelEventId) {
+                $this->sessions->update($sessionId, ['travel_event_id' => $travelEventId]);
+            }
+        }
+
+        return $sessionId;
     }
 
     public function update(int $id, array $data): bool
@@ -111,10 +145,39 @@ class TrainingSessionService
             'end_datetime' => $data['end_datetime'] ?? null,
             'location' => $data['location'] ?? null,
             'general_notes' => $data['general_notes'] ?? null,
+            'travel_required' => (int) ($data['travel_required'] ?? 0),
+            'travel_event_id' => !empty($data['travel_event_id']) ? (int) $data['travel_event_id'] : null,
+            'travel_departure_datetime' => $this->normalizeDateTime($data['travel_departure_datetime'] ?? null),
+            'travel_return_datetime' => $this->normalizeDateTime($data['travel_return_datetime'] ?? null),
+            'travel_location' => $data['travel_location'] ?? null,
+            'travel_notes' => $data['travel_notes'] ?? null,
             'updated_at' => Time::now()->toDateTimeString(),
         ];
 
-        return $this->sessions->update($id, $payload);
+        $updated = $this->sessions->update($id, $payload);
+        if ($updated) {
+            $eventId = $payload['event_id'] ?? null;
+            if ($eventId) {
+                $this->createOrUpdateEventFromSession($payload, null, (int) $eventId);
+            } else {
+                $newEventId = $this->createOrUpdateEventFromSession($payload, null);
+                if ($newEventId) {
+                    $this->sessions->update($id, ['event_id' => $newEventId]);
+                }
+            }
+
+            if (!empty($payload['travel_required'])) {
+                $travelEventId = $this->createOrUpdateTravelEventFromSession($payload, null, $payload['travel_event_id'] ?? null);
+                if ($travelEventId) {
+                    $this->sessions->update($id, ['travel_event_id' => $travelEventId]);
+                }
+            } elseif (!empty($payload['travel_event_id'])) {
+                $this->eventService->delete((int) $payload['travel_event_id']);
+                $this->sessions->update($id, ['travel_event_id' => null]);
+            }
+        }
+
+        return $updated;
     }
 
     public function delete(int $id): bool
@@ -142,5 +205,79 @@ class TrainingSessionService
         ];
 
         return $this->create($payload, $userId);
+    }
+
+    protected function createOrUpdateEventFromSession(array $payload, ?int $userId = null, ?int $eventId = null): ?int
+    {
+        $start = $this->normalizeDateTime($payload['start_datetime'] ?? null, $payload['session_date'] ?? null);
+        $end = $this->normalizeDateTime($payload['end_datetime'] ?? null, $payload['session_date'] ?? null);
+
+        $eventPayload = [
+            'team_id' => (int) ($payload['team_id'] ?? 0),
+            'category_id' => (int) ($payload['category_id'] ?? 0),
+            'type' => 'TRAINING',
+            'title' => $payload['title'] ?? 'Treino',
+            'description' => null,
+            'start_datetime' => $start ?? Time::now()->toDateTimeString(),
+            'end_datetime' => $end,
+            'location' => $payload['location'] ?? null,
+            'status' => 'scheduled',
+        ];
+
+        if ($eventId) {
+            $this->eventService->update($eventId, $eventPayload, $userId);
+            return $eventId;
+        }
+
+        return $this->eventService->create($eventPayload, $userId);
+    }
+
+    protected function createOrUpdateTravelEventFromSession(array $payload, ?int $userId = null, ?int $eventId = null): ?int
+    {
+        $start = $this->normalizeDateTime($payload['travel_departure_datetime'] ?? null, $payload['session_date'] ?? null);
+        $end = $this->normalizeDateTime($payload['travel_return_datetime'] ?? null, $payload['session_date'] ?? null);
+
+        $title = 'Viagem';
+        if (!empty($payload['title'])) {
+            $title .= ' â€” ' . $payload['title'];
+        }
+
+        $eventPayload = [
+            'team_id' => (int) ($payload['team_id'] ?? 0),
+            'category_id' => (int) ($payload['category_id'] ?? 0),
+            'type' => 'TRAVEL',
+            'title' => $title,
+            'description' => $payload['travel_notes'] ?? null,
+            'start_datetime' => $start ?? Time::now()->toDateTimeString(),
+            'end_datetime' => $end,
+            'location' => $payload['travel_location'] ?? ($payload['location'] ?? null),
+            'status' => 'scheduled',
+        ];
+
+        if ($eventId) {
+            $this->eventService->update($eventId, $eventPayload, $userId);
+            return $eventId;
+        }
+
+        return $this->eventService->create($eventPayload, $userId);
+    }
+
+    protected function normalizeDateTime(?string $value, ?string $fallbackDate): ?string
+    {
+        $value = trim((string) $value);
+        if ($value !== '') {
+            $normalized = str_replace('T', ' ', $value);
+            if (strlen($normalized) === 16) {
+                return $normalized . ':00';
+            }
+            return $normalized;
+        }
+
+        $fallbackDate = trim((string) $fallbackDate);
+        if ($fallbackDate !== '') {
+            return $fallbackDate . ' 00:00:00';
+        }
+
+        return null;
     }
 }

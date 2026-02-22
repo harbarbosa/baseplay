@@ -14,12 +14,17 @@ class CategoryService
         $this->categories = new CategoryModel();
     }
 
-    public function listByTeam(int $teamId): array
+    public function listByTeam(int $teamId, array $categoryIds = []): array
     {
-        return $this->categories
-            ->where('team_id', $teamId)
-            ->orderBy('id', 'DESC')
-            ->findAll();
+        $model = $this->categories->where('team_id', $teamId);
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $model = $model->whereIn('id', $ids);
+            }
+        }
+
+        return $model->orderBy('id', 'DESC')->findAll();
     }
 
     public function find(int $id): ?array
@@ -27,7 +32,7 @@ class CategoryService
         return $this->categories->find($id);
     }
 
-    public function listAll(?int $teamId = null, bool $onlyActive = false): array
+    public function listAll(?int $teamId = null, bool $onlyActive = false, array $categoryIds = []): array
     {
         $model = $this->categories->where('deleted_at', null);
         if ($onlyActive) {
@@ -36,19 +41,25 @@ class CategoryService
         if ($teamId) {
             $model = $model->where('team_id', $teamId);
         }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $model = $model->whereIn('id', $ids);
+            }
+        }
 
         return $model->orderBy('name', 'ASC')->findAll();
     }
 
-    public function listAllActive(?int $teamId = null): array
+    public function listAllActive(?int $teamId = null, array $categoryIds = []): array
     {
-        return $this->listAll($teamId, true);
+        return $this->listAll($teamId, true, $categoryIds);
     }
 
-    public function listDistinctByTeam(?int $teamId = null, bool $onlyActive = false): array
+    public function listDistinctByTeam(?int $teamId = null, bool $onlyActive = false, array $categoryIds = []): array
     {
         $builder = $this->categories->builder();
-        $builder->select('MIN(categories.id) AS id, categories.name');
+        $builder->select('MIN(categories.id) AS id, categories.team_id, categories.name');
         $builder->where('categories.deleted_at', null);
         if ($onlyActive) {
             $builder->where('categories.status', 'active');
@@ -56,13 +67,19 @@ class CategoryService
         if ($teamId) {
             $builder->where('categories.team_id', $teamId);
         }
-        $builder->groupBy('categories.name');
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $builder->whereIn('categories.id', $ids);
+            }
+        }
+        $builder->groupBy('categories.team_id, categories.name');
         $builder->orderBy('categories.name', 'ASC');
 
         return $builder->get()->getResultArray();
     }
 
-    public function listDistinctAllByTeam(bool $onlyActive = false, array $teamIds = []): array
+    public function listDistinctAllByTeam(bool $onlyActive = false, array $teamIds = [], array $categoryIds = []): array
     {
         $builder = $this->categories->builder();
         $builder->select('MIN(categories.id) AS id, categories.team_id, categories.name');
@@ -74,6 +91,12 @@ class CategoryService
             $ids = array_values(array_filter(array_map('intval', $teamIds)));
             if ($ids !== []) {
                 $builder->whereIn('categories.team_id', $ids);
+            }
+        }
+        if ($categoryIds !== []) {
+            $ids = array_values(array_filter(array_map('intval', $categoryIds)));
+            if ($ids !== []) {
+                $builder->whereIn('categories.id', $ids);
             }
         }
         $builder->groupBy('categories.team_id, categories.name');

@@ -13,7 +13,9 @@ class TrainingSessionModel extends Model
 
     protected $allowedFields = [
         'team_id','category_id','event_id','training_plan_id','title','session_date',
-        'start_datetime','end_datetime','location','general_notes','created_by',
+        'start_datetime','end_datetime','location','general_notes',
+        'travel_required','travel_event_id','travel_departure_datetime','travel_return_datetime',
+        'travel_location','travel_notes','created_by',
         'created_at','updated_at','deleted_at',
     ];
 }

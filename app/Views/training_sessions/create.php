@@ -66,6 +66,30 @@
             <label>Observações gerais</label>
             <textarea name="general_notes" rows="4" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc(old('general_notes')) ?></textarea>
         </div>
+        <div class="form-group" style="margin-top:6px;">
+            <label>
+                <input type="checkbox" id="travel_required" name="travel_required" value="1" <?= old('travel_required') ? 'checked' : '' ?>>
+                Haverá viagem para este treino?
+            </label>
+        </div>
+        <div class="travel-fields" id="travel-fields" style="display:none;">
+            <div class="form-group">
+                <label>Saída (data/hora)</label>
+                <input type="datetime-local" name="travel_departure_datetime" value="<?= esc(old('travel_departure_datetime')) ?>">
+            </div>
+            <div class="form-group">
+                <label>Retorno (data/hora)</label>
+                <input type="datetime-local" name="travel_return_datetime" value="<?= esc(old('travel_return_datetime')) ?>">
+            </div>
+            <div class="form-group">
+                <label>Local de saída</label>
+                <input type="text" name="travel_location" value="<?= esc(old('travel_location')) ?>">
+            </div>
+            <div class="form-group">
+                <label>Observações da viagem</label>
+                <textarea name="travel_notes" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc(old('travel_notes')) ?></textarea>
+            </div>
+        </div>
 
         <button type="submit">Salvar</button>
         <a href="<?= base_url('/training-sessions') ?>" class="button secondary">Cancelar</a>
@@ -89,6 +113,18 @@
     };
     teamSelect.addEventListener('change', filterCategories);
     filterCategories();
+})();
+</script>
+<script>
+(() => {
+    const checkbox = document.getElementById('travel_required');
+    const fields = document.getElementById('travel-fields');
+    if (!checkbox || !fields) return;
+    const toggle = () => {
+        fields.style.display = checkbox.checked ? 'block' : 'none';
+    };
+    checkbox.addEventListener('change', toggle);
+    toggle();
 })();
 </script>
 <?php $mapsKey = getenv('GOOGLE_MAPS_API_KEY'); ?>

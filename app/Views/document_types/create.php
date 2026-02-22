@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/base') ?>
+﻿<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <div class="card" style="max-width:700px;">
@@ -22,6 +22,13 @@
         <div class="form-group">
             <label>Dias padrão de validade</label>
             <input type="number" name="default_valid_days" value="<?= esc(old('default_valid_days')) ?>">
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="is_required" value="1" <?= old('is_required') === '1' ? 'checked' : '' ?>>
+                Obrigatório para todas as categorias
+            </label>
         </div>
 
         <div class="form-group">

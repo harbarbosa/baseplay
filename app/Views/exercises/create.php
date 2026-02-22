@@ -26,6 +26,8 @@
             'medium' => 'Média',
             'high' => 'Alta',
         ];
+        $boardOptions = $boardOptions ?? [];
+        $linkedBoardIds = $linkedBoardIds ?? [];
         ?>
 
         <div class="form-group">
@@ -78,6 +80,20 @@
             <select name="status">
                 <option value="active" <?= old('status', 'active') === 'active' ? 'selected' : '' ?>>Ativo</option>
                 <option value="inactive" <?= old('status') === 'inactive' ? 'selected' : '' ?>>Inativo</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Quadros táticos (opcional)</label>
+            <select name="tactical_board_ids[]" multiple size="5">
+                <?php if (empty($boardOptions)): ?>
+                    <option value="">Nenhuma prancheta disponível</option>
+                <?php else: ?>
+                    <?php foreach ($boardOptions as $boardOption): ?>
+                        <option value="<?= esc($boardOption['id']) ?>" <?= in_array((int) $boardOption['id'], $linkedBoardIds, true) ? 'selected' : '' ?>>
+                            <?= esc($boardOption['title']) ?> (<?= esc($boardOption['team_name'] ?? '-') ?> / <?= esc($boardOption['category_name'] ?? '-') ?>)
+                        </option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </select>
         </div>
 

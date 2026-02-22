@@ -49,6 +49,7 @@ class DashboardService
             ->where('expires_at <', $today)
             ->countAllResults();
 
+        $missingRequired = $this->countMissingRequiredDocuments();
         $lowAttendanceCount = $this->countLowAttendanceAthletes();
 
         $alerts = (new DocumentAlertService())->getAlerts([7, 15, 30]);
@@ -61,6 +62,7 @@ class DashboardService
                 'upcomingEventsCount' => count($upcomingEvents),
                 'matchesCount' => $matchesCount,
                 'docsExpired' => $docsExpired,
+                'missingRequiredDocuments' => $missingRequired,
                 'lowAttendanceCount' => $lowAttendanceCount,
                 'upcomingEvents' => $upcomingEvents,
                 'documentAlerts' => $alerts,
@@ -127,6 +129,7 @@ class DashboardService
                 'nextTraining' => $nextTraining,
                 'nextMatch' => $nextMatch,
                 'documentsPending' => (int) $docsExpired->countAllResults(),
+                'missingRequiredDocuments' => $this->countMissingRequiredDocuments($teamIds),
                 'lowAttendanceCount' => $this->countLowAttendanceAthletes($teamIds),
                 'systemAlertUnread' => (new AlertService())->unreadCount(),
             ],
@@ -283,5 +286,36 @@ class DashboardService
             ->getResultArray();
 
         return array_map(static fn($row) => (int) $row['team_id'], $rows);
+    }
+
+    protected function countMissingRequiredDocuments(array $teamIds = []): int
+    {
+        $db = db_connect();
+        if (! $db->tableExists('category_required_documents')) {
+            return 0;
+        }
+
+        $builder = $db->table('category_required_documents crd')
+            ->select('COUNT(*) AS total')
+            ->join('categories c', 'c.id = crd.category_id', 'left')
+            ->join('athletes a', 'a.category_id = c.id', 'left')
+            ->join(
+                'documents d',
+                'd.athlete_id = a.id AND d.document_type_id = crd.document_type_id AND d.deleted_at IS NULL',
+                'left'
+            )
+            ->where('crd.deleted_at', null)
+            ->where('crd.is_required', 1)
+            ->where('c.deleted_at', null)
+            ->where('a.deleted_at', null)
+            ->where('a.status', 'active')
+            ->where('d.id', null);
+
+        if ($teamIds !== []) {
+            $builder->whereIn('c.team_id', $teamIds);
+        }
+
+        $row = $builder->get()->getRowArray();
+        return (int) ($row['total'] ?? 0);
     }
 }

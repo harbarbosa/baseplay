@@ -4,16 +4,19 @@ namespace App\Controllers\Api;
 
 use App\Services\DocumentService;
 use App\Services\DocumentTypeService;
+use App\Services\PendingCenterService;
 
 class DocumentsController extends BaseApiController
 {
     protected DocumentService $documents;
     protected DocumentTypeService $types;
+    protected PendingCenterService $pending;
 
     public function __construct()
     {
         $this->documents = new DocumentService();
         $this->types = new DocumentTypeService();
+        $this->pending = new PendingCenterService();
     }
 
     protected function ok($data = null, string $message = 'OK', int $code = 200)
@@ -55,7 +58,7 @@ class DocumentsController extends BaseApiController
         ];
 
         if ($isGuardian) {
-            // Responsável só pode listar documentos próprios.
+            // ResponsÃ¡vel sÃ³ pode listar documentos prÃ³prios.
             $filters['guardian_id'] = $guardianIdFromUser ?? -1;
             $filters['team_id'] = null;
         }
@@ -232,6 +235,72 @@ class DocumentsController extends BaseApiController
 
         $this->documents->delete($id);
         return $this->ok(['id' => $id], 'Documento removido.');
+    }
+
+    public function missingRequired()
+    {
+        if ($response = $this->ensurePermission('documents.view')) {
+            return $response;
+        }
+
+        $user = $this->apiUser();
+        if (!$user) {
+            return $this->fail('Unauthorized', 401);
+        }
+
+        $teamId = (int) ($this->request->getGet('team_id') ?? 0);
+        $categoryId = (int) ($this->request->getGet('category_id') ?? 0);
+        $perPage = max(1, (int) ($this->request->getGet('per_page') ?? 50));
+        $page = max(1, (int) ($this->request->getGet('page') ?? 1));
+
+        $userId = (int) ($user['id'] ?? 0);
+        $isAdmin = $userId > 0 && \Config\Services::rbac()->userHasPermission($userId, 'admin.access');
+        $teamIds = $isAdmin ? [] : $this->getApiUserTeamIds($userId);
+
+        if (!$isAdmin && $teamId > 0 && !in_array($teamId, $teamIds, true)) {
+            return $this->fail('Acesso negado', 403);
+        }
+
+        $guardianId = null;
+        if ($this->apiUserHasRole('responsavel', $user)) {
+            $guardianId = $this->resolveGuardianIdFromApiUser($user);
+        }
+
+        $items = $this->pending->missingRequiredDocumentsForApi(
+            $teamIds,
+            $teamId > 0 ? $teamId : null,
+            $categoryId > 0 ? $categoryId : null,
+            $guardianId
+        );
+
+        $total = count($items);
+        $offset = ($page - 1) * $perPage;
+        $paged = array_slice($items, $offset, $perPage);
+
+        return $this->ok([
+            'items' => $paged,
+            'pager' => [
+                'currentPage' => $page,
+                'pageCount' => (int) ceil(max(1, $total) / $perPage),
+                'perPage' => $perPage,
+                'total' => $total,
+            ],
+        ]);
+    }
+
+    protected function getApiUserTeamIds(int $userId): array
+    {
+        if ($userId <= 0) {
+            return [];
+        }
+
+        $rows = db_connect()->table('user_team_links')
+            ->select('team_id')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
+
+        return array_map(static fn($row): int => (int) $row['team_id'], $rows);
     }
 
     protected function storeFile($file): array

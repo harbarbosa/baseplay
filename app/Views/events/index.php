@@ -5,7 +5,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
             <h1>Agenda</h1>
-            <p style="color:var(--muted);">Eventos, convocaÃ§Ãµes e presenÃ§a.</p>
+            <p style="color:var(--muted);">Eventos, convocações e presença.</p>
         </div>
         <?php if (has_permission('events.create')): ?>
             <a href="<?= base_url('/events/create') ?>" class="button">Novo evento</a>
@@ -14,7 +14,7 @@
 
     <div style="margin-top:12px;">
         <a href="<?= base_url('/events?view=list') ?>" class="button secondary">Lista</a>
-        <a href="<?= base_url('/events?view=calendar') ?>" class="button secondary">CalendÃ¡rio</a>
+        <a href="<?= base_url('/events?view=calendar') ?>" class="button secondary">Calendário</a>
     </div>
 
     <form method="get" action="<?= base_url('/events') ?>" style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">
@@ -49,7 +49,7 @@
             <option value="">Status</option>
             <option value="scheduled" <?= ($filters['status'] ?? '') === 'scheduled' ? 'selected' : '' ?>>Agendado</option>
             <option value="cancelled" <?= ($filters['status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelado</option>
-            <option value="completed" <?= ($filters['status'] ?? '') === 'completed' ? 'selected' : '' ?>>ConcluÃ­do</option>
+            <option value="completed" <?= ($filters['status'] ?? '') === 'completed' ? 'selected' : '' ?>>Concluído</option>
         </select>
         <input type="date" name="from_date" value="<?= esc($filters['from_date'] ?? '') ?>">
         <input type="date" name="to_date" value="<?= esc($filters['to_date'] ?? '') ?>">
@@ -67,7 +67,7 @@
             $daysInMonth = (int) $monthEnd->format('j');
         ?>
         <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:8px;">
-            <?php foreach (['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b', 'Dom'] as ): ?>
+            <?php foreach (['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] as $dayLabel): ?>
                 <div style="font-weight:600; text-align:center;"><?= esc($dayLabel) ?></div>
             <?php endforeach; ?>
             <?php for ($i = 1; $i < $startDay; $i++): ?>
@@ -105,12 +105,12 @@
             <thead>
                 <tr>
                     <th>Data/Hora</th>
-                    <th>TÃ­tulo</th>
+                    <th>Título</th>
                     <th>Equipe</th>
                     <th>Categoria</th>
                     <th>Tipo</th>
                     <th>Status</th>
-                    <th>AÃ§Ãµes</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -123,13 +123,24 @@
                     <td><?= esc($types[$event['type']] ?? $event['type']) ?></td>
                     <td><?= esc(enum_label($event['status'], 'status')) ?></td>
                     <td>
-                        <a href="<?= base_url('/events/' . $event['id']) ?>">Detalhes</a>
-                        <?php if (has_permission('events.update')): ?>
-                            | <a href="<?= base_url('/events/' . $event['id'] . '/edit') ?>">Editar</a>
-                        <?php endif; ?>
-                        <?php if (has_permission('events.delete')): ?>
-                            | <a href="<?= base_url('/events/' . $event['id'] . '/delete') ?>">Excluir</a>
-                        <?php endif; ?>
+                        <div class="bp-action-buttons">
+                            <a href="<?= base_url('/events/' . $event['id']) ?>" class="bp-icon-btn" title="Detalhar" aria-label="Detalhar">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <?php if (has_permission('events.update')): ?>
+                                <a href="<?= base_url('/events/' . $event['id'] . '/edit') ?>" class="bp-icon-btn" title="Editar" aria-label="Editar">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>
+                                </a>
+                            <?php endif; ?>
+                            <?php if (has_permission('events.delete')): ?>
+                                <form method="post" action="<?= base_url('/events/' . $event['id'] . '/delete') ?>" class="bp-inline-form" onsubmit="return confirm('Excluir este evento?');">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="bp-icon-btn bp-icon-danger" title="Excluir" aria-label="Excluir">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>

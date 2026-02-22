@@ -14,6 +14,7 @@ class DocumentTypeModel extends Model
         'name',
         'requires_expiration',
         'default_valid_days',
+        'is_required',
         'status',
         'created_at',
         'updated_at',

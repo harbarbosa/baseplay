@@ -32,7 +32,7 @@ class PendingCenterService
     protected function expiredDocuments(?int $teamId, ?int $categoryId): array
     {
         $builder = db_connect()->table('documents d')
-            ->select('d.id, d.expires_at, d.original_name, dt.name AS type_name, t.name AS team_name, c.name AS category_name, a.first_name, a.last_name')
+            ->select('d.id, d.athlete_id, d.document_type_id, d.expires_at, d.original_name, dt.name AS type_name, t.name AS team_name, c.name AS category_name, a.first_name, a.last_name')
             ->join('document_types dt', 'dt.id = d.document_type_id', 'left')
             ->join('athletes a', 'a.id = d.athlete_id', 'left')
             ->join('categories c', 'c.id = a.category_id', 'left')
@@ -58,7 +58,7 @@ class PendingCenterService
         $limit = date('Y-m-d', strtotime("+{$days} days"));
 
         $builder = db_connect()->table('documents d')
-            ->select('d.id, d.expires_at, d.original_name, dt.name AS type_name, t.name AS team_name, c.name AS category_name, a.first_name, a.last_name')
+            ->select('d.id, d.athlete_id, d.document_type_id, d.expires_at, d.original_name, dt.name AS type_name, t.name AS team_name, c.name AS category_name, a.first_name, a.last_name')
             ->join('document_types dt', 'dt.id = d.document_type_id', 'left')
             ->join('athletes a', 'a.id = d.athlete_id', 'left')
             ->join('categories c', 'c.id = a.category_id', 'left')
@@ -114,7 +114,7 @@ class PendingCenterService
         }
 
         $reqBuilder = $db->table('category_required_documents crd')
-            ->select('crd.category_id, crd.document_type_id, c.name AS category_name, t.name AS team_name, dt.name AS type_name')
+            ->select('crd.category_id, crd.document_type_id, c.name AS category_name, t.name AS team_name, t.id AS team_id, dt.name AS type_name')
             ->join('categories c', 'c.id = crd.category_id', 'left')
             ->join('teams t', 't.id = c.team_id', 'left')
             ->join('document_types dt', 'dt.id = crd.document_type_id', 'left');
@@ -164,6 +164,85 @@ class PendingCenterService
                     'last_name' => $athlete['last_name'] ?? '',
                     'category_name' => $req['category_name'] ?? '-',
                     'team_name' => $req['team_name'] ?? '-',
+                    'team_id' => (int) ($req['team_id'] ?? 0),
+                    'category_id' => $catId,
+                    'document_type_id' => $typeId,
+                    'type_name' => $req['type_name'] ?? '-',
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    public function missingRequiredDocumentsForApi(array $teamIds = [], ?int $teamId = null, ?int $categoryId = null, ?int $guardianId = null): array
+    {
+        $db = db_connect();
+        if (! $db->tableExists('category_required_documents')) {
+            return [];
+        }
+
+        $reqBuilder = $db->table('category_required_documents crd')
+            ->select('crd.category_id, crd.document_type_id, c.name AS category_name, t.name AS team_name, t.id AS team_id, dt.name AS type_name')
+            ->join('categories c', 'c.id = crd.category_id', 'left')
+            ->join('teams t', 't.id = c.team_id', 'left')
+            ->join('document_types dt', 'dt.id = crd.document_type_id', 'left');
+
+        if ($teamId) {
+            $reqBuilder->where('c.team_id', $teamId);
+        } elseif ($teamIds !== []) {
+            $reqBuilder->whereIn('c.team_id', $teamIds);
+        }
+        if ($categoryId) {
+            $reqBuilder->where('c.id', $categoryId);
+        }
+
+        $requirements = $reqBuilder->get()->getResultArray();
+        if ($requirements === []) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($requirements as $req) {
+            $catId = (int) ($req['category_id'] ?? 0);
+            $typeId = (int) ($req['document_type_id'] ?? 0);
+            if ($catId <= 0 || $typeId <= 0) {
+                continue;
+            }
+
+            $athletesBuilder = $db->table('athletes')
+                ->select('id, first_name, last_name')
+                ->where('deleted_at', null)
+                ->where('status', 'active')
+                ->where('category_id', $catId);
+
+            if ($guardianId) {
+                $athletesBuilder->join('athlete_guardians ag', 'ag.athlete_id = athletes.id', 'inner');
+                $athletesBuilder->where('ag.guardian_id', (int) $guardianId);
+            }
+
+            $athletes = $athletesBuilder->get()->getResultArray();
+
+            foreach ($athletes as $athlete) {
+                $exists = $db->table('documents')
+                    ->where('deleted_at', null)
+                    ->where('athlete_id', (int) $athlete['id'])
+                    ->where('document_type_id', $typeId)
+                    ->countAllResults() > 0;
+
+                if ($exists) {
+                    continue;
+                }
+
+                $items[] = [
+                    'athlete_id' => (int) $athlete['id'],
+                    'first_name' => $athlete['first_name'] ?? '',
+                    'last_name' => $athlete['last_name'] ?? '',
+                    'category_name' => $req['category_name'] ?? '-',
+                    'team_name' => $req['team_name'] ?? '-',
+                    'team_id' => (int) ($req['team_id'] ?? 0),
+                    'category_id' => $catId,
+                    'document_type_id' => $typeId,
                     'type_name' => $req['type_name'] ?? '-',
                 ];
             }

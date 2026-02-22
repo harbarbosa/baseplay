@@ -107,6 +107,7 @@ class DocumentService
             'expired' => 0,
             'expiring' => 0,
             'active' => 0,
+            'missing_required' => 0,
         ];
 
         $rows = $base
@@ -120,6 +121,35 @@ class DocumentService
             $counters['expired'] = (int) ($rows['expired_count'] ?? 0);
             $counters['expiring'] = (int) ($rows['expiring_count'] ?? 0);
             $counters['active'] = (int) ($rows['active_count'] ?? 0);
+        }
+
+        $db = db_connect();
+        if ($db->tableExists('category_required_documents')) {
+            $missingBuilder = $db->table('category_required_documents crd')
+                ->select('COUNT(*) AS total')
+                ->join('categories c', 'c.id = crd.category_id', 'left')
+                ->join('athletes a', 'a.category_id = c.id', 'left')
+                ->join(
+                    'documents d',
+                    'd.athlete_id = a.id AND d.document_type_id = crd.document_type_id AND d.deleted_at IS NULL',
+                    'left'
+                )
+                ->where('crd.deleted_at', null)
+                ->where('crd.is_required', 1)
+                ->where('c.deleted_at', null)
+                ->where('a.deleted_at', null)
+                ->where('a.status', 'active')
+                ->where('d.id', null);
+
+            if (!empty($filters['team_id'])) {
+                $missingBuilder->where('c.team_id', (int) $filters['team_id']);
+            }
+            if (!empty($filters['category_id'])) {
+                $missingBuilder->where('c.id', (int) $filters['category_id']);
+            }
+
+            $row = $missingBuilder->get()->getRowArray();
+            $counters['missing_required'] = (int) ($row['total'] ?? 0);
         }
 
         return $counters;

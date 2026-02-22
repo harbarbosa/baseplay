@@ -95,16 +95,7 @@ class TacticalBoards extends BaseController
             return redirect()->back()->withInput()->with('error', 'Equipe invalida.');
         }
 
-        $teamId = (int) ($payload['team_id'] ?? 0);
-        $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
-        if ($categories === []) {
-            return redirect()->back()->withInput()->with('error', 'Esta equipe nao possui categoria ativa para criar prancheta.');
-        }
-
-        $payload['category_id'] = (int) ($categories[0]['id'] ?? 0);
-        if ($payload['category_id'] <= 0) {
-            return redirect()->back()->withInput()->with('error', 'Nao foi possivel definir a categoria da prancheta.');
-        }
+        $payload['category_id'] = null;
 
         $templateId = (int) ($payload['template_id'] ?? 0);
         if ($templateId > 0) {
@@ -651,6 +642,9 @@ class TacticalBoards extends BaseController
             $selectedState = $this->states->getLatest($id);
         }
 
+        $viewerMode = $this->request->getGet('viewer') === '1' || $this->request->getGet('mode') === 'viewer';
+        $embedMode = $this->request->getGet('embed') === '1';
+
         return view('tactical_boards/editor', [
             'title' => 'Editor de prancheta',
             'board' => $board,
@@ -659,6 +653,8 @@ class TacticalBoards extends BaseController
             'canEdit' => has_permission('tactical_board.update'),
             'sequenceManage' => has_permission('tactical_sequence.manage'),
             'sequences' => $this->sequences->listByBoard($id),
+            'viewerMode' => $viewerMode,
+            'embedMode' => $embedMode,
         ]);
     }
 

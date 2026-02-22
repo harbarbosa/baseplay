@@ -8,6 +8,9 @@ use App\Services\MatchLineupService;
 use App\Services\MatchEventService;
 use App\Services\MatchReportService;
 use App\Services\MatchAttachmentService;
+use App\Models\MatchTacticalBoardModel;
+use App\Models\TacticalBoardModel;
+use CodeIgniter\I18n\Time;
 use App\Services\TeamService;
 use App\Services\CategoryService;
 use App\Services\AthleteService;
@@ -22,6 +25,8 @@ class Matches extends BaseController
     protected MatchEventService $events;
     protected MatchReportService $reports;
     protected MatchAttachmentService $attachments;
+    protected MatchTacticalBoardModel $matchBoards;
+    protected TacticalBoardModel $boards;
     protected TeamService $teams;
     protected CategoryService $categories;
     protected AthleteService $athletes;
@@ -35,6 +40,8 @@ class Matches extends BaseController
         $this->events = new MatchEventService();
         $this->reports = new MatchReportService();
         $this->attachments = new MatchAttachmentService();
+        $this->matchBoards = new MatchTacticalBoardModel();
+        $this->boards = new TacticalBoardModel();
         $this->teams = new TeamService();
         $this->categories = new CategoryService();
         $this->athletes = new AthleteService();
@@ -137,6 +144,16 @@ class Matches extends BaseController
         $report = $this->reports->findByMatch($id);
         $attachments = $this->attachments->listByMatch($id);
         $athletes = $this->athletes->listByCategory((int) $match['category_id']);
+        $linkedBoards = $this->matchBoards
+            ->select('match_tactical_boards.tactical_board_id, tactical_boards.title AS board_title, teams.name AS team_name, categories.name AS category_name, tactical_boards.team_id')
+            ->join('tactical_boards', 'tactical_boards.id = match_tactical_boards.tactical_board_id', 'inner')
+            ->join('teams', 'teams.id = tactical_boards.team_id', 'left')
+            ->join('categories', 'categories.id = tactical_boards.category_id', 'left')
+            ->where('match_tactical_boards.match_id', $id)
+            ->orderBy('tactical_boards.updated_at', 'DESC')
+            ->findAll();
+
+        $boardOptions = $this->listTacticalBoardsForUser();
 
         return view('matches/show', [
             'title' => 'Detalhe do jogo',
@@ -147,7 +164,63 @@ class Matches extends BaseController
             'report' => $report,
             'attachments' => $attachments,
             'athletes' => $athletes,
+            'linkedBoards' => $linkedBoards,
+            'boardOptions' => $boardOptions,
         ]);
+    }
+
+    public function addTacticalBoard(int $matchId)
+    {
+        $match = $this->matches->find($matchId);
+        if (!$match) {
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+
+        $boardIds = $this->request->getPost('tactical_board_ids') ?? $this->request->getPost('tactical_board_id') ?? [];
+        $boardIds = $this->resolveBoardIdsForUser(is_array($boardIds) ? $boardIds : [$boardIds]);
+        if ($boardIds === []) {
+            return redirect()->back()->with('error', 'Selecione uma prancheta.');
+        }
+
+        foreach ($boardIds as $boardId) {
+            $exists = $this->matchBoards
+                ->where('match_id', $matchId)
+                ->where('tactical_board_id', $boardId)
+                ->first();
+
+            if (!$exists) {
+                $this->matchBoards->insert([
+                    'match_id' => $matchId,
+                    'tactical_board_id' => $boardId,
+                    'created_at' => Time::now()->toDateTimeString(),
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pranchetas vinculadas.');
+    }
+
+    public function removeTacticalBoard(int $matchId, int $boardId)
+    {
+        $match = $this->matches->find($matchId);
+        if (!$match) {
+            return redirect()->to('/matches')->with('error', 'Jogo nao encontrado.');
+        }
+
+        if ($response = $this->denyIfTeamForbidden((int) $match['team_id'], '/matches')) {
+            return $response;
+        }
+
+        $this->matchBoards
+            ->where('match_id', $matchId)
+            ->where('tactical_board_id', $boardId)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Vinculo removido.');
     }
 
     public function edit(int $id)
@@ -488,5 +561,20 @@ class Matches extends BaseController
 
         $this->attachments->delete($id);
         return redirect()->back()->with('success', 'Anexo removido.');
+    }
+
+    protected function listTacticalBoardsForUser(): array
+    {
+        $builder = $this->boards
+            ->select('tactical_boards.id, tactical_boards.title, tactical_boards.team_id, teams.name AS team_name, categories.name AS category_name')
+            ->join('teams', 'teams.id = tactical_boards.team_id', 'left')
+            ->join('categories', 'categories.id = tactical_boards.category_id', 'left')
+            ->where('tactical_boards.deleted_at', null);
+
+        if ($this->scopedTeamIds !== []) {
+            $builder->whereIn('tactical_boards.team_id', $this->scopedTeamIds);
+        }
+
+        return $builder->orderBy('tactical_boards.updated_at', 'DESC')->findAll(200);
     }
 }

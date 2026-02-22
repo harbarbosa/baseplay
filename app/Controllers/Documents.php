@@ -112,6 +112,13 @@ class Documents extends BaseController
 
     public function create()
     {
+        $prefill = [
+            'team_id' => $this->request->getGet('team_id'),
+            'category_id' => $this->request->getGet('category_id'),
+            'athlete_id' => $this->request->getGet('athlete_id'),
+            'document_type_id' => $this->request->getGet('document_type_id'),
+        ];
+
         $types = $this->types->listAllActive();
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
@@ -126,6 +133,7 @@ class Documents extends BaseController
             'athletes' => $athletes,
             'categories' => $categories,
             'guardianContext' => $guardianContext,
+            'prefill' => $prefill,
         ]);
     }
 

@@ -41,13 +41,24 @@
                 <td><?= esc($team['short_name'] ?? '-') ?></td>
                 <td><?= esc(enum_label($team['status'], 'status')) ?></td>
                 <td>
-                    <a href="<?= base_url('/teams/' . $team['id']) ?>">Detalhes</a>
-                    <?php if (has_permission('teams.update')): ?>
-                        | <a href="<?= base_url('/teams/' . $team['id'] . '/edit') ?>">Editar</a>
-                    <?php endif; ?>
-                    <?php if (has_permission('teams.delete')): ?>
-                        | <a href="<?= base_url('/teams/' . $team['id'] . '/delete') ?>">Excluir</a>
-                    <?php endif; ?>
+                    <div class="bp-action-buttons">
+                        <a href="<?= base_url('/teams/' . $team['id']) ?>" class="bp-icon-btn" title="Detalhar" aria-label="Detalhar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </a>
+                        <?php if (has_permission('teams.update')): ?>
+                            <a href="<?= base_url('/teams/' . $team['id'] . '/edit') ?>" class="bp-icon-btn" title="Editar" aria-label="Editar">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (has_permission('teams.delete')): ?>
+                            <form method="post" action="<?= base_url('/teams/' . $team['id'] . '/delete') ?>" class="bp-inline-form" onsubmit="return confirm('Excluir esta equipe?');">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="bp-icon-btn bp-icon-danger" title="Excluir" aria-label="Excluir">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
                 </td>
             </tr>
         <?php endforeach; ?>

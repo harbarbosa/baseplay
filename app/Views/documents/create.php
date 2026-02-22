@@ -11,12 +11,15 @@
             <div class="alert success">Documento enviado como responsável: <strong><?= esc($guardianContext['guardian_name'] ?? 'Responsável') ?></strong>.</div>
         <?php endif; ?>
 
+        <?php $prefill = $prefill ?? []; ?>
+
         <div class="form-group">
             <label>Tipo de documento</label>
             <select name="document_type_id" required>
                 <option value="">Selecione</option>
                 <?php foreach ($types as $type): ?>
-                    <option value="<?= esc($type['id']) ?>" <?= old('document_type_id') == $type['id'] ? 'selected' : '' ?>>
+                    <?php $selectedType = old('document_type_id', $prefill['document_type_id'] ?? ''); ?>
+                    <option value="<?= esc($type['id']) ?>" <?= (string) $selectedType === (string) $type['id'] ? 'selected' : '' ?>>
                         <?= esc($type['name']) ?>
                     </option>
                 <?php endforeach; ?>
@@ -29,7 +32,8 @@
                 <select name="team_id" id="doc_team_id">
                     <option value="">Selecione a equipe</option>
                     <?php foreach ($teams as $team): ?>
-                        <option value="<?= esc($team['id']) ?>" <?= old('team_id') == $team['id'] ? 'selected' : '' ?>>
+                        <?php $selectedTeam = old('team_id', $prefill['team_id'] ?? ''); ?>
+                        <option value="<?= esc($team['id']) ?>" <?= (string) $selectedTeam === (string) $team['id'] ? 'selected' : '' ?>>
                             <?= esc($team['name']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -41,10 +45,11 @@
                 <select name="category_id" id="doc_category_id">
                     <option value="">Selecione a categoria</option>
                     <?php foreach ($categories as $category): ?>
+                        <?php $selectedCategory = old('category_id', $prefill['category_id'] ?? ''); ?>
                         <option
                             value="<?= esc($category['id']) ?>"
                             data-team-id="<?= esc($category['team_id'] ?? '') ?>"
-                            <?= old('category_id') == $category['id'] ? 'selected' : '' ?>
+                            <?= (string) $selectedCategory === (string) $category['id'] ? 'selected' : '' ?>
                         >
                             <?= esc(preg_replace('/^sub[\s-]*/iu', 'Categoria ', (string) $category['name'])) ?>
                         </option>
@@ -58,11 +63,12 @@
                     <option value="">Selecione o atleta</option>
                     <?php foreach ($athletes as $athlete): ?>
                         <?php $full = trim(($athlete['first_name'] ?? '') . ' ' . ($athlete['last_name'] ?? '')); ?>
+                        <?php $selectedAthlete = old('athlete_id', $prefill['athlete_id'] ?? ''); ?>
                         <option
                             value="<?= esc($athlete['id']) ?>"
                             data-team-id="<?= esc($athlete['team_id'] ?? '') ?>"
                             data-category-id="<?= esc($athlete['category_id'] ?? '') ?>"
-                            <?= old('athlete_id') == $athlete['id'] ? 'selected' : '' ?>
+                            <?= (string) $selectedAthlete === (string) $athlete['id'] ? 'selected' : '' ?>
                         >
                             <?= esc($full) ?>
                         </option>

@@ -100,14 +100,15 @@ class CategoryService
                 continue;
             }
 
-            $this->categories->insert([
+            $categoryId = (int) $this->categories->insert([
                 'team_id' => $teamId,
                 'name' => $name,
                 'gender' => 'mixed',
                 'status' => 'active',
                 'created_at' => Time::now()->toDateTimeString(),
                 'updated_at' => Time::now()->toDateTimeString(),
-            ]);
+            ], true);
+            $this->applyRequiredDocumentTypes($categoryId);
         }
     }
 
@@ -125,7 +126,9 @@ class CategoryService
             'updated_at'    => Time::now()->toDateTimeString(),
         ];
 
-        return (int) $this->categories->insert($payload);
+        $categoryId = (int) $this->categories->insert($payload);
+        $this->applyRequiredDocumentTypes($categoryId);
+        return $categoryId;
     }
 
     public function update(int $id, array $data): bool
@@ -146,5 +149,51 @@ class CategoryService
     public function delete(int $id): bool
     {
         return $this->categories->delete($id);
+    }
+
+    protected function applyRequiredDocumentTypes(int $categoryId): void
+    {
+        if ($categoryId <= 0) {
+            return;
+        }
+
+        $db = db_connect();
+        if (! $db->tableExists('category_required_documents')) {
+            return;
+        }
+
+        $requiredTypes = $db->table('document_types')
+            ->select('id')
+            ->where('is_required', 1)
+            ->get()
+            ->getResultArray();
+        if ($requiredTypes === []) {
+            return;
+        }
+
+        $now = Time::now()->toDateTimeString();
+        foreach ($requiredTypes as $type) {
+            $typeId = (int) ($type['id'] ?? 0);
+            if ($typeId <= 0) {
+                continue;
+            }
+
+            $exists = $db->table('category_required_documents')
+                ->where('category_id', $categoryId)
+                ->where('document_type_id', $typeId)
+                ->countAllResults() > 0;
+
+            if ($exists) {
+                continue;
+            }
+
+            $db->table('category_required_documents')->insert([
+                'category_id' => $categoryId,
+                'document_type_id' => $typeId,
+                'is_required' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
     }
 }

@@ -61,7 +61,7 @@ class TacticalBoardService
     {
         $payload = [
             'team_id' => (int) $data['team_id'],
-            'category_id' => (int) $data['category_id'],
+            'category_id' => $this->nullableInt($data['category_id'] ?? null),
             'title' => trim((string) $data['title']),
             'description' => $data['description'] ?? null,
             'created_by' => $userId,
@@ -76,7 +76,7 @@ class TacticalBoardService
     {
         $payload = [
             'team_id' => (int) $data['team_id'],
-            'category_id' => (int) $data['category_id'],
+            'category_id' => $this->nullableInt($data['category_id'] ?? null),
             'title' => trim((string) $data['title']),
             'description' => $data['description'] ?? null,
             'updated_at' => Time::now()->toDateTimeString(),
@@ -99,8 +99,8 @@ class TacticalBoardService
 
         $payload = [
             'team_id' => (int) $board['team_id'],
-            'category_id' => (int) $board['category_id'],
-            'title' => trim((string) $board['title']) . ' (cópia)',
+            'category_id' => $this->nullableInt($board['category_id'] ?? null),
+            'title' => trim((string) $board['title']) . ' (cÃ³pia)',
             'description' => $board['description'] ?? null,
             'created_by' => $userId,
             'created_at' => Time::now()->toDateTimeString(),
@@ -109,5 +109,12 @@ class TacticalBoardService
 
         return (int) $this->boards->insert($payload);
     }
-}
 
+    protected function nullableInt($value): ?int
+    {
+        if ($value === null || $value === '' || (int) $value <= 0) {
+            return null;
+        }
+        return (int) $value;
+    }
+}

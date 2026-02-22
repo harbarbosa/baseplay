@@ -42,7 +42,7 @@
     <?php if (empty($athletes)): ?>
         <div class="bp-empty-state" style="margin-top:16px;">
             <strong>Nenhum atleta ainda</strong>
-            <div>Crie o primeiro atleta para comecar o acompanhamento.</div>
+            <div>Crie o primeiro atleta para começar o acompanhamento.</div>
             <?php if (has_permission('athletes.create')): ?>
                 <div style="margin-top:12px;">
                     <a href="<?= base_url('/athletes/create') ?>" class="bp-btn-primary">Criar atleta</a>
@@ -70,13 +70,24 @@
                     <td><?= esc($athlete['category_name'] ?? '-') ?></td>
                     <td><?= esc(enum_label($athlete['status'], 'status')) ?></td>
                     <td>
-                        <a href="<?= base_url('/athletes/' . $athlete['id']) ?>">Ver perfil</a>
-                        <?php if (has_permission('athletes.update')): ?>
-                            | <a href="<?= base_url('/athletes/' . $athlete['id'] . '/edit') ?>">Editar</a>
-                        <?php endif; ?>
-                        <?php if (has_permission('athletes.delete')): ?>
-                            | <a href="<?= base_url('/athletes/' . $athlete['id'] . '/delete') ?>">Excluir</a>
-                        <?php endif; ?>
+                        <div class="bp-action-buttons">
+                            <a href="<?= base_url('/athletes/' . $athlete['id']) ?>" class="bp-icon-btn" title="Detalhar" aria-label="Detalhar">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <?php if (has_permission('athletes.update')): ?>
+                                <a href="<?= base_url('/athletes/' . $athlete['id'] . '/edit') ?>" class="bp-icon-btn" title="Editar" aria-label="Editar">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>
+                                </a>
+                            <?php endif; ?>
+                            <?php if (has_permission('athletes.delete')): ?>
+                                <form method="post" action="<?= base_url('/athletes/' . $athlete['id'] . '/delete') ?>" class="bp-inline-form" onsubmit="return confirm('Excluir este atleta?');">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="bp-icon-btn bp-icon-danger" title="Excluir" aria-label="Excluir">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>

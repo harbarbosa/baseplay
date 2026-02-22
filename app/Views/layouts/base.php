@@ -66,6 +66,11 @@
         }, timeout);
     };
 
+    if (window.__bpToastQueue?.length) {
+        const pending = window.__bpToastQueue.splice(0);
+        pending.forEach((item) => window.bpToast(item.type, item.message));
+    }
+
     const colorInputs = document.querySelectorAll('.bp-color-input');
     const syncColorInput = (input) => {
         if (!input) return;

@@ -50,19 +50,21 @@
     <div class="card" style="margin-top:16px;">
         <h2>Documentos vencidos</h2>
         <table class="table">
-            <thead><tr><th>Atleta</th><th>Tipo</th><th>Equipe</th><th>Categoria</th><th>Validade</th></tr></thead>
+            <thead><tr><th>Atleta</th><th>Tipo</th><th>Equipe</th><th>Categoria</th><th>Validade</th><th>Ação</th></tr></thead>
             <tbody>
             <?php foreach (($data['expired_documents'] ?? []) as $item): ?>
+                <?php $docLink = base_url('/documents?status=expired&athlete_id=' . (int) ($item['athlete_id'] ?? 0) . '&document_type_id=' . (int) ($item['document_type_id'] ?? 0)); ?>
                 <tr>
                     <td><?= esc(trim(($item['first_name'] ?? '') . ' ' . ($item['last_name'] ?? ''))) ?></td>
                     <td><?= esc($item['type_name'] ?? '-') ?></td>
                     <td><?= esc($item['team_name'] ?? '-') ?></td>
                     <td><?= esc($item['category_name'] ?? '-') ?></td>
                     <td><?= esc(format_date_br($item['expires_at'] ?? null)) ?></td>
+                    <td><a class="bp-btn-ghost" href="<?= esc($docLink) ?>">Resolver</a></td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($data['expired_documents'])): ?>
-                <tr><td colspan="5">Sem pendências.</td></tr>
+                <tr><td colspan="6">Sem pendências.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -71,19 +73,21 @@
     <div class="card" style="margin-top:16px;">
         <h2>Documentos a vencer (30 dias)</h2>
         <table class="table">
-            <thead><tr><th>Atleta</th><th>Tipo</th><th>Equipe</th><th>Categoria</th><th>Validade</th></tr></thead>
+            <thead><tr><th>Atleta</th><th>Tipo</th><th>Equipe</th><th>Categoria</th><th>Validade</th><th>Ação</th></tr></thead>
             <tbody>
             <?php foreach (($data['expiring_documents'] ?? []) as $item): ?>
+                <?php $docLink = base_url('/documents?expiring_in_days=30&athlete_id=' . (int) ($item['athlete_id'] ?? 0) . '&document_type_id=' . (int) ($item['document_type_id'] ?? 0)); ?>
                 <tr>
                     <td><?= esc(trim(($item['first_name'] ?? '') . ' ' . ($item['last_name'] ?? ''))) ?></td>
                     <td><?= esc($item['type_name'] ?? '-') ?></td>
                     <td><?= esc($item['team_name'] ?? '-') ?></td>
                     <td><?= esc($item['category_name'] ?? '-') ?></td>
                     <td><?= esc(format_date_br($item['expires_at'] ?? null)) ?></td>
+                    <td><a class="bp-btn-ghost" href="<?= esc($docLink) ?>">Resolver</a></td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($data['expiring_documents'])): ?>
-                <tr><td colspan="5">Sem pendências.</td></tr>
+                <tr><td colspan="6">Sem pendências.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -92,18 +96,25 @@
     <div class="card" style="margin-top:16px;">
         <h2>Atletas sem documento obrigatório</h2>
         <table class="table">
-            <thead><tr><th>Atleta</th><th>Documento</th><th>Equipe</th><th>Categoria</th></tr></thead>
+            <thead><tr><th>Atleta</th><th>Documento</th><th>Equipe</th><th>Categoria</th><th>Ação</th></tr></thead>
             <tbody>
             <?php foreach (($data['missing_required_documents'] ?? []) as $item): ?>
+                <?php
+                    $createLink = base_url('/documents/create?team_id=' . (int) ($item['team_id'] ?? 0)
+                        . '&category_id=' . (int) ($item['category_id'] ?? 0)
+                        . '&athlete_id=' . (int) ($item['athlete_id'] ?? 0)
+                        . '&document_type_id=' . (int) ($item['document_type_id'] ?? 0));
+                ?>
                 <tr>
                     <td><?= esc(trim(($item['first_name'] ?? '') . ' ' . ($item['last_name'] ?? ''))) ?></td>
                     <td><?= esc($item['type_name'] ?? '-') ?></td>
                     <td><?= esc($item['team_name'] ?? '-') ?></td>
                     <td><?= esc($item['category_name'] ?? '-') ?></td>
+                    <td><a class="bp-btn-ghost" href="<?= esc($createLink) ?>">Enviar</a></td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($data['missing_required_documents'])): ?>
-                <tr><td colspan="4">Sem pendências.</td></tr>
+                <tr><td colspan="5">Sem pendências.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -112,23 +123,24 @@
     <div class="card" style="margin-top:16px;">
         <h2>Eventos próximos sem convocação</h2>
         <table class="table">
-            <thead><tr><th>Evento</th><th>Tipo</th><th>Equipe</th><th>Categoria</th><th>Data</th></tr></thead>
+            <thead><tr><th>Evento</th><th>Tipo</th><th>Equipe</th><th>Categoria</th><th>Data</th><th>Ação</th></tr></thead>
             <tbody>
             <?php foreach (($data['upcoming_events_without_callups'] ?? []) as $item): ?>
+                <?php $eventLink = base_url('/events/' . (int) ($item['id'] ?? 0)); ?>
                 <tr>
                     <td><?= esc($item['title'] ?? '-') ?></td>
                     <td><?= esc($item['type'] ?? '-') ?></td>
                     <td><?= esc($item['team_name'] ?? '-') ?></td>
                     <td><?= esc($item['category_name'] ?? '-') ?></td>
                     <td><?= esc(format_datetime_br($item['start_datetime'] ?? null)) ?></td>
+                    <td><a class="bp-btn-ghost" href="<?= esc($eventLink) ?>">Abrir</a></td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($data['upcoming_events_without_callups'])): ?>
-                <tr><td colspan="5">Sem pendências.</td></tr>
+                <tr><td colspan="6">Sem pendências.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 <?= $this->endSection() ?>
-

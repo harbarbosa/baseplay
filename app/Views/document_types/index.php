@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/base') ?>
+﻿<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <div class="card">
@@ -27,6 +27,7 @@
                 <th>Nome</th>
                 <th>Exige vencimento</th>
                 <th>Dias padrão</th>
+                <th>Obrigatório</th>
                 <th>Status</th>
                 <th>Ações</th>
             </tr>
@@ -37,10 +38,17 @@
                 <td><?= esc($type['name']) ?></td>
                 <td><?= (int) $type['requires_expiration'] === 1 ? 'Sim' : 'Não' ?></td>
                 <td><?= esc($type['default_valid_days'] ?? '-') ?></td>
-                <td><?= esc($type['status']) ?></td>
+                <td><?= !empty($type['is_required']) ? 'Sim' : 'Não' ?></td>
+                <td><?= esc(enum_label($type['status'], 'status')) ?></td>
                 <td>
-                    <a href="<?= base_url('/document-types/' . $type['id'] . '/edit') ?>">Editar</a>
-                    | <a href="<?= base_url('/document-types/' . $type['id'] . '/delete') ?>">Excluir</a>
+                    <div class="bp-action-buttons">
+                        <a href="<?= base_url('/document-types/' . $type['id'] . '/edit') ?>" class="bp-icon-btn" title="Editar" aria-label="Editar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>
+                        </a>
+                        <a href="<?= base_url('/document-types/' . $type['id'] . '/delete') ?>" class="bp-icon-btn bp-icon-danger" title="Excluir" aria-label="Excluir">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                        </a>
+                    </div>
                 </td>
             </tr>
         <?php endforeach; ?>

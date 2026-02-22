@@ -55,14 +55,27 @@
                 <td><?= esc($session['category_name'] ?? '-') ?></td>
                 <td><?= esc(format_date_br($session['session_date'])) ?></td>
                 <td>
-                    <a href="<?= base_url('/training-sessions/' . $session['id']) ?>">Detalhes</a>
-                    | <a href="<?= base_url('/training-sessions/' . $session['id'] . '/field') ?>">Modo campo</a>
-                    <?php if (has_permission('training_sessions.update')): ?>
-                        | <a href="<?= base_url('/training-sessions/' . $session['id'] . '/edit') ?>">Editar</a>
-                    <?php endif; ?>
-                    <?php if (has_permission('training_sessions.delete')): ?>
-                        | <a href="<?= base_url('/training-sessions/' . $session['id'] . '/delete') ?>">Excluir</a>
-                    <?php endif; ?>
+                    <div class="bp-action-buttons">
+                        <a href="<?= base_url('/training-sessions/' . $session['id']) ?>" class="bp-icon-btn" title="Detalhar" aria-label="Detalhar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </a>
+                        <a href="<?= base_url('/training-sessions/' . $session['id'] . '/field') ?>" class="bp-icon-btn" title="Modo campo" aria-label="Modo campo">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+                        </a>
+                        <?php if (has_permission('training_sessions.update')): ?>
+                            <a href="<?= base_url('/training-sessions/' . $session['id'] . '/edit') ?>" class="bp-icon-btn" title="Editar" aria-label="Editar">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (has_permission('training_sessions.delete')): ?>
+                            <form method="post" action="<?= base_url('/training-sessions/' . $session['id'] . '/delete') ?>" class="bp-inline-form" onsubmit="return confirm('Excluir esta sessão?');">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="bp-icon-btn bp-icon-danger" title="Excluir" aria-label="Excluir">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
                 </td>
             </tr>
         <?php endforeach; ?>

@@ -326,6 +326,7 @@ class Validation extends BaseConfig
         'name' => 'required|min_length[2]|max_length[80]',
         'requires_expiration' => 'permit_empty|in_list[0,1]',
         'default_valid_days' => 'permit_empty|integer',
+        'is_required' => 'permit_empty|in_list[0,1]',
         'status' => 'permit_empty|in_list[active,inactive]',
     ];
 

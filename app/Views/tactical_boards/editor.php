@@ -1,4 +1,9 @@
-<?= $this->extend('layouts/base') ?>
+<?php
+$viewerMode = $viewerMode ?? false;
+$embedMode = $embedMode ?? false;
+$canEdit = $viewerMode ? false : ($canEdit ?? false);
+?>
+<?= $this->extend($embedMode ? 'layouts/embed' : 'layouts/base') ?>
 
 <?= $this->section('content') ?>
 <?php
@@ -12,6 +17,16 @@ if (!is_array($decoded)) {
 }
 ?>
 <?php $isTemplateMode = $templateMode ?? false; ?>
+<?php if ($viewerMode): ?>
+    <style>
+        .tactical-board-page > div:first-child {display:none;}
+        .tactical-field-toolbar {display:none !important;}
+        .tactical-step-toolbar {display:none !important;}
+        #item-modal {display:none !important;}
+        .tactical-board-page {padding:0; margin:0;}
+        .tactical-board-page .tactical-board-layout {margin-top:0;}
+    </style>
+<?php endif; ?>
 <div class="card tactical-board-page">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
         <div>
@@ -363,8 +378,20 @@ if (!is_array($decoded)) {
         el.style.top = `${item.y}%`;
 
         if (item.type === 'arrow') {
-            const length = Number(item.length || 60);
-            el.style.width = `${length}px`;
+            const rect = fieldEl.getBoundingClientRect();
+            let lengthPx = 60;
+            if (item.length_pct !== null && item.length_pct !== undefined && rect.width > 0) {
+                lengthPx = (Number(item.length_pct) / 100) * rect.width;
+            } else if (item.length !== null && item.length !== undefined) {
+                lengthPx = Number(item.length) || 60;
+                if (rect.width > 0) {
+                    item.length_pct = Number(((lengthPx / rect.width) * 100).toFixed(3));
+                }
+            } else if (rect.width > 0) {
+                item.length_pct = 8;
+                lengthPx = (8 / 100) * rect.width;
+            }
+            el.style.width = `${lengthPx}px`;
             el.style.height = '16px';
             el.style.transform = `rotate(${item.angle || 0}deg)`;
             el.style.transformOrigin = '0 50%';
@@ -494,6 +521,7 @@ if (!is_array($decoded)) {
             size: type === 'goal' ? GOAL_WIDTH : size,
             angle: type === 'arrow' ? 0 : null,
             length: type === 'arrow' ? 60 : null,
+            length_pct: type === 'arrow' ? 8 : null,
             rotation: type === 'goal' ? 0 : null,
         };
         state.items.push(item);
@@ -580,7 +608,9 @@ if (!is_array($decoded)) {
             const length = Math.sqrt(dxPx * dxPx + dyPx * dyPx);
             const angle = Math.atan2(dyPx, dxPx) * (180 / Math.PI);
             const maxLen = Math.sqrt((pt.rect.width * pt.rect.width) + (pt.rect.height * pt.rect.height));
-            item.length = Number(clamp(length, 16, maxLen).toFixed(1));
+            const lengthPx = Number(clamp(length, 16, maxLen).toFixed(1));
+            item.length = lengthPx;
+            item.length_pct = pt.rect.width > 0 ? Number(((lengthPx / pt.rect.width) * 100).toFixed(3)) : null;
             item.angle = Number(angle.toFixed(1));
             renderAll();
             return;
@@ -658,6 +688,7 @@ if (!is_array($decoded)) {
             size: ARROW_SIZE,
             angle: 0,
             length: 16,
+            length_pct: pt.rect.width > 0 ? Number(((16 / pt.rect.width) * 100).toFixed(3)) : null,
         });
         drawingArrow = {
             id: arrowId,

@@ -25,11 +25,11 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="primary_color">Cor primaria</label>
+            <label for="primary_color">Cor primária</label>
             <input id="primary_color" name="primary_color" type="color" class="bp-color-input" value="<?= esc(old('primary_color') ?? ($team['primary_color'] ?? '#7A1126')) ?>">
         </div>
         <div class="form-group">
-            <label for="secondary_color">Cor secundaria</label>
+            <label for="secondary_color">Cor secundária</label>
             <input id="secondary_color" name="secondary_color" type="color" class="bp-color-input" value="<?= esc(old('secondary_color') ?? ($team['secondary_color'] ?? '#F4D6DB')) ?>">
         </div>
         <div class="form-group">
@@ -41,6 +41,25 @@
                 <img src="<?= base_url($team['logo_path']) ?>" alt="Logo atual" style="max-width:220px; max-height:120px; width:auto; height:auto; object-fit:contain;">
             </div>
         <?php endif; ?>
+
+        <div class="form-group" style="margin-top:16px;">
+            <label>Admin da equipe</label>
+            <?php if (!empty($adminUser)): ?>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <div style="min-width:220px;">
+                        <small style="color:var(--muted);">Nome</small>
+                        <div><?= esc($adminUser['name'] ?? '-') ?></div>
+                    </div>
+                    <div style="min-width:220px;">
+                        <small style="color:var(--muted);">Email</small>
+                        <div><?= esc($adminUser['email'] ?? '-') ?></div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div style="color:var(--muted);">Nenhum admin vinculado.</div>
+            <?php endif; ?>
+        </div>
+
         <button type="submit">Salvar</button>
         <a href="<?= base_url('/teams/' . $team['id']) ?>" class="button secondary">Cancelar</a>
     </form>

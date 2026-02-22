@@ -10,8 +10,14 @@ $isActive = function (string $path) use ($current): bool {
 };
 
 $alertsUnread = 0;
+$pendingCount = 0;
 if (has_permission('alerts.view')) {
     $alertsUnread = (new \App\Services\AlertService())->unreadCount();
+    $pendingData = (new \App\Services\PendingCenterService())->getData();
+    $pendingCount = count($pendingData['expired_documents'] ?? [])
+        + count($pendingData['expiring_documents'] ?? [])
+        + count($pendingData['missing_required_documents'] ?? [])
+        + count($pendingData['upcoming_events_without_callups'] ?? []);
 }
 ?>
 <div class="bp-sidebar-overlay" id="bp-sidebar-overlay"></div>
@@ -24,16 +30,21 @@ if (has_permission('alerts.view')) {
                 <span>MicroSaaS</span>
             </div>
         </div>
-        <button type="button" class="bp-icon-btn bp-sidebar-close" id="bp-sidebar-close" aria-label="Fechar menu">✕</button>
+        <button type="button" class="bp-icon-btn bp-sidebar-close" id="bp-sidebar-close" aria-label="Fechar menu">×</button>
     </div>
 
     <nav class="bp-nav">
-        <div class="bp-nav-section">Visao Geral</div>
+        <div class="bp-nav-section">Visão Geral</div>
         <?php if (has_permission('dashboard.view')): ?>
             <a href="<?= base_url('/') ?>" class="bp-nav-link menu-item dashboard <?= $isActive('') ? 'active' : '' ?>"><span class="menu-icon"></span>Painel</a>
         <?php endif; ?>
         <?php if (has_permission('alerts.view')): ?>
-            <a href="<?= base_url('/pending-center') ?>" class="bp-nav-link menu-item pending-center <?= $isActive('pending-center') ? 'active' : '' ?>"><span class="menu-icon"></span>Central de pendências</a>
+            <a href="<?= base_url('/pending-center') ?>" class="bp-nav-link menu-item pending-center <?= $isActive('pending-center') ? 'active' : '' ?>">
+                <span class="menu-icon"></span>Central de pendências
+                <?php if ($pendingCount > 0): ?>
+                    <span class="bp-badge bp-badge-danger" style="margin-left:auto;"><?= esc($pendingCount) ?></span>
+                <?php endif; ?>
+            </a>
             <a href="<?= base_url('/alerts') ?>" class="bp-nav-link menu-item alerts <?= $isActive('alerts') ? 'active' : '' ?>">
                 <span class="menu-icon"></span>Alertas
                 <?php if ($alertsUnread > 0): ?>
@@ -109,4 +120,3 @@ if (has_permission('alerts.view')) {
         <?php endif; ?>
     </nav>
 </aside>
-

@@ -15,6 +15,7 @@
     <div class="stat-grid" style="margin-top:14px;">
         <div class="card stat-card"><strong>Vencidos</strong><div class="stat-value"><?= esc($statusCounters['expired'] ?? 0) ?></div></div>
         <div class="card stat-card"><strong>A vencer (30 dias)</strong><div class="stat-value"><?= esc($statusCounters['expiring'] ?? 0) ?></div></div>
+        <div class="card stat-card"><strong>Falta obrigatório</strong><div class="stat-value"><?= esc($statusCounters['missing_required'] ?? 0) ?></div></div>
         <div class="card stat-card"><strong>Ativos</strong><div class="stat-value"><?= esc($statusCounters['active'] ?? 0) ?></div></div>
     </div>
 
@@ -110,7 +111,7 @@
                         <th>Arquivo</th>
                         <th>Tipo</th>
                         <th>Atleta</th>
-                        <th>Responsavel</th>
+                        <th>Responsável</th>
                         <th>Equipe</th>
                         <th>Validade</th>
                         <th>Status</th>
@@ -141,14 +142,24 @@
                         </td>
                         <td><span class="badge <?= esc($badgeClass) ?>"><?= esc(enum_label($status, 'status')) ?></span></td>
                         <td>
-                            <a href="<?= base_url('/documents/' . $doc['id']) ?>">Detalhes</a>
-                            | <a href="<?= base_url('/documents/' . $doc['id'] . '/download') ?>">Baixar</a>
-                            <?php if (has_permission('documents.update')): ?>
-                                | <a href="<?= base_url('/documents/' . $doc['id'] . '/edit') ?>">Editar</a>
-                            <?php endif; ?>
-                            <?php if (has_permission('documents.delete')): ?>
-                                | <a href="<?= base_url('/documents/' . $doc['id'] . '/delete') ?>">Excluir</a>
-                            <?php endif; ?>
+                            <div class="bp-action-buttons">
+                                <a href="<?= base_url('/documents/' . $doc['id']) ?>" class="bp-icon-btn" title="Detalhar" aria-label="Detalhar">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                                <a href="<?= base_url('/documents/' . $doc['id'] . '/download') ?>" class="bp-icon-btn" title="Baixar" aria-label="Baixar">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 21h16"/></svg>
+                                </a>
+                                <?php if (has_permission('documents.update')): ?>
+                                    <a href="<?= base_url('/documents/' . $doc['id'] . '/edit') ?>" class="bp-icon-btn" title="Editar" aria-label="Editar">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (has_permission('documents.delete')): ?>
+                                    <a href="<?= base_url('/documents/' . $doc['id'] . '/delete') ?>" class="bp-icon-btn bp-icon-danger" title="Excluir" aria-label="Excluir">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>

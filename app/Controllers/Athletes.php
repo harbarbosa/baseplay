@@ -66,7 +66,6 @@ class Athletes extends BaseController
         $teams = $this->teams->list($teamFilters, 200, 'teams_filter')['items'];
         $categories = [];
         if ($teamId > 0) {
-            $this->categories->ensureStandardCategories($teamId, 10, 20);
             $categories = $this->categories->listDistinctByTeam($teamId, true);
         }
 
@@ -145,9 +144,7 @@ class Athletes extends BaseController
             $teamId = $requestedTeamId;
         }
 
-        if ($teamId > 0) {
-            $this->categories->ensureStandardCategories($teamId, 10, 20);
-        }
+        // Não criar categorias automaticamente ao editar atleta
         $categories = $this->categories->listDistinctByTeam($teamId > 0 ? $teamId : null, true);
 
         $teamFilters = $this->scopedTeamIds !== [] ? ['ids' => $this->scopedTeamIds] : [];

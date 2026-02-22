@@ -165,7 +165,19 @@ class Teams extends BaseController
             return redirect()->to('/teams')->with('error', 'Equipe nao encontrada.');
         }
 
-        return view('teams/edit', ['title' => 'Editar equipe', 'team' => $team]);
+        $adminUser = db_connect()->table('user_team_links')
+            ->select('users.id, users.name, users.email')
+            ->join('users', 'users.id = user_team_links.user_id', 'inner')
+            ->where('user_team_links.team_id', $id)
+            ->where('user_team_links.role_in_team', 'admin_equipe')
+            ->get()
+            ->getRowArray();
+
+        return view('teams/edit', [
+            'title' => 'Editar equipe',
+            'team' => $team,
+            'adminUser' => $adminUser,
+        ]);
     }
 
     public function update(int $id)

@@ -19,12 +19,34 @@
 
     <?php if (in_array($role, ['cordenador', 'admin'], true)): ?>
         <div class="stat-grid">
-            <div class="card stat-card"><strong>Total de atletas</strong><div class="stat-value"><?= esc($data['kpis']['totalAthletes'] ?? 0) ?></div></div>
-            <div class="card stat-card"><strong>Presença média (mês)</strong><div class="stat-value"><?= esc($data['kpis']['attendancePct'] ?? 0) ?>%</div></div>
-            <div class="card stat-card"><strong>Documentos vencidos</strong><div class="stat-value"><?= esc($data['kpis']['docsExpired'] ?? 0) ?></div></div>
-            <div class="card stat-card"><strong>Próximos eventos</strong><div class="stat-value"><?= esc($data['kpis']['upcomingEventsCount'] ?? 0) ?></div></div>
-            <div class="card stat-card"><strong>Baixa presença</strong><div class="stat-value"><?= esc($data['kpis']['lowAttendanceCount'] ?? 0) ?></div></div>
-            <div class="card stat-card"><strong>Alertas pendentes</strong><div class="stat-value"><?= esc($data['kpis']['systemAlertUnread'] ?? 0) ?></div></div>
+            <a href="<?= base_url('/athletes') ?>" class="card stat-card bp-stat-link">
+                <strong>Total de atletas</strong>
+                <div class="stat-value"><?= esc($data['kpis']['totalAthletes'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/reports/attendance') ?>" class="card stat-card bp-stat-link">
+                <strong>Presença média (mês)</strong>
+                <div class="stat-value"><?= esc($data['kpis']['attendancePct'] ?? 0) ?>%</div>
+            </a>
+            <a href="<?= base_url('/documents?status=expired') ?>" class="card stat-card bp-stat-link">
+                <strong>Documentos vencidos</strong>
+                <div class="stat-value"><?= esc($data['kpis']['docsExpired'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/pending-center?type=missing_required_documents') ?>" class="card stat-card bp-stat-link">
+                <strong>Pendências obrigatórias</strong>
+                <div class="stat-value"><?= esc($data['kpis']['missingRequiredDocuments'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/events?status=scheduled') ?>" class="card stat-card bp-stat-link">
+                <strong>Próximos eventos</strong>
+                <div class="stat-value"><?= esc($data['kpis']['upcomingEventsCount'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/reports/attendance') ?>" class="card stat-card bp-stat-link">
+                <strong>Baixa presença</strong>
+                <div class="stat-value"><?= esc($data['kpis']['lowAttendanceCount'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/alerts') ?>" class="card stat-card bp-stat-link">
+                <strong>Alertas pendentes</strong>
+                <div class="stat-value"><?= esc($data['kpis']['systemAlertUnread'] ?? 0) ?></div>
+            </a>
         </div>
 
         <div class="card" style="margin-top:16px;">
@@ -48,18 +70,46 @@
 
     <?php elseif ($role === 'treinador'): ?>
         <div class="stat-grid">
-            <div class="card stat-card"><strong>Presença da categoria</strong><div class="stat-value"><?= esc($data['kpis']['attendancePct'] ?? 0) ?>%</div></div>
-            <div class="card stat-card"><strong>Próximo treino</strong><div class="stat-value"><?= esc(format_datetime_br($data['kpis']['nextTraining']['start_datetime'] ?? null)) ?></div></div>
-            <div class="card stat-card"><strong>Próximo jogo</strong><div class="stat-value"><?= esc(format_datetime_br($data['kpis']['nextMatch']['start_datetime'] ?? null)) ?></div></div>
-            <div class="card stat-card"><strong>Documentos pendentes</strong><div class="stat-value"><?= esc($data['kpis']['documentsPending'] ?? 0) ?></div></div>
-            <div class="card stat-card"><strong>Atletas com baixa presença</strong><div class="stat-value"><?= esc($data['kpis']['lowAttendanceCount'] ?? 0) ?></div></div>
-            <div class="card stat-card"><strong>Alertas pendentes</strong><div class="stat-value"><?= esc($data['kpis']['systemAlertUnread'] ?? 0) ?></div></div>
+            <a href="<?= base_url('/reports/attendance') ?>" class="card stat-card bp-stat-link">
+                <strong>Presença da categoria</strong>
+                <div class="stat-value"><?= esc($data['kpis']['attendancePct'] ?? 0) ?>%</div>
+            </a>
+            <a href="<?= base_url('/events?type=TRAINING&status=scheduled') ?>" class="card stat-card bp-stat-link">
+                <strong>Próximo treino</strong>
+                <div class="stat-value"><?= esc(format_datetime_br($data['kpis']['nextTraining']['start_datetime'] ?? null)) ?></div>
+            </a>
+            <a href="<?= base_url('/events?type=MATCH&status=scheduled') ?>" class="card stat-card bp-stat-link">
+                <strong>Próximo jogo</strong>
+                <div class="stat-value"><?= esc(format_datetime_br($data['kpis']['nextMatch']['start_datetime'] ?? null)) ?></div>
+            </a>
+            <a href="<?= base_url('/documents?status=expired') ?>" class="card stat-card bp-stat-link">
+                <strong>Documentos vencidos</strong>
+                <div class="stat-value"><?= esc($data['kpis']['documentsPending'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/pending-center?type=missing_required_documents') ?>" class="card stat-card bp-stat-link">
+                <strong>Pendências obrigatórias</strong>
+                <div class="stat-value"><?= esc($data['kpis']['missingRequiredDocuments'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/reports/attendance') ?>" class="card stat-card bp-stat-link">
+                <strong>Atletas com baixa presença</strong>
+                <div class="stat-value"><?= esc($data['kpis']['lowAttendanceCount'] ?? 0) ?></div>
+            </a>
+            <a href="<?= base_url('/alerts') ?>" class="card stat-card bp-stat-link">
+                <strong>Alertas pendentes</strong>
+                <div class="stat-value"><?= esc($data['kpis']['systemAlertUnread'] ?? 0) ?></div>
+            </a>
         </div>
 
     <?php elseif ($role === 'auxiliar'): ?>
         <div class="stat-grid">
-            <div class="card stat-card"><strong>Eventos próximos</strong><div class="stat-value"><?= count($data['kpis']['eventsWindow'] ?? []) ?></div></div>
-            <div class="card stat-card"><strong>Alertas pendentes</strong><div class="stat-value"><?= esc($data['kpis']['systemAlertUnread'] ?? 0) ?></div></div>
+            <a href="<?= base_url('/events?status=scheduled') ?>" class="card stat-card bp-stat-link">
+                <strong>Eventos próximos</strong>
+                <div class="stat-value"><?= count($data['kpis']['eventsWindow'] ?? []) ?></div>
+            </a>
+            <a href="<?= base_url('/alerts') ?>" class="card stat-card bp-stat-link">
+                <strong>Alertas pendentes</strong>
+                <div class="stat-value"><?= esc($data['kpis']['systemAlertUnread'] ?? 0) ?></div>
+            </a>
         </div>
 
         <div class="card" style="margin-top:16px;">
@@ -76,8 +126,14 @@
 
     <?php else: ?>
         <div class="stat-grid">
-            <div class="card stat-card"><strong>Próximos eventos</strong><div class="stat-value"><?= count($data['kpis']['upcomingEvents'] ?? []) ?></div></div>
-            <div class="card stat-card"><strong>Avisos recentes</strong><div class="stat-value"><?= count($data['kpis']['notices'] ?? []) ?></div></div>
+            <a href="<?= base_url('/events?status=scheduled') ?>" class="card stat-card bp-stat-link">
+                <strong>Próximos eventos</strong>
+                <div class="stat-value"><?= count($data['kpis']['upcomingEvents'] ?? []) ?></div>
+            </a>
+            <a href="<?= base_url('/notices') ?>" class="card stat-card bp-stat-link">
+                <strong>Avisos recentes</strong>
+                <div class="stat-value"><?= count($data['kpis']['notices'] ?? []) ?></div>
+            </a>
         </div>
 
         <div class="card" style="margin-top:16px;">
@@ -109,21 +165,64 @@
 <?php if (in_array($role, ['cordenador', 'admin'], true)): ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primary = rootStyles.getPropertyValue('--primary').trim() || '#1E3A8A';
+    const primaryDark = rootStyles.getPropertyValue('--primary-dark').trim() || '#172554';
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#2563EB';
+    const muted = rootStyles.getPropertyValue('--muted').trim() || '#64748B';
+
     const weekly = <?= json_encode($data['charts']['weeklyAttendance'] ?? []) ?>;
     const weekLabels = weekly.map((r) => r.week);
     const weekValues = weekly.map((r) => r.total > 0 ? Math.round((r.present_count / r.total) * 100) : 0);
 
     new Chart(document.getElementById('attendanceChart'), {
         type: 'line',
-        data: { labels: weekLabels, datasets: [{ label: 'Presença %', data: weekValues, borderColor: '#7A1126' }] },
-        options: { responsive: true }
+        data: {
+            labels: weekLabels,
+            datasets: [{
+                label: 'Presença %',
+                data: weekValues,
+                borderColor: accent,
+                backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                pointBackgroundColor: primary,
+                tension: 0.35,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: muted }, grid: { color: 'rgba(226, 232, 240, 0.6)' } },
+                y: { ticks: { color: muted }, grid: { color: 'rgba(226, 232, 240, 0.6)' }, beginAtZero: true, max: 100 }
+            },
+            plugins: {
+                legend: { labels: { color: muted } }
+            }
+        }
     });
 
     const trainings = <?= json_encode($data['charts']['trainingsByCategory'] ?? []) ?>;
     new Chart(document.getElementById('trainingChart'), {
         type: 'bar',
-        data: { labels: trainings.map((r) => r.category_name), datasets: [{ label: 'Treinos', data: trainings.map((r) => r.total), backgroundColor: '#5E0D1D' }] },
-        options: { responsive: true }
+        data: {
+            labels: trainings.map((r) => r.category_name),
+            datasets: [{
+                label: 'Treinos',
+                data: trainings.map((r) => r.total),
+                backgroundColor: primary,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: muted }, grid: { display: false } },
+                y: { ticks: { color: muted }, grid: { color: 'rgba(226, 232, 240, 0.6)' }, beginAtZero: true }
+            },
+            plugins: {
+                legend: { labels: { color: muted } }
+            }
+        }
     });
 
     const results = <?= json_encode($data['charts']['matchResults'] ?? []) ?>;
@@ -131,9 +230,18 @@
         type: 'doughnut',
         data: {
             labels: ['Vitórias', 'Empates', 'Derrotas'],
-            datasets: [{ data: [results.wins || 0, results.draws || 0, results.losses || 0], backgroundColor: ['#16a34a', '#f59e0b', '#dc2626'] }]
+            datasets: [{
+                data: [results.wins || 0, results.draws || 0, results.losses || 0],
+                backgroundColor: ['#22c55e', accent, '#ef4444'],
+                borderWidth: 0
+            }]
         },
-        options: { responsive: true }
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: muted } }
+            }
+        }
     });
 </script>
 <?php endif; ?>

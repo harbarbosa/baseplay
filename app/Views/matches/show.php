@@ -8,7 +8,7 @@
             <p style="color:var(--muted);">
                 <?= esc(format_date_br($match['match_date'])) ?>
                 <?= esc($match['start_time'] ?? '') ?>
-                · <?= esc($match['category_name'] ?? '') ?>
+                Â· <?= esc($match['category_name'] ?? '') ?>
             </p>
         </div>
         <div>
@@ -25,6 +25,51 @@
             <span style="margin-left:8px;"><strong>Placar:</strong> <?= esc($match['score_for'] ?? '-') ?> x <?= esc($match['score_against'] ?? '-') ?></span>
         <?php endif; ?>
     </div>
+
+    <hr style="margin:24px 0;">
+
+    <h2>Quadros táticos</h2>
+    <?php if (!empty($linkedBoards)): ?>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+            <?php foreach ($linkedBoards as $board): ?>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid var(--border); border-radius:10px; padding:10px 12px;">
+                    <div>
+                        <strong><?= esc($board['board_title']) ?></strong>
+                        <div style="color:var(--muted); font-size:12px;">
+                            <?= esc($board['team_name'] ?? '-') ?> · <?= esc($board['category_name'] ?? '-') ?>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button type="button" class="button secondary js-open-board" data-board-id="<?= esc($board['tactical_board_id']) ?>">Abrir</button>
+                        <?php if (has_permission('matches.update')): ?>
+                            <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/tactical-boards/' . $board['tactical_board_id'] . '/delete') ?>">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="secondary">Remover</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <p style="color:var(--muted);">Nenhuma prancheta vinculada.</p>
+    <?php endif; ?>
+
+    <?php if (has_permission('matches.update')): ?>
+        <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/tactical-boards') ?>" style="margin-bottom:16px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <?= csrf_field() ?>
+            <select name="tactical_board_ids[]" multiple size="5">
+                <option value="">Selecionar pranchetas</option>
+                <?php foreach ($boardOptions as $boardOption): ?>
+                    <option value="<?= esc($boardOption['id']) ?>">
+                        <?= esc($boardOption['title']) ?> (<?= esc($boardOption['team_name'] ?? '-') ?> / <?= esc($boardOption['category_name'] ?? '-') ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit">Vincular</button>
+            <small style="color:var(--muted);">Use Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplas.</small>
+        </form>
+    <?php endif; ?>
 
     <hr style="margin:24px 0;">
 
@@ -60,7 +105,7 @@
                 <th>Atleta</th>
                 <th>Status</th>
                 <th>Titular</th>
-                <th>Ações</th>
+                <th>AÃ§Ãµes</th>
             </tr>
         </thead>
         <tbody>
@@ -68,7 +113,7 @@
             <tr>
                 <td><?= esc(trim($callup['first_name'] . ' ' . ($callup['last_name'] ?? ''))) ?></td>
                 <td><?= esc(enum_label($callup['callup_status'], 'invitation')) ?></td>
-                <td><?= (int) $callup['is_starting'] === 1 ? 'Sim' : 'Não' ?></td>
+                <td><?= (int) $callup['is_starting'] === 1 ? 'Sim' : 'NÃ£o' ?></td>
                 <td>
                     <?php if (has_permission('matches.update')): ?>
                         <form method="post" action="<?= base_url('/match-callups/' . $callup['id'] . '/update') ?>" style="display:inline-flex; gap:6px; align-items:center;">
@@ -99,7 +144,7 @@
 
     <hr style="margin:24px 0;">
 
-    <h2>Escalação</h2>
+    <h2>EscalaÃ§Ã£o</h2>
     <?php
     $lineupMap = [];
     foreach ($lineups as $lineup) {
@@ -110,10 +155,10 @@
         <thead>
             <tr>
                 <th>Atleta</th>
-                <th>Função</th>
-                <th>Posição</th>
+                <th>FunÃ§Ã£o</th>
+                <th>PosiÃ§Ã£o</th>
                 <th>Camisa</th>
-                <th>Ações</th>
+                <th>AÃ§Ãµes</th>
             </tr>
         </thead>
         <tbody>
@@ -136,7 +181,7 @@
                                 <option value="starting" <?= $lineupRole === 'starting' ? 'selected' : '' ?>>Titular</option>
                                 <option value="bench" <?= $lineupRole === 'bench' ? 'selected' : '' ?>>Banco</option>
                             </select>
-                            <input type="text" name="position_code" placeholder="Posição" value="<?= esc($lineup['position_code'] ?? '') ?>" style="width:90px;">
+                            <input type="text" name="position_code" placeholder="PosiÃ§Ã£o" value="<?= esc($lineup['position_code'] ?? '') ?>" style="width:90px;">
                             <input type="number" name="shirt_number" placeholder="#" value="<?= esc($lineup['shirt_number'] ?? '') ?>" style="width:70px;">
                             <button type="submit" class="secondary">Salvar</button>
                         </form>
@@ -151,7 +196,7 @@
 
     <hr style="margin:24px 0;">
 
-    <h2>Estatísticas</h2>
+    <h2>EstatÃ­sticas</h2>
     <?php if (has_permission('match_stats.manage')): ?>
         <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/events') ?>" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <?= csrf_field() ?>
@@ -173,7 +218,7 @@
                 <?php endforeach; ?>
             </select>
             <input type="number" name="minute" placeholder="Min" style="width:80px;">
-            <input type="text" name="notes" placeholder="Observação" style="min-width:200px;">
+            <input type="text" name="notes" placeholder="ObservaÃ§Ã£o" style="min-width:200px;">
             <button type="submit">Adicionar</button>
         </form>
     <?php endif; ?>
@@ -186,7 +231,7 @@
                 <th>Atleta</th>
                 <th>Relacionado</th>
                 <th>Notas</th>
-                <th>Ações</th>
+                <th>AÃ§Ãµes</th>
             </tr>
         </thead>
         <tbody>
@@ -214,7 +259,7 @@
 
     <hr style="margin:24px 0;">
 
-    <h2>Relatório</h2>
+    <h2>RelatÃ³rio</h2>
     <?php if (has_permission('match_reports.manage')): ?>
         <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/report') ?>">
             <?= csrf_field() ?>
@@ -231,17 +276,17 @@
                 <textarea name="weaknesses" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc($report['weaknesses'] ?? '') ?></textarea>
             </div>
             <div class="form-group">
-                <label>Ações para treino</label>
+                <label>AÃ§Ãµes para treino</label>
                 <textarea name="next_actions" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc($report['next_actions'] ?? '') ?></textarea>
             </div>
             <div class="form-group">
                 <label>Notas do treinador</label>
                 <textarea name="coach_notes" rows="3" style="padding:12px; border-radius:10px; border:1px solid var(--border);"><?= esc($report['coach_notes'] ?? '') ?></textarea>
             </div>
-            <button type="submit">Salvar relatório</button>
+            <button type="submit">Salvar relatÃ³rio</button>
         </form>
     <?php else: ?>
-        <p style="color:var(--muted);">Sem permissão para editar o relatório.</p>
+        <p style="color:var(--muted);">Sem permissÃ£o para editar o relatÃ³rio.</p>
     <?php endif; ?>
 
     <hr style="margin:24px 0;">
@@ -250,7 +295,7 @@
     <?php if (has_permission('match_reports.manage')): ?>
         <form method="post" action="<?= base_url('/matches/' . $match['id'] . '/attachments') ?>" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <?= csrf_field() ?>
-            <input type="text" name="original_name" placeholder="Descrição (opcional)" style="min-width:220px;">
+            <input type="text" name="original_name" placeholder="DescriÃ§Ã£o (opcional)" style="min-width:220px;">
             <input type="text" name="url" placeholder="Link" style="min-width:260px;">
             <button type="submit">Adicionar</button>
         </form>
@@ -270,4 +315,59 @@
         <?php endforeach; ?>
     </ul>
 </div>
+<div id="bp-board-modal" class="bp-modal" aria-hidden="true">
+    <div class="bp-modal-backdrop" data-bp-modal-close="1"></div>
+    <div class="bp-modal-dialog" role="dialog" aria-modal="true">
+        <div class="bp-modal-header">
+            <strong>Quadro tático</strong>
+            <button type="button" class="button secondary" data-bp-modal-close="1">Fechar</button>
+        </div>
+        <div class="bp-modal-body">
+            <iframe id="bp-board-frame" title="Quadro tático" src="" loading="lazy"></iframe>
+        </div>
+    </div>
+</div>
+
+<style>
+.bp-modal {position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1000;}
+.bp-modal.open {display:flex;}
+.bp-modal-backdrop {position:absolute; inset:0; background:rgba(0,0,0,0.45);}
+.bp-modal-dialog {position:relative; background:#fff; width:min(1100px, 95vw); height:min(720px, 90vh); border-radius:12px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.25); display:flex; flex-direction:column;}
+.bp-modal-header {display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border);}
+.bp-modal-body {flex:1;}
+.bp-modal-body iframe {width:100%; height:100%; border:0;}
+</style>
+
+<script>
+(() => {
+    const modal = document.getElementById('bp-board-modal');
+    if (!modal) return;
+    const frame = document.getElementById('bp-board-frame');
+    const openButtons = document.querySelectorAll('.js-open-board');
+    const closeButtons = modal.querySelectorAll('[data-bp-modal-close]');
+    const baseUrl = <?= json_encode(base_url(), JSON_UNESCAPED_SLASHES) ?>;
+
+    const openModal = (boardId) => {
+        frame.src = `${baseUrl}/tactical-boards/${boardId}?viewer=1&embed=1`;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeModal = () => {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        frame.src = '';
+    };
+
+    openButtons.forEach((btn) => {
+        btn.addEventListener('click', () => openModal(btn.getAttribute('data-board-id')));
+    });
+    closeButtons.forEach((btn) => btn.addEventListener('click', closeModal));
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+})();
+</script>
 <?= $this->endSection() ?>
+
+

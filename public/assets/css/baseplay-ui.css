@@ -841,3 +841,110 @@
 
 
 
+
+.bp-action-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bp-inline-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.bp-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.bp-icon-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.bp-icon-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #f8fafc;
+}
+
+.bp-icon-danger {
+  color: #b91c1c;
+}
+
+.bp-icon-danger:hover {
+  border-color: #ef4444;
+  background: #fff5f5;
+}
+
+.bp-pagination {
+  margin-top: 16px;
+}
+
+.bp-pagination ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.bp-page-item {
+  display: inline-flex;
+}
+
+.bp-page-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: #fff;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.bp-page-item.active .bp-page-link {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.bp-page-item.disabled .bp-page-link {
+  color: var(--muted);
+  background: #f8fafc;
+}
+
+.bp-page-link:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+
+.bp-stat-link { display:block; color:inherit; text-decoration:none; }
+.bp-stat-link:hover { text-decoration:none; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08); }
+
+.bp-subnav-title .menu-icon {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M4 4h16v2H4V4Zm0 6h10v2H4v-2Zm0 6h16v2H4v-2Zm12-5h4v6h-4v-6Z'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M4 4h16v2H4V4Zm0 6h10v2H4v-2Zm0 6h16v2H4v-2Zm12-5h4v6h-4v-6Z'/></svg>");
+}

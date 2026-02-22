@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'BASEPLAY') ?></title>
+    <link rel="icon" type="image/png" href="<?= base_url('favicon.png') ?>">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;600;700&display=swap">
     <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/baseplay-theme.css') ?>">
@@ -11,11 +12,13 @@
 </head>
 <?php $team = current_team(); ?>
 <?php
+    $isAdmin = function_exists('has_permission') && has_permission('admin.access');
+    $applyTeamTheme = $team && !$isAdmin;
     $teamPrimary = $team['primary_color'] ?? '#7A1126';
     $teamSecondary = $team['secondary_color'] ?? '#F4D6DB';
     $teamLogo = !empty($team['logo_path']) ? base_url($team['logo_path']) : '';
 ?>
-<body class="bp-body<?= $team ? ' bp-team-theme' : '' ?>" style="<?= $team ? '--team-primary:' . esc($teamPrimary) . '; --team-secondary:' . esc($teamSecondary) . '; --team-logo:url(' . esc($teamLogo) . '); --primary:' . esc($teamPrimary) . '; --primary-hover:' . esc($teamSecondary) . ';' : '' ?>">
+<body class="bp-body<?= $applyTeamTheme ? ' bp-team-theme' : '' ?>" style="<?= $applyTeamTheme ? '--team-primary:' . esc($teamPrimary) . '; --team-secondary:' . esc($teamSecondary) . '; --team-logo:url(' . esc($teamLogo) . '); --primary:' . esc($teamPrimary) . '; --primary-hover:' . esc($teamSecondary) . ';' : '' ?>">
 <div class="bp-layout">
     <?= $this->include('partials/sidebar') ?>
     <div class="bp-main">

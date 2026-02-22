@@ -5,8 +5,11 @@ $quickAction = $quickAction ?? null;
     <div class="bp-topbar-left">
         <button type="button" class="bp-icon-btn bp-mobile-toggle" id="bp-sidebar-toggle" aria-label="Abrir menu">☰</button>
         <?php $team = current_team(); ?>
-        <?php $teamLogo = !empty($team['logo_path']) ? base_url($team['logo_path']) : base_url('assets/images/baseplay-logo.png'); ?>
-        <img src="<?= esc($teamLogo) ?>" alt="Logo" class="bp-topbar-logo">
+        <?php $isAdmin = function_exists('has_permission') && has_permission('admin.access'); ?>
+        <?php if (!$isAdmin): ?>
+            <?php $teamLogo = !empty($team['logo_path']) ? base_url($team['logo_path']) : base_url('assets/images/baseplay-logo.png'); ?>
+            <img src="<?= esc($teamLogo) ?>" alt="Logo" class="bp-topbar-logo">
+        <?php endif; ?>
         <div class="bp-topbar-title">
             <strong><?= esc($title ?? 'Painel') ?></strong>
             <?= $this->include('partials/breadcrumbs') ?>

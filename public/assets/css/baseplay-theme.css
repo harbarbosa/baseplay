@@ -1,12 +1,14 @@
 :root {
-  --primary: #7a1126;
-  --primary-hover: #5c0d1d;
-  --primary-soft: #f4d6db;
-  --bg: #ffffff;
-  --bg-soft: #f1f5f9;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
+  --primary: #1E3A8A;
+  --primary-hover: #172554;
+  --primary-dark: #172554;
+  --accent: #2563EB;
+  --primary-soft: #E0E7FF;
+  --bg: #FFFFFF;
+  --bg-soft: #F8FAFC;
+  --ink: #0F172A;
+  --muted: #64748B;
+  --border: #E2E8F0;
   --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   --shadow-soft: 0 8px 18px rgba(15, 23, 42, 0.06);
   --radius: 14px;
@@ -91,9 +93,9 @@ body {
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary), #4a0b18);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   position: relative;
-  box-shadow: 0 8px 16px rgba(122, 17, 38, 0.22);
+  box-shadow: 0 8px 16px rgba(30, 58, 138, 0.22);
 }
 
 .brand-mark::after {
@@ -370,7 +372,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(122, 17, 38, 0.12);
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.12);
 }
 
 button,
@@ -379,7 +381,7 @@ button,
   color: #fff;
   border-radius: 12px;
   transition: all 0.2s ease;
-  box-shadow: 0 8px 18px rgba(122, 17, 38, 0.18);
+  box-shadow: 0 8px 18px rgba(30, 58, 138, 0.18);
 }
 
 button:hover,
@@ -508,7 +510,7 @@ button.danger:hover,
   color: var(--primary);
 }
 
-.event-training { background: #f4d6db; color: #7a1126; }
+.event-training { background: var(--primary-soft); color: var(--primary); }
 .event-match { background: #fde2e2; color: #7f1d1d; }
 .event-meeting { background: #e8f7ee; color: #14532d; }
 .event-evaluation { background: #fef3c7; color: #92400e; }
@@ -544,3 +546,6 @@ button.danger:hover,
     flex: 0 0 auto;
   }
 }
+
+
+

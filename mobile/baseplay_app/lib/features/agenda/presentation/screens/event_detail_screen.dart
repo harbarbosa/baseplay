@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../presentation/state/providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
+import '../../../../core/auth/permissions.dart';
+import '../../../pending/presentation/state/pending_providers.dart';
+import '../../../dashboard/presentation/state/dashboard_providers.dart';
 import '../../domain/models/event.dart';
 import '../state/agenda_providers.dart';
 
@@ -17,9 +21,19 @@ class EventDetailScreen extends ConsumerWidget {
     final participantsAsync = ref.watch(eventParticipantsProvider(eventId));
     final canManageAttendance =
         ref.watch(authUserProvider)?.hasPermission('attendance.manage') ?? false;
+    final user = ref.watch(authUserProvider);
+    final canConfirm = user?.hasPermission(Permissions.eventsConfirmSelf) ?? false;
+    final isAthleteOrGuardian = user?.roles.any(
+          (role) => ['athlete', 'guardian', 'atleta', 'responsavel', 'responsável']
+              .contains(role.toLowerCase().trim()),
+        ) ??
+        false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalhe do evento')),
+      appBar: AppBar(
+        title: const Text('Detalhe do evento'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(eventDetailProvider(eventId));
@@ -86,6 +100,36 @@ class EventDetailScreen extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 24),
+            if (isAthleteOrGuardian && canConfirm)
+              eventAsync.maybeWhen(
+                data: (event) {
+                  final status = _invitationLabel(event.invitationStatus);
+                  final canShowButton =
+                      event.invitationStatus == null ||
+                      event.invitationStatus == 'pending';
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Convocação: $status',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      if (canShowButton)
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () =>
+                                _confirmEvent(context, ref, eventId),
+                            icon: const Icon(Icons.check_circle_outline),
+                            label: const Text('Confirmar participação'),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
             if (canManageAttendance)
               SizedBox(
                 width: double.infinity,
@@ -120,6 +164,8 @@ class EventDetailScreen extends ConsumerWidget {
               'Local: ${event.location?.isNotEmpty == true ? event.location : '-'}',
             ),
             Text('Status: ${event.status}'),
+            if (event.invitationStatus != null)
+              Text('Convocação: ${_invitationLabel(event.invitationStatus)}'),
           ],
         ),
       ),
@@ -147,6 +193,40 @@ class EventDetailScreen extends ConsumerWidget {
         return 'Jogo';
       default:
         return type;
+    }
+  }
+
+  String _invitationLabel(String? status) {
+    switch ((status ?? '').toLowerCase()) {
+      case 'confirmed':
+        return 'Confirmado';
+      case 'pending':
+        return 'Pendente';
+      case 'declined':
+        return 'Recusado';
+      default:
+        return 'Convocado';
+    }
+  }
+
+  Future<void> _confirmEvent(
+    BuildContext context,
+    WidgetRef ref,
+    int eventId,
+  ) async {
+    try {
+      await ref.read(eventConfirmationControllerProvider).confirm(eventId);
+      ref.invalidate(pendingItemsProvider);
+      ref.invalidate(dashboardSummaryProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Presença confirmada.')),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString().replaceAll('Exception: ', ''))),
+      );
     }
   }
 }

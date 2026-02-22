@@ -11,6 +11,7 @@ class Event {
   final String status;
   final String? teamName;
   final String? categoryName;
+  final String? invitationStatus;
 
   const Event({
     required this.id,
@@ -25,6 +26,7 @@ class Event {
     required this.status,
     this.teamName,
     this.categoryName,
+    this.invitationStatus,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class Event {
       status: '${json['status'] ?? ''}',
       teamName: json['team_name']?.toString(),
       categoryName: json['category_name']?.toString(),
+      invitationStatus: json['invitation_status']?.toString(),
     );
   }
 }

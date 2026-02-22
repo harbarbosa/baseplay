@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../athletes/domain/models/athlete_model.dart';
 import '../state/documents_providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
 
 class DocumentsOverviewScreen extends ConsumerWidget {
   const DocumentsOverviewScreen({super.key});
@@ -19,7 +20,10 @@ class DocumentsOverviewScreen extends ConsumerWidget {
         : _categoriesFromAthletes(athletesAsync.valueOrNull!);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Documentos')),
+      appBar: AppBar(
+        title: const Text('Documentos'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(documentsOverviewProvider);
@@ -222,9 +226,13 @@ class _ComplianceCard extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            LinearProgressIndicator(value: athletesTotal == 0 ? 0 : compliant / athletesTotal),
+            LinearProgressIndicator(
+              value: athletesTotal == 0 ? 0 : compliant / athletesTotal,
+            ),
             const SizedBox(height: 8),
-            Text('${percentage.toStringAsFixed(1)}% ($compliant/$athletesTotal atletas)'),
+            Text(
+              '${percentage.toStringAsFixed(1)}% ($compliant/$athletesTotal atletas)',
+            ),
           ],
         ),
       ),

@@ -39,15 +39,15 @@ class DashboardRepository {
           continue;
         }
 
-        throw _mapException(error, fallback: 'Nao foi possivel carregar painel.');
+        throw _mapException(error, fallback: 'Não foi possível carregar painel.');
       }
     }
 
     if (lastError != null) {
-      throw _mapException(lastError, fallback: 'Nao foi possivel identificar o perfil para o painel.');
+      throw _mapException(lastError, fallback: 'Não foi possível identificar o perfil para o painel.');
     }
 
-    throw const ApiException('Nao foi possivel carregar painel.');
+    throw const ApiException('Não foi possível carregar painel.');
   }
 
   Future<PendingCenterSummary> getPendingCenterSummary() async {
@@ -76,7 +76,7 @@ class DashboardRepository {
     } on DioException catch (error) {
       final code = error.response?.statusCode;
       if (code != 403 && code != 404) {
-        throw _mapException(error, fallback: 'Nao foi possivel carregar pendencias de documentos.');
+        throw _mapException(error, fallback: 'Não foi possível carregar pendências de documentos.');
       }
     }
 
@@ -92,7 +92,7 @@ class DashboardRepository {
     } on DioException catch (error) {
       final code = error.response?.statusCode;
       if (code != 403 && code != 404) {
-        throw _mapException(error, fallback: 'Nao foi possivel carregar alertas de documentos obrigatorios.');
+        throw _mapException(error, fallback: 'Não foi possível carregar alertas de documentos obrigatórios.');
       }
     }
 
@@ -131,13 +131,13 @@ class DashboardRepository {
           if (code == 403 || code == 404) {
             break;
           }
-          throw _mapException(error, fallback: 'Nao foi possivel validar convocacoes dos eventos.');
+          throw _mapException(error, fallback: 'Não foi possível validar convocações dos eventos.');
         }
       }
     } on DioException catch (error) {
       final code = error.response?.statusCode;
       if (code != 403 && code != 404) {
-        throw _mapException(error, fallback: 'Nao foi possivel carregar eventos pendentes.');
+        throw _mapException(error, fallback: 'Não foi possível carregar eventos pendentes.');
       }
     }
 
@@ -162,3 +162,4 @@ class DashboardRepository {
     return '$year-$month-$day';
   }
 }
+

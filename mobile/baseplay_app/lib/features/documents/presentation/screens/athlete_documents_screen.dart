@@ -6,6 +6,7 @@ import '../../../athletes/presentation/state/athletes_providers.dart';
 import '../../../../presentation/state/providers.dart';
 import '../../domain/models/document_model.dart';
 import '../state/documents_providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
 
 class AthleteDocumentsScreen extends ConsumerWidget {
   final int athleteId;
@@ -20,7 +21,10 @@ class AthleteDocumentsScreen extends ConsumerWidget {
         ref.watch(authUserProvider)?.hasPermission('documents.upload') ?? false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Documentos do atleta')),
+      appBar: AppBar(
+        title: const Text('Documentos do atleta'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(documentsByAthleteProvider(athleteId));

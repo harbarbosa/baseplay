@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import '../../../core/api/endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
@@ -109,6 +109,49 @@ class EventRepository {
     }
   }
 
+  Future<void> confirmEvent(int eventId) async {
+    try {
+      await _api.dio.post(Endpoints.eventConfirm(eventId));
+    } on DioException catch (e) {
+      throw _mapException(
+        e,
+        fallback: 'Não foi possível confirmar o evento.',
+      );
+    }
+  }
+
+  Future<List<Event>> listUpcomingForConfirmation({
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    try {
+      final response = await _api.dio.get(
+        Endpoints.events,
+        queryParameters: {
+          'from_date': _formatDate(from),
+          'to_date': _formatDate(to),
+          'status': 'scheduled',
+          'per_page': 50,
+        },
+      );
+
+      final payload = ApiResponseParser.extractData(response.data);
+      final data = ApiResponseParser.asMap(payload);
+      final rawItems = (data['items'] as List?) ?? const [];
+
+      return rawItems
+          .map((item) => Event.fromJson(ApiResponseParser.asMap(item)))
+          .where((event) =>
+              (event.invitationStatus ?? '').toLowerCase() == 'pending')
+          .toList();
+    } on DioException catch (e) {
+      throw _mapException(
+        e,
+        fallback: 'Não foi possível carregar confirmações pendentes.',
+      );
+    }
+  }
+
   ApiException _mapException(DioException error, {required String fallback}) {
     final statusCode = error.response?.statusCode;
     final message = ApiResponseParser.extractMessage(
@@ -129,3 +172,4 @@ class EventRepository {
     return '$year-$month-$day';
   }
 }
+

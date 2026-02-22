@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/attendance.dart';
 import '../../domain/models/participant.dart';
 import '../state/agenda_providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
+import '../../../../core/offline/outbox_provider.dart';
+import '../../../../core/offline/outbox_item.dart';
 
 class EventAttendanceFieldScreen extends ConsumerStatefulWidget {
   final int eventId;
@@ -18,7 +21,17 @@ class EventAttendanceFieldScreen extends ConsumerStatefulWidget {
 class _EventAttendanceFieldScreenState
     extends ConsumerState<EventAttendanceFieldScreen> {
   final Map<int, String> _statusByAthlete = <int, String>{};
+  final Map<int, AttendanceSaveStatus> _syncByAthlete =
+      <int, AttendanceSaveStatus>{};
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(outboxControllerProvider.notifier).processQueue(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +39,24 @@ class _EventAttendanceFieldScreenState
       eventParticipantsProvider(widget.eventId),
     );
     final attendanceAsync = ref.watch(eventAttendanceProvider(widget.eventId));
+    final outboxItems = ref.watch(outboxControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modo campo'),
         actions: [
+          const TeamSelectorAction(),
+          IconButton(
+            icon: const Icon(Icons.sync),
+            tooltip: 'Sincronizar',
+            onPressed: () async {
+              await ref.read(outboxControllerProvider.notifier).processQueue();
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sincronização concluída.')),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Recarregar',
@@ -52,6 +78,7 @@ class _EventAttendanceFieldScreenState
           final attendance =
               attendanceAsync.valueOrNull ?? const <Attendance>[];
           _hydrateFromAttendance(attendance);
+          _hydrateFromOutbox(outboxItems);
 
           return ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -60,9 +87,11 @@ class _EventAttendanceFieldScreenState
               final participant = participants[index];
               final status =
                   _statusByAthlete[participant.athleteId] ?? 'absent';
+              final syncStatus = _syncByAthlete[participant.athleteId];
               return _AthleteAttendanceCard(
                 participant: participant,
                 status: status,
+                syncStatus: syncStatus,
                 disabled: _isSubmitting,
                 onStatusTap: (value) => _saveAttendance(participant, value),
               );
@@ -88,6 +117,37 @@ class _EventAttendanceFieldScreenState
     }
   }
 
+  void _hydrateFromOutbox(List<OutboxItem> items) {
+    final pendingForEvent = <int>{};
+    for (final item in items) {
+      if (item.type != 'attendance') {
+        continue;
+      }
+      final eventId = int.tryParse('${item.payload['eventId'] ?? ''}') ?? 0;
+      final athleteId =
+          int.tryParse('${item.payload['athleteId'] ?? ''}') ?? 0;
+      if (eventId != widget.eventId || athleteId <= 0) {
+        continue;
+      }
+      pendingForEvent.add(athleteId);
+      if (item.status == OutboxStatus.error) {
+        _syncByAthlete[athleteId] = AttendanceSaveStatus.error;
+      } else {
+        _syncByAthlete[athleteId] = AttendanceSaveStatus.pending;
+      }
+    }
+
+    final keys = _syncByAthlete.keys.toList();
+    for (final athleteId in keys) {
+      final status = _syncByAthlete[athleteId];
+      if ((status == AttendanceSaveStatus.pending ||
+              status == AttendanceSaveStatus.error) &&
+          !pendingForEvent.contains(athleteId)) {
+        _syncByAthlete[athleteId] = AttendanceSaveStatus.synced;
+      }
+    }
+  }
+
   Future<void> _saveAttendance(Participant participant, String status) async {
     final previous = _statusByAthlete[participant.athleteId];
 
@@ -97,19 +157,21 @@ class _EventAttendanceFieldScreenState
     });
 
     try {
-      await ref
-          .read(eventAttendanceControllerProvider)
-          .save(
-            eventId: widget.eventId,
-            athleteId: participant.athleteId,
-            status: status,
-          );
+      final result =
+          await ref.read(eventAttendanceControllerProvider).save(
+                eventId: widget.eventId,
+                athleteId: participant.athleteId,
+                status: status,
+              );
+      _syncByAthlete[participant.athleteId] = result;
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${participant.fullName} marcado como ${_statusLabel(status)}.',
+            result == AttendanceSaveStatus.pending
+                ? '${participant.fullName} salvo como pendente.'
+                : '${participant.fullName} marcado como ${_statusLabel(status)}.',
           ),
           duration: const Duration(milliseconds: 900),
         ),
@@ -154,12 +216,14 @@ class _EventAttendanceFieldScreenState
 class _AthleteAttendanceCard extends StatelessWidget {
   final Participant participant;
   final String status;
+  final AttendanceSaveStatus? syncStatus;
   final bool disabled;
   final ValueChanged<String> onStatusTap;
 
   const _AthleteAttendanceCard({
     required this.participant,
     required this.status,
+    required this.syncStatus,
     required this.disabled,
     required this.onStatusTap,
   });
@@ -179,6 +243,10 @@ class _AthleteAttendanceCard extends StatelessWidget {
                   : participant.fullName,
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
+            if (syncStatus != null) ...[
+              const SizedBox(height: 6),
+              _SyncStatusChip(status: syncStatus!),
+            ],
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -256,6 +324,49 @@ class _StatusButton extends StatelessWidget {
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
         child: Text(label),
+      ),
+    );
+  }
+}
+
+class _SyncStatusChip extends StatelessWidget {
+  final AttendanceSaveStatus status;
+
+  const _SyncStatusChip({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    String label;
+    Color color;
+
+    switch (status) {
+      case AttendanceSaveStatus.pending:
+        label = 'Pendente';
+        color = Colors.orange;
+        break;
+      case AttendanceSaveStatus.error:
+        label = 'Erro';
+        color = Colors.red;
+        break;
+      case AttendanceSaveStatus.synced:
+        label = 'Sincronizado';
+        color = Colors.green;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

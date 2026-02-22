@@ -4,10 +4,16 @@ import '../../../../core/storage/cache_storage.dart';
 import '../../../../presentation/state/providers.dart';
 import '../../data/notice_read_cache.dart';
 import '../../data/notice_repository.dart';
+import '../../data/notice_replies_repository.dart';
 import '../../domain/models/notice.dart';
+import '../../domain/models/notice_reply.dart';
 
 final noticeReadCacheProvider = Provider<NoticeReadCache>((ref) {
-  return NoticeReadCache(CacheStorage());
+  final userId = ref.watch(authUserProvider)?.id;
+  return NoticeReadCache(
+    CacheStorage(),
+    scopeKey: userId?.toString() ?? 'anonymous',
+  );
 });
 
 final noticeRepositoryProvider = Provider<NoticeRepository>((ref) {
@@ -15,6 +21,10 @@ final noticeRepositoryProvider = Provider<NoticeRepository>((ref) {
     ref.read(apiClientProvider),
     ref.read(noticeReadCacheProvider),
   );
+});
+
+final noticeRepliesRepositoryProvider = Provider<NoticeRepliesRepository>((ref) {
+  return NoticeRepliesRepository(ref.read(apiClientProvider));
 });
 
 final noticesProvider = FutureProvider.autoDispose<List<Notice>>((ref) async {
@@ -32,6 +42,15 @@ final noticeActionControllerProvider = Provider<NoticeActionController>((ref) {
   return NoticeActionController(ref);
 });
 
+final noticeRepliesProvider =
+    FutureProvider.autoDispose.family<List<NoticeReply>, int>((ref, noticeId) {
+      return ref.read(noticeRepliesRepositoryProvider).listReplies(noticeId);
+    });
+
+final noticeReplyControllerProvider = Provider<NoticeReplyController>((ref) {
+  return NoticeReplyController(ref);
+});
+
 class NoticeActionController {
   final Ref _ref;
 
@@ -41,5 +60,18 @@ class NoticeActionController {
     await _ref.read(noticeRepositoryProvider).markAsRead(noticeId);
     _ref.invalidate(noticesProvider);
     _ref.invalidate(noticeDetailProvider(noticeId));
+  }
+}
+
+class NoticeReplyController {
+  final Ref _ref;
+
+  NoticeReplyController(this._ref);
+
+  Future<void> send(int noticeId, String message) async {
+    await _ref
+        .read(noticeRepliesRepositoryProvider)
+        .sendReply(noticeId, message);
+    _ref.invalidate(noticeRepliesProvider(noticeId));
   }
 }

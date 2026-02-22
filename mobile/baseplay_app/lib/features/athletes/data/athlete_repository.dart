@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 
 import '../../../core/api/endpoints.dart';
 import '../../../core/network/api_client.dart';
@@ -71,7 +71,7 @@ class AthleteRepository {
         pageCount: int.tryParse('${pager['pageCount'] ?? 1}') ?? 1,
       );
     } on DioException catch (e) {
-      throw _mapException(e, fallback: 'Nao foi possivel carregar atletas.');
+      throw _mapException(e, fallback: 'Não foi possível carregar atletas.');
     }
   }
 
@@ -83,7 +83,7 @@ class AthleteRepository {
       );
       return AthleteModel.fromJson(data);
     } on DioException catch (e) {
-      throw _mapException(e, fallback: 'Nao foi possivel carregar atleta.');
+      throw _mapException(e, fallback: 'Não foi possível carregar atleta.');
     }
   }
 
@@ -135,7 +135,7 @@ class AthleteRepository {
     } on DioException catch (e) {
       throw _mapException(
         e,
-        fallback: 'Nao foi possivel carregar documentos do atleta.',
+        fallback: 'Não foi possível carregar documentos do atleta.',
       );
     }
   }
@@ -203,7 +203,7 @@ class AthleteRepository {
     } on DioException catch (e) {
       throw _mapException(
         e,
-        fallback: 'Nao foi possivel carregar resumo do atleta.',
+        fallback: 'Não foi possível carregar resumo do atleta.',
       );
     }
   }
@@ -219,7 +219,7 @@ class AthleteRepository {
     } on DioException catch (e) {
       throw _mapException(
         e,
-        fallback: 'Nao foi possivel carregar ultima atividade.',
+        fallback: 'Não foi possível carregar última atividade.',
       );
     }
   }
@@ -373,3 +373,4 @@ class AthleteRepository {
     );
   }
 }
+

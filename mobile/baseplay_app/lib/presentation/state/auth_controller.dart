@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/services/auth_service.dart';
 import 'auth_state.dart';
@@ -41,3 +41,4 @@ class AuthController extends StateNotifier<AuthState> {
     onLoggedOut?.call();
   }
 }
+

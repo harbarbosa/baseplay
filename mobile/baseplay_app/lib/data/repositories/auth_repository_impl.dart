@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import '../../core/api/endpoints.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
@@ -68,3 +68,4 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<String?> getToken() => _tokenStorage.read();
 }
+

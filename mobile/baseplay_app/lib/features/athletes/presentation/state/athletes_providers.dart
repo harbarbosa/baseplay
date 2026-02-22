@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../presentation/state/providers.dart';
+import '../../../../core/context/team_context_provider.dart';
 import '../../data/athlete_repository.dart';
 import '../../domain/models/athlete_model.dart';
 import '../../domain/models/athlete_summary_model.dart';
@@ -18,6 +19,7 @@ final athletesProvider = FutureProvider.autoDispose
       ref,
       params,
     ) async {
+      ref.watch(teamContextRefreshProvider);
       return ref
           .read(athleteRepositoryProvider)
           .listAthletes(search: params.search, page: params.page, perPage: 15);
@@ -28,16 +30,19 @@ final athleteDocumentIndicatorsProvider = FutureProvider.autoDispose
       ref,
       athletes,
     ) async {
+      ref.watch(teamContextRefreshProvider);
       final ids = athletes.map((a) => a.id).toList();
       return ref.read(athleteRepositoryProvider).getDocumentIndicators(ids);
     });
 
 final athleteDetailProvider = FutureProvider.autoDispose
     .family<AthleteModel, int>((ref, athleteId) {
+      ref.watch(teamContextRefreshProvider);
       return ref.read(athleteRepositoryProvider).getAthlete(athleteId);
     });
 
 final athleteSummaryProvider = FutureProvider.autoDispose
     .family<AthleteSummaryModel, int>((ref, athleteId) {
+      ref.watch(teamContextRefreshProvider);
       return ref.read(athleteRepositoryProvider).getAthleteSummary(athleteId);
     });

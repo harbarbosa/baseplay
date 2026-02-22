@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/storage/token_storage.dart';
+import '../../core/context/team_context_provider.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/services/auth_service.dart';
@@ -19,6 +20,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   final tokenStorage = ref.read(tokenStorageProvider);
   return ApiClient(
     tokenStorage,
+    loadTeamId: () async => ref.read(teamContextProvider).activeTeamId,
     onUnauthorized: () {
       ref.read(sessionExpiredProvider.notifier).state = true;
     },
@@ -44,6 +46,7 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
       },
       onLoggedOut: () {
         ref.read(sessionExpiredProvider.notifier).state = false;
+        ref.read(teamContextProvider.notifier).setScope('global');
       },
     );
   },

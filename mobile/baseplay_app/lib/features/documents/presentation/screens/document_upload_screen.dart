@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/document_repository.dart';
 import '../../domain/models/document_type_model.dart';
 import '../state/documents_providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
 
 class DocumentUploadScreen extends ConsumerStatefulWidget {
   final int athleteId;
@@ -41,7 +42,10 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     final progress = ref.watch(documentsUploadProgressProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Upload de documento')),
+      appBar: AppBar(
+        title: const Text('Upload de documento'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -113,7 +117,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                                   setState(() => _issuedAt = date);
                                 }
                               },
-                        child: Text('Emissao: ${_fmtDate(_issuedAt)}'),
+                        child: Text('Emissão: ${_fmtDate(_issuedAt)}'),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -137,7 +141,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                   controller: _notesController,
                   minLines: 2,
                   maxLines: 3,
-                  decoration: const InputDecoration(labelText: 'Observacao'),
+                  decoration: const InputDecoration(labelText: 'Observação'),
                 ),
                 const SizedBox(height: 16),
                 if (_sending)
@@ -245,7 +249,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         _expiresAt!.isBefore(_issuedAt!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vencimento deve ser maior ou igual a emissao.'),
+          content: Text('Vencimento deve ser maior ou igual à emissão.'),
         ),
       );
       return;

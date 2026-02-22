@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../presentation/state/providers.dart';
+import '../../../../core/context/team_context_provider.dart';
 import '../../../athletes/domain/models/athlete_model.dart';
 import '../../../athletes/presentation/state/athletes_providers.dart';
 import '../../data/document_repository.dart';
@@ -9,6 +10,7 @@ import '../../domain/models/document_type_model.dart';
 import '../../domain/models/documents_overview_model.dart';
 
 final documentsCategoryFilterProvider = StateProvider<int?>((ref) => null);
+final selfDocumentsAthleteIdProvider = StateProvider<int?>((ref) => null);
 
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
   return DocumentRepository(
@@ -24,11 +26,13 @@ final documentTypesProvider =
 
 final documentsByAthleteProvider = FutureProvider.autoDispose
     .family<List<DocumentModel>, int>((ref, athleteId) {
+      ref.watch(teamContextRefreshProvider);
       return ref.read(documentRepositoryProvider).listByAthlete(athleteId);
     });
 
 final documentsOverviewProvider =
     FutureProvider.autoDispose<DocumentsOverviewModel>((ref) {
+      ref.watch(teamContextRefreshProvider);
       final categoryId = ref.watch(documentsCategoryFilterProvider);
       return ref
           .read(documentRepositoryProvider)
@@ -37,6 +41,7 @@ final documentsOverviewProvider =
 
 final athletesForDocumentsProvider =
     FutureProvider.autoDispose<List<AthleteModel>>((ref) async {
+      ref.watch(teamContextRefreshProvider);
       final categoryId = ref.watch(documentsCategoryFilterProvider);
       final all = <AthleteModel>[];
       var page = 1;
@@ -53,6 +58,14 @@ final athletesForDocumentsProvider =
       }
 
       return all;
+    });
+
+final selfAthletesProvider =
+    FutureProvider.autoDispose<List<AthleteModel>>((ref) async {
+      final response = await ref
+          .read(athleteRepositoryProvider)
+          .listAthletes(page: 1, perPage: 50);
+      return response.items;
     });
 
 final documentsUploadProgressProvider = StateProvider<double>((ref) => 0);

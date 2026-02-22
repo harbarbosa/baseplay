@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -56,7 +56,7 @@ class DocumentRepository {
           .map((item) => DocumentModel.fromJson(ApiResponseParser.asMap(item)))
           .toList();
     } on DioException catch (e) {
-      throw _mapException(e, fallback: 'Nao foi possivel carregar documentos.');
+      throw _mapException(e, fallback: 'Não foi possível carregar documentos.');
     }
   }
 
@@ -73,7 +73,7 @@ class DocumentRepository {
     } on DioException catch (e) {
       throw _mapException(
         e,
-        fallback: 'Nao foi possivel carregar tipos de documento.',
+        fallback: 'Não foi possível carregar tipos de documento.',
       );
     }
   }
@@ -87,7 +87,7 @@ class DocumentRepository {
       if (kIsWeb) {
         final fileBytes = request.bytes;
         if (fileBytes == null) {
-          throw const ApiException('Arquivo invalido para upload.');
+          throw const ApiException('Arquivo inválido para upload.');
         }
         filePart = MultipartFile.fromBytes(
           fileBytes,
@@ -96,7 +96,7 @@ class DocumentRepository {
       } else {
         final path = request.filePath;
         if (path == null || path.isEmpty || !File(path).existsSync()) {
-          throw const ApiException('Arquivo invalido para upload.');
+          throw const ApiException('Arquivo inválido para upload.');
         }
         filePart = await MultipartFile.fromFile(
           path,
@@ -123,7 +123,7 @@ class DocumentRepository {
         onSendProgress: onProgress,
       );
     } on DioException catch (e) {
-      throw _mapException(e, fallback: 'Nao foi possivel enviar documento.');
+      throw _mapException(e, fallback: 'Não foi possível enviar documento.');
     }
   }
 
@@ -169,7 +169,7 @@ class DocumentRepository {
     } on DioException catch (e) {
       throw _mapException(
         e,
-        fallback: 'Nao foi possivel carregar visao geral de documentos.',
+        fallback: 'Não foi possível carregar visão geral de documentos.',
       );
     }
   }
@@ -215,3 +215,5 @@ class DocumentRepository {
     );
   }
 }
+
+

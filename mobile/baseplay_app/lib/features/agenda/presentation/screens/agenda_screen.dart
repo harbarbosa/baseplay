@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/models/event.dart';
 import '../state/agenda_providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
 
 class AgendaScreen extends ConsumerWidget {
   const AgendaScreen({super.key});
@@ -14,7 +15,10 @@ class AgendaScreen extends ConsumerWidget {
     final eventsAsync = ref.watch(agendaEventsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Agenda')),
+      appBar: AppBar(
+        title: const Text('Agenda'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: Column(
         children: [
           Padding(
@@ -241,3 +245,4 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
+

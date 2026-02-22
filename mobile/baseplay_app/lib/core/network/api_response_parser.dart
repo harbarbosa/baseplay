@@ -1,4 +1,4 @@
-class ApiResponseParser {
+﻿class ApiResponseParser {
   static Map<String, dynamic> asMap(dynamic value) {
     if (value is Map<String, dynamic>) {
       return value;
@@ -29,3 +29,4 @@ class ApiResponseParser {
     return fallback;
   }
 }
+

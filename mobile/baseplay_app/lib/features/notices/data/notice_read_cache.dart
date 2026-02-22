@@ -3,10 +3,13 @@ import 'dart:convert';
 import '../../../core/storage/cache_storage.dart';
 
 class NoticeReadCache {
-  static const _key = 'notice_read_ids';
   final CacheStorage _cache;
+  final String _scopeKey;
 
-  NoticeReadCache(this._cache);
+  NoticeReadCache(this._cache, {required String scopeKey})
+    : _scopeKey = scopeKey;
+
+  String get _key => 'notice_read_ids_$_scopeKey';
 
   Future<Set<int>> getReadIds() async {
     final value = await _cache.getString(_key);

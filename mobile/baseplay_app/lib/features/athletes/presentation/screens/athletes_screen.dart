@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../data/athlete_repository.dart';
 import '../../domain/models/athlete_model.dart';
 import '../state/athletes_providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
+import '../../../../core/auth/permissions.dart';
+import '../../../../presentation/state/providers.dart';
 
 class AthletesScreen extends ConsumerStatefulWidget {
   const AthletesScreen({super.key});
@@ -35,16 +38,23 @@ class _AthletesScreenState extends ConsumerState<AthletesScreen> {
     final athletesAsync = ref.watch(
       athletesProvider((search: search, page: page)),
     );
+    final canViewTeamDocuments =
+        ref
+            .watch(authUserProvider)
+            ?.hasPermission(Permissions.documentsViewTeam) ??
+        false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Atletas'),
         actions: [
-          IconButton(
-            tooltip: 'Documentos',
-            onPressed: () => context.push('/home/documents'),
-            icon: const Icon(Icons.folder_copy_outlined),
-          ),
+          const TeamSelectorAction(),
+          if (canViewTeamDocuments)
+            IconButton(
+              tooltip: 'Documentos',
+              onPressed: () => context.push('/home/documents'),
+              icon: const Icon(Icons.folder_copy_outlined),
+            ),
         ],
       ),
       body: Column(
@@ -235,7 +245,7 @@ class _DocumentBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        hasPending ? 'Pendencia' : 'Documentos OK',
+        hasPending ? 'Pendência' : 'Documentos OK',
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -275,7 +285,7 @@ class _Pagination extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         const SizedBox(width: 12),
-        OutlinedButton(onPressed: onNext, child: const Text('Proxima')),
+        OutlinedButton(onPressed: onNext, child: const Text('Próxima')),
       ],
     );
   }

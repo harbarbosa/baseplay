@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../presentation/state/providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
 import '../state/dashboard_providers.dart';
+import '../../../pending/presentation/state/pending_providers.dart';
 
 class AppDashboardScreen extends ConsumerWidget {
   const AppDashboardScreen({super.key});
@@ -11,9 +13,13 @@ class AppDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(dashboardSummaryProvider);
+    final pendingCount = ref.watch(pendingCountProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Painel')),
+      appBar: AppBar(
+        title: const Text('Painel'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(dashboardSummaryProvider),
         child: ListView(
@@ -22,7 +28,9 @@ class AppDashboardScreen extends ConsumerWidget {
           children: [
             dashboardAsync.when(
               loading: () => const _LoadingCard(),
-              error: (error, stackTrace) => _ErrorCard(message: error.toString()),
+              error: (error, stackTrace) => _ErrorCard(
+                message: error.toString(),
+              ),
               data: (summary) {
                 final kpis = summary.kpis;
                 return Column(
@@ -37,10 +45,27 @@ class AppDashboardScreen extends ConsumerWidget {
                       mainAxisSpacing: 10,
                       childAspectRatio: 1.45,
                       children: [
-                        _KpiCard(title: 'Alertas pendentes', value: '${kpis['systemAlertUnread'] ?? 0}', icon: Icons.warning_amber_rounded),
-                        _KpiCard(title: 'Presença média', value: '${kpis['attendancePct'] ?? 0}%', icon: Icons.percent_rounded),
-                        _KpiCard(title: 'Documentos pendentes', value: '${kpis['documentsPending'] ?? kpis['docsExpired'] ?? 0}', icon: Icons.description_outlined),
-                        _KpiCard(title: 'Baixa presença', value: '${kpis['lowAttendanceCount'] ?? 0}', icon: Icons.trending_down),
+                        _KpiCard(
+                          title: 'Alertas pendentes',
+                          value: '${kpis['systemAlertUnread'] ?? 0}',
+                          icon: Icons.warning_amber_rounded,
+                        ),
+                        _KpiCard(
+                          title: 'Presença média',
+                          value: '${kpis['attendancePct'] ?? 0}%',
+                          icon: Icons.percent_rounded,
+                        ),
+                        _KpiCard(
+                          title: 'Documentos pendentes',
+                          value:
+                              '${kpis['documentsPending'] ?? kpis['docsExpired'] ?? 0}',
+                          icon: Icons.description_outlined,
+                        ),
+                        _KpiCard(
+                          title: 'Baixa presença',
+                          value: '${kpis['lowAttendanceCount'] ?? 0}',
+                          icon: Icons.trending_down,
+                        ),
                       ],
                     ),
                   ],
@@ -52,7 +77,11 @@ class AppDashboardScreen extends ConsumerWidget {
               child: ListTile(
                 leading: const Icon(Icons.rule_folder_outlined),
                 title: const Text('Central de Pendências'),
-                subtitle: const Text('Documentos vencidos, obrigatórios e eventos sem convocação'),
+                subtitle: Text(
+                  pendingCount == 0
+                      ? 'Sem pendências no momento'
+                      : '$pendingCount pendência(s) pendente(s)',
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/home/profile/pending-center'),
               ),
@@ -85,7 +114,10 @@ class PendingCenterScreen extends ConsumerWidget {
     final pendingAsync = ref.watch(pendingCenterSummaryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Central de Pendências')),
+      appBar: AppBar(
+        title: const Text('Central de Pendências'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(pendingCenterSummaryProvider),
         child: ListView(
@@ -94,7 +126,9 @@ class PendingCenterScreen extends ConsumerWidget {
           children: [
             pendingAsync.when(
               loading: () => const _LoadingCard(),
-              error: (error, stackTrace) => _ErrorCard(message: error.toString()),
+              error: (error, stackTrace) => _ErrorCard(
+                message: error.toString(),
+              ),
               data: (summary) => Column(
                 children: [
                   _PendingTile(

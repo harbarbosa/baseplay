@@ -8,10 +8,13 @@ class Endpoints {
       '/api/events/$eventId/participants';
   static String eventAttendance(int eventId) =>
       '/api/events/$eventId/attendance';
+  static String eventConfirm(int eventId) => '/api/events/$eventId/confirm';
 
   static const notices = '/api/notices';
   static String noticeById(int id) => '/api/notices/$id';
   static String noticeRead(int id) => '/api/notices/$id/read';
+  static String noticeReplies(int id) => '/api/notices/$id/replies';
+  static String noticeReply(int id) => '/api/notices/$id/reply';
 
   static const athletes = '/api/athletes';
   static String athleteById(int id) => '/api/athletes/$id';
@@ -21,6 +24,7 @@ class Endpoints {
   static const documents = '/api/documents';
   static const documentTypes = '/api/document-types';
   static const documentAlerts = '/api/documents/alerts';
+  static const documentsMissingRequired = '/api/documents/missing-required';
   static String reportAthlete(int athleteId) =>
       '/api/reports/athlete/$athleteId';
 

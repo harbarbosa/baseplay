@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../state/providers.dart';
+import '../../core/navigation/nav_items.dart';
 
 class MainShellScreen extends ConsumerWidget {
   final Widget child;
@@ -16,8 +17,10 @@ class MainShellScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final permissions = ref.watch(authUserProvider)?.permissions.toSet() ?? <String>{};
-    final destinations = _destinationsForPermissions(permissions);
+    final permissions = ref.watch(authUserProvider)?.capabilities.toSet() ??
+        ref.watch(authUserProvider)?.permissions.toSet() ??
+        <String>{};
+    final destinations = visibleNavItems(permissions);
     final currentIndex = _indexFromLocation(location, destinations);
 
     return Scaffold(
@@ -38,8 +41,9 @@ class MainShellScreen extends ConsumerWidget {
             .toList(growable: false),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: currentIndex == 3
-          || (currentIndex >= 0 && destinations[currentIndex].route == '/home/profile')
+      floatingActionButton: currentIndex == 3 ||
+              (currentIndex >= 0 &&
+                  destinations[currentIndex].route == '/home/profile')
           ? null
           : FloatingActionButton.small(
               tooltip: 'Sair',
@@ -54,76 +58,11 @@ class MainShellScreen extends ConsumerWidget {
     );
   }
 
-  int _indexFromLocation(String value, List<_NavItem> items) {
+  int _indexFromLocation(String value, List<NavItem> items) {
     final idx = items.indexWhere((item) => value.startsWith(item.route));
     if (idx >= 0) {
       return idx;
     }
     return 0;
   }
-
-  List<_NavItem> _destinationsForPermissions(Set<String> permissions) {
-    final has = (String permission) => permissions.contains(permission);
-    final items = <_NavItem>[];
-
-    if (has('events.view')) {
-      items.add(
-        const _NavItem(
-          route: '/home/agenda',
-          label: 'Agenda',
-          iconOutlined: Icons.calendar_month_outlined,
-          iconFilled: Icons.calendar_month,
-        ),
-      );
-    }
-
-    if (has('notices.view')) {
-      items.add(
-        const _NavItem(
-          route: '/home/notices',
-          label: 'Avisos',
-          iconOutlined: Icons.campaign_outlined,
-          iconFilled: Icons.campaign,
-        ),
-      );
-    }
-
-    if (has('athletes.view')) {
-      items.add(
-        const _NavItem(
-          route: '/home/athletes',
-          label: 'Atletas',
-          iconOutlined: Icons.groups_2_outlined,
-          iconFilled: Icons.groups_2,
-        ),
-      );
-    }
-
-    if (has('dashboard.view') || items.isEmpty) {
-      items.add(
-        const _NavItem(
-          route: '/home/profile',
-          label: 'Painel',
-          iconOutlined: Icons.dashboard_outlined,
-          iconFilled: Icons.dashboard,
-        ),
-      );
-    }
-
-    return items;
-  }
-}
-
-class _NavItem {
-  final String route;
-  final String label;
-  final IconData iconOutlined;
-  final IconData iconFilled;
-
-  const _NavItem({
-    required this.route,
-    required this.label,
-    required this.iconOutlined,
-    required this.iconFilled,
-  });
 }

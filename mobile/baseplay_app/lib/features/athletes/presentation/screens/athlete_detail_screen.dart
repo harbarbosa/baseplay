@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,7 +6,11 @@ import '../../domain/models/attendance_history_model.dart';
 import '../../domain/models/athlete_model.dart';
 import '../../domain/models/athlete_summary_model.dart';
 import '../../../../presentation/state/providers.dart';
+import '../../../../presentation/widgets/team_selector_action.dart';
 import '../state/athletes_providers.dart';
+import '../../../documents/presentation/state/documents_providers.dart';
+import '../../../documents/domain/models/document_model.dart';
+import '../../../../core/auth/permissions.dart';
 
 class AthleteDetailScreen extends ConsumerWidget {
   final int athleteId;
@@ -17,45 +21,74 @@ class AthleteDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final athleteAsync = ref.watch(athleteDetailProvider(athleteId));
     final summaryAsync = ref.watch(athleteSummaryProvider(athleteId));
-    final canViewDocuments =
-        ref.watch(authUserProvider)?.hasPermission('documents.view') ?? false;
+    final canViewDocuments = ref
+            .watch(authUserProvider)
+            ?.hasPermission(Permissions.documentsViewTeam) ??
+        false;
+    final canUploadDocuments = ref
+            .watch(authUserProvider)
+            ?.hasPermission(Permissions.documentsUpload) ??
+        false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Perfil do atleta')),
+      appBar: AppBar(
+        title: const Text('Perfil do atleta'),
+        actions: const [TeamSelectorAction()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(athleteDetailProvider(athleteId));
           ref.invalidate(athleteSummaryProvider(athleteId));
+          ref.invalidate(documentsByAthleteProvider(athleteId));
         },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          children: [
-            athleteAsync.when(
-              loading: () => const _LoadingCard(),
-              error: (error, stackTrace) =>
-                  _ErrorCard(message: error.toString()),
-              data: (athlete) => _AthleteHeader(athlete: athlete),
-            ),
-            const SizedBox(height: 12),
-            if (canViewDocuments)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () =>
-                      context.push('/home/documents/athlete/$athleteId'),
-                  icon: const Icon(Icons.folder_copy_outlined),
-                  label: const Text('Ver documentos'),
+        child: DefaultTabController(
+          length: canViewDocuments ? 2 : 1,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: athleteAsync.when(
+                  loading: () => const _LoadingCard(),
+                  error: (error, stackTrace) =>
+                      _ErrorCard(message: error.toString()),
+                  data: (athlete) => _AthleteHeader(athlete: athlete),
                 ),
               ),
-            const SizedBox(height: 12),
-            summaryAsync.when(
-              loading: () => const _LoadingCard(),
-              error: (error, stackTrace) =>
-                  _ErrorCard(message: error.toString()),
-              data: (summary) => _SummaryContent(summary: summary),
-            ),
-          ],
+              const SizedBox(height: 8),
+              if (canViewDocuments)
+                const TabBar(
+                  tabs: [
+                    Tab(text: 'Resumo'),
+                    Tab(text: 'Documentos'),
+                  ],
+                )
+              else
+                const SizedBox(height: 8),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        summaryAsync.when(
+                          loading: () => const _LoadingCard(),
+                          error: (error, stackTrace) =>
+                              _ErrorCard(message: error.toString()),
+                          data: (summary) => _SummaryContent(summary: summary),
+                        ),
+                      ],
+                    ),
+                    if (canViewDocuments)
+                      _DocumentsTab(
+                        athleteId: athleteId,
+                        canUpload: canUploadDocuments,
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -132,7 +165,7 @@ class _SummaryContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Historico de presenca',
+                  'Histórico de Presença',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
                 const SizedBox(height: 10),
@@ -164,17 +197,17 @@ class _CardsGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _MiniCard(
-                title: 'Presenca',
+                title: 'Presença',
                 value: '${summary.presencePercentage.toStringAsFixed(1)}%',
                 subtitle:
-                    '${summary.totalSessions} sessoes | ${summary.absences} faltas',
+                    '${summary.totalSessions} sessões | ${summary.absences} faltas',
                 icon: Icons.fact_check_outlined,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _MiniCard(
-                title: 'Ultima atividade',
+                title: 'Última atividade',
                 value: summary.lastTrainingDate != null
                     ? _formatDate(summary.lastTrainingDate)
                     : '--',
@@ -204,7 +237,7 @@ class _CardsGrid extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _MiniCard(
-                title: 'Proximo evento',
+                title: 'Próximo evento',
                 value: summary.nextEventType == null
                     ? '--'
                     : _eventType(summary.nextEventType!),
@@ -427,3 +460,133 @@ class _ErrorCard extends StatelessWidget {
     );
   }
 }
+
+class _DocumentsTab extends ConsumerWidget {
+  final int athleteId;
+  final bool canUpload;
+
+  const _DocumentsTab({
+    required this.athleteId,
+    required this.canUpload,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final docsAsync = ref.watch(documentsByAthleteProvider(athleteId));
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      children: [
+        if (canUpload)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  context.push('/home/documents/athlete/$athleteId/upload'),
+              icon: const Icon(Icons.upload_file_outlined),
+              label: const Text('Upload de documento'),
+            ),
+          ),
+        if (canUpload) const SizedBox(height: 12),
+        docsAsync.when(
+          loading: () => const Card(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ),
+          error: (error, stackTrace) => Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(error.toString()),
+            ),
+          ),
+          data: (docs) {
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Nenhum documento enviado para este atleta.'),
+                ),
+              );
+            }
+
+            final sorted = [...docs]
+              ..sort((a, b) {
+                final aTs =
+                    a.expiresAt?.millisecondsSinceEpoch ??
+                    DateTime(9999).millisecondsSinceEpoch;
+                final bTs =
+                    b.expiresAt?.millisecondsSinceEpoch ??
+                    DateTime(9999).millisecondsSinceEpoch;
+                return aTs.compareTo(bTs);
+              });
+
+            return Column(
+              children:
+                  sorted.map((doc) => _DocumentTile(document: doc)).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DocumentTile extends StatelessWidget {
+  final DocumentModel document;
+
+  const _DocumentTile({required this.document});
+
+  @override
+  Widget build(BuildContext context) {
+    final status = _statusInfo(document);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        title: Text(document.typeName ?? 'Documento'),
+        subtitle: Text(
+          'Arquivo: ${document.originalName ?? '-'}\nVencimento: ${_formatDate(document.expiresAt)}',
+        ),
+        isThreeLine: true,
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: status.color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            status.label,
+            style: TextStyle(
+              color: status.color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  ({String label, Color color}) _statusInfo(DocumentModel doc) {
+    if (doc.isExpired) {
+      return (label: 'Vencido', color: Colors.red);
+    }
+    if (doc.isExpiringSoon) {
+      return (label: 'Vencendo', color: Colors.orange);
+    }
+    return (label: 'OK', color: Colors.green);
+  }
+
+  String _formatDate(DateTime? value) {
+    if (value == null) {
+      return '-';
+    }
+    final d = value.day.toString().padLeft(2, '0');
+    final m = value.month.toString().padLeft(2, '0');
+    final y = value.year.toString();
+    return '$d/$m/$y';
+  }
+}
+

@@ -1,0 +1,87 @@
+/* PlayAcademy brand palette
+   Blue: #082a73
+   Green: #0a9b53
+*/
+:root {
+  --bs-primary: #082a73;
+  --bs-primary-rgb: 8, 42, 115;
+  --bs-primary-text-emphasis: #04163f;
+  --bs-primary-bg-subtle: #e8eef9;
+  --bs-primary-border-subtle: #c9d8f3;
+
+  --bs-success: #0a9b53;
+  --bs-success-rgb: 10, 155, 83;
+  --bs-success-text-emphasis: #075d32;
+  --bs-success-bg-subtle: #e8f8ef;
+  --bs-success-border-subtle: #c8edd9;
+
+  --bs-link-color: #082a73;
+  --bs-link-hover-color: #0a9b53;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: #0a3a99;
+  --bs-btn-hover-border-color: #0a3a99;
+  --bs-btn-active-bg: #06225f;
+  --bs-btn-active-border-color: #06225f;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+}
+
+.menu-vertical .menu-item.active > .menu-link,
+.menu-vertical .menu-item.open > .menu-link {
+  background-color: color-mix(in sRGB, var(--bs-success) 10%, #ffffff) !important;
+  color: var(--bs-primary) !important;
+  font-weight: 600;
+}
+
+.menu-vertical .menu-item .menu-link:hover {
+  background-color: color-mix(in sRGB, var(--bs-success) 10%, #ffffff) !important;
+  color: var(--bs-primary) !important;
+}
+
+.menu-vertical .menu-item.active > .menu-link i,
+.menu-vertical .menu-item.open > .menu-link i,
+.menu-vertical .menu-item .menu-link:hover i {
+  color: inherit;
+}
+
+/* Indicador do item ativo no menu lateral (linha) */
+.layout-wrapper:not(.layout-horizontal) .menu-vertical .menu-inner > .menu-item.active::before,
+.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle)::before {
+  background-color: var(--bs-success) !important;
+}
+
+/* Barra do scroll do menu lateral (Perfect Scrollbar) */
+#layout-menu .ps__thumb-y {
+  background-color: var(--bs-success) !important;
+}
+
+.app-brand-text {
+  color: var(--bs-primary) !important;
+}
+
+.breadcrumb-item a {
+  color: var(--bs-primary);
+}
+
+.breadcrumb-item a:hover {
+  color: var(--bs-success);
+}
+
+.layout-navbar {
+  border-bottom: 2px solid color-mix(in sRGB, var(--bs-success) 55%, #ffffff);
+}
+
+.container-xxl > h4.fw-bold {
+  color: var(--bs-primary);
+  border-left: 4px solid var(--bs-success);
+  padding-left: 0.6rem;
+}

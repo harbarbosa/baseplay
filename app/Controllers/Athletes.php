@@ -108,7 +108,14 @@ class Athletes extends BaseController
             return redirect()->back()->withInput()->with('error', 'A data de nascimento nao pode ser futura.');
         }
 
-        $athleteId = $this->athletes->create($this->request->getPost());
+        try {
+            $athleteId = $this->athletes->create($this->request->getPost());
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+        if ($athleteId <= 0) {
+            return redirect()->back()->withInput()->with('error', 'Falha ao criar o atleta.');
+        }
         Services::audit()->log(session('user_id'), 'athlete_created', ['athlete_id' => $athleteId]);
 
         return redirect()->to('/athletes/' . $athleteId)->with('success', 'Atleta criado com sucesso.');
@@ -210,7 +217,11 @@ class Athletes extends BaseController
             return redirect()->back()->withInput()->with('error', 'A data de nascimento nao pode ser futura.');
         }
 
-        $this->athletes->update($id, $this->request->getPost());
+        try {
+            $this->athletes->update($id, $this->request->getPost());
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
         Services::audit()->log(session('user_id'), 'athlete_updated', ['athlete_id' => $id]);
 
         return redirect()->to('/athletes/' . $id)->with('success', 'Atleta atualizado.');

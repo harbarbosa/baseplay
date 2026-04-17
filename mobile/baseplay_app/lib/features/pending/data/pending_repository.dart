@@ -27,13 +27,16 @@ class PendingRepository {
     final items = <PendingItem>[];
     final isStaff = _isStaff(user);
 
-    items.addAll(await _loadUnreadNotices());
+    if (isStaff) {
+      items.addAll(await _loadUnreadNotices());
+    }
 
     if (isStaff) {
       items.addAll(await _loadTeamDocumentAlerts());
       items.addAll(await _loadMissingRequiredDocuments());
     } else {
       items.addAll(await _loadSelfDocumentAlerts());
+      items.addAll(await _loadSelfMissingRequiredDocuments());
       items.addAll(await _loadEventConfirmations());
     }
 
@@ -193,6 +196,36 @@ class PendingRepository {
       return [
         PendingItem(
           id: 'docs-missing',
+          type: PendingType.documents,
+          title: 'Documentos obrigatórios pendentes',
+          description: '$count pendência(s) encontrada(s).',
+          priority: PendingPriority.high,
+          ctaLabel: 'Ver documentos',
+          actionType: PendingActionType.openRoute,
+          route: '/home/documents',
+        ),
+      ];
+    } on DioException {
+      return const [];
+    }
+  }
+
+  Future<List<PendingItem>> _loadSelfMissingRequiredDocuments() async {
+    try {
+      final response = await _api.dio.get(Endpoints.documentsMissingRequired);
+      final payload = ApiResponseParser.extractData(response.data);
+      final data = ApiResponseParser.asMap(payload);
+      final items = (data['items'] as List?) ?? const [];
+      final pager = ApiResponseParser.asMap(data['pager']);
+      final count =
+          int.tryParse('${pager['total'] ?? items.length}') ?? items.length;
+      if (count <= 0) {
+        return const [];
+      }
+
+      return [
+        PendingItem(
+          id: 'self-docs-missing',
           type: PendingType.documents,
           title: 'Documentos obrigatórios pendentes',
           description: '$count pendência(s) encontrada(s).',

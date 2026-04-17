@@ -7,8 +7,10 @@ use App\Services\DocumentTypeService;
 use App\Services\DocumentOverviewService;
 use App\Services\TeamService;
 use App\Services\AthleteService;
+use App\Services\AthleteGuardianService;
 use App\Services\CategoryService;
 use App\Models\GuardianModel;
+use App\Models\UserModel;
 use Config\Services;
 
 class Documents extends BaseController
@@ -18,6 +20,7 @@ class Documents extends BaseController
     protected DocumentOverviewService $overview;
     protected TeamService $teams;
     protected AthleteService $athletes;
+    protected AthleteGuardianService $athleteGuardians;
     protected CategoryService $categories;
 
     public function __construct()
@@ -26,12 +29,14 @@ class Documents extends BaseController
         $this->types = new DocumentTypeService();
         $this->teams = new TeamService();
         $this->athletes = new AthleteService();
+        $this->athleteGuardians = new AthleteGuardianService();
         $this->categories = new CategoryService();
         $this->overview = new DocumentOverviewService();
     }
 
     public function index()
     {
+        $athleteContext = $this->resolveCurrentAthleteContext();
         $guardianContext = $this->resolveCurrentGuardianContext();
 
         $filters = [
@@ -48,8 +53,14 @@ class Documents extends BaseController
             'sort' => $this->request->getGet('sort') ?: 'expires_nearest',
         ];
 
+        if ($athleteContext['is_athlete']) {
+            $filters['athlete_id'] = $athleteContext['athlete_id'];
+        } elseif ($guardianContext['is_guardian']) {
+            $guardianAthletes = $this->athleteGuardians->listByGuardian((int) $guardianContext['guardian_id']);
+            $filters['athlete_ids'] = array_values(array_filter(array_map(static fn($row) => (int) ($row['athlete_id'] ?? 0), $guardianAthletes)));
+        }
+
         if ($guardianContext['is_guardian']) {
-            $filters['uploaded_by'] = (int) session('user_id');
             if ($guardianContext['guardian_id']) {
                 $filters['guardian_id'] = $guardianContext['guardian_id'];
             }
@@ -599,6 +610,24 @@ class Documents extends BaseController
             'is_guardian' => true,
             'guardian_id' => $guardian['id'] ?? null,
             'guardian_name' => $guardian['full_name'] ?? null,
+        ];
+    }
+
+    protected function resolveCurrentAthleteContext(): array
+    {
+        $userId = (int) session('user_id');
+        if ($userId <= 0) {
+            return ['is_athlete' => false, 'athlete_id' => null];
+        }
+
+        $user = (new UserModel())->find($userId);
+        if (!$user || empty($user['athlete_id'])) {
+            return ['is_athlete' => false, 'athlete_id' => null];
+        }
+
+        return [
+            'is_athlete' => true,
+            'athlete_id' => (int) $user['athlete_id'],
         ];
     }
 }

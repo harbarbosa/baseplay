@@ -41,7 +41,7 @@ class MatchCallupService
             return (int) $existing['id'];
         }
 
-        return (int) $this->callups->insert([
+        $callupId = (int) $this->callups->insert([
             'match_id' => $matchId,
             'athlete_id' => $athleteId,
             'callup_status' => $status,
@@ -49,6 +49,10 @@ class MatchCallupService
             'created_at' => Time::now()->toDateTimeString(),
             'updated_at' => Time::now()->toDateTimeString(),
         ]);
+
+        $this->syncTravelEventParticipant($matchId, $athleteId, $status);
+
+        return $callupId;
     }
 
     public function addParticipantsBulk(int $matchId, array $athleteIds): int
@@ -94,16 +98,34 @@ class MatchCallupService
 
     public function update(int $id, string $status, int $isStarting = 0): bool
     {
-        return $this->callups->update($id, [
+        $updated = $this->callups->update($id, [
             'callup_status' => $status,
             'is_starting' => $isStarting,
             'updated_at' => Time::now()->toDateTimeString(),
         ]);
+        if ($updated) {
+            $callup = $this->callups->find($id);
+            if ($callup) {
+                $this->syncTravelEventParticipant((int) $callup['match_id'], (int) $callup['athlete_id'], $status);
+            }
+        }
+
+        return $updated;
     }
 
     public function delete(int $id): bool
     {
-        return $this->callups->delete($id);
+        $callup = $this->callups->find($id);
+        if (!$callup) {
+            return false;
+        }
+
+        $deleted = $this->callups->delete($id);
+        if ($deleted) {
+            $this->removeTravelEventParticipant((int) $callup['match_id'], (int) $callup['athlete_id']);
+        }
+
+        return $deleted;
     }
 
     public function find(int $id): array
@@ -117,5 +139,62 @@ class MatchCallupService
             ->where('match_id', $matchId)
             ->where('athlete_id', $athleteId)
             ->first();
+    }
+
+    protected function syncTravelEventParticipant(int $matchId, int $athleteId, string $status = 'invited'): void
+    {
+        $travelEventId = $this->getTravelEventId($matchId);
+        if (!$travelEventId) {
+            return;
+        }
+
+        $existing = $this->eventParticipants
+            ->where('event_id', $travelEventId)
+            ->where('athlete_id', $athleteId)
+            ->first();
+
+        if ($existing) {
+            $this->eventParticipants->update((int) $existing['id'], [
+                'invitation_status' => $status,
+                'updated_at' => Time::now()->toDateTimeString(),
+            ]);
+            return;
+        }
+
+        $this->eventParticipants->insert([
+            'event_id' => $travelEventId,
+            'athlete_id' => $athleteId,
+            'invitation_status' => $status,
+            'created_at' => Time::now()->toDateTimeString(),
+            'updated_at' => Time::now()->toDateTimeString(),
+        ]);
+    }
+
+    protected function removeTravelEventParticipant(int $matchId, int $athleteId): void
+    {
+        $travelEventId = $this->getTravelEventId($matchId);
+        if (!$travelEventId) {
+            return;
+        }
+
+        $this->eventParticipants
+            ->where('event_id', $travelEventId)
+            ->where('athlete_id', $athleteId)
+            ->delete();
+    }
+
+    protected function getTravelEventId(int $matchId): ?int
+    {
+        $row = db_connect()->table('matches')
+            ->select('travel_event_id')
+            ->where('id', $matchId)
+            ->get()
+            ->getRowArray();
+
+        if (!$row || empty($row['travel_event_id'])) {
+            return null;
+        }
+
+        return (int) $row['travel_event_id'];
     }
 }

@@ -51,10 +51,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _email,
-                      decoration: const InputDecoration(labelText: 'E-mail'),
-                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail ou CPF',
+                        helperText: 'CPF somente números',
+                      ),
+                      keyboardType: TextInputType.text,
                       validator: (value) => (value == null || value.isEmpty)
-                          ? 'Informe o e-mail'
+                          ? 'Informe o e-mail ou CPF'
                           : null,
                     ),
                     const SizedBox(height: 12),
@@ -84,9 +87,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 if (_formKey.currentState?.validate() != true) {
                                   return;
                                 }
+                                final rawLogin = _email.text.trim();
+                                final numericLogin =
+                                    rawLogin.replaceAll(RegExp(r'\D'), '');
+                                final loginValue =
+                                    rawLogin.contains('@') && rawLogin.isNotEmpty
+                                        ? rawLogin
+                                        : (numericLogin.length == 11
+                                            ? numericLogin
+                                            : rawLogin);
                                 ref
                                     .read(authControllerProvider.notifier)
-                                    .login(_email.text.trim(), _password.text);
+                                    .login(loginValue, _password.text);
                               },
                         child: state.isLoading
                             ? const SizedBox(

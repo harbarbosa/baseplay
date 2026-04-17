@@ -4,17 +4,23 @@ namespace App\Services;
 
 use App\Models\DocumentModel;
 use App\Models\DocumentTypeModel;
+use App\Models\UserModel;
+use App\Models\GuardianModel;
 use CodeIgniter\I18n\Time;
 
 class DocumentService
 {
     protected DocumentModel $documents;
     protected DocumentTypeModel $types;
+    protected UserModel $users;
+    protected GuardianModel $guardians;
 
     public function __construct()
     {
         $this->documents = new DocumentModel();
         $this->types = new DocumentTypeModel();
+        $this->users = new UserModel();
+        $this->guardians = new GuardianModel();
     }
 
     public function list(array $filters = [], int $perPage = 15, string $group = 'documents'): array
@@ -36,6 +42,14 @@ class DocumentService
 
         if (!empty($filters['athlete_id'])) {
             $model = $model->where('documents.athlete_id', (int) $filters['athlete_id']);
+        }
+        if (!empty($filters['athlete_ids']) && is_array($filters['athlete_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['athlete_ids'])));
+            if ($ids !== []) {
+                $model = $model->whereIn('documents.athlete_id', $ids);
+            } else {
+                $model = $model->where('documents.athlete_id', 0);
+            }
         }
         if (!empty($filters['team_id'])) {
             $model = $model->where('documents.team_id', (int) $filters['team_id']);
@@ -106,6 +120,17 @@ class DocumentService
         }
         if (!empty($filters['category_id'])) {
             $base->where('categories.id', (int) $filters['category_id']);
+        }
+        if (!empty($filters['athlete_id'])) {
+            $base->where('d.athlete_id', (int) $filters['athlete_id']);
+        }
+        if (!empty($filters['athlete_ids']) && is_array($filters['athlete_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['athlete_ids'])));
+            if ($ids !== []) {
+                $base->whereIn('d.athlete_id', $ids);
+            } else {
+                $base->where('d.athlete_id', 0);
+            }
         }
 
         $today = date('Y-m-d');
@@ -319,6 +344,27 @@ class DocumentService
             return true;
         }
 
+        $athleteId = $this->getAthleteIdForUser($userId);
+        if ($athleteId !== null && !empty($document['athlete_id'])) {
+            return (int) $document['athlete_id'] === $athleteId;
+        }
+
+        $guardianId = $this->getGuardianIdForUser($userId);
+        if ($guardianId !== null) {
+            if (!empty($document['guardian_id']) && (int) $document['guardian_id'] === $guardianId) {
+                return true;
+            }
+            if (!empty($document['athlete_id'])) {
+                $hasLink = db_connect()->table('athlete_guardians')
+                    ->where('guardian_id', $guardianId)
+                    ->where('athlete_id', (int) $document['athlete_id'])
+                    ->countAllResults();
+                if ($hasLink > 0) {
+                    return true;
+                }
+            }
+        }
+
         $teamIds = $this->getUserTeamIds($userId);
         if ($teamIds === []) {
             return false;
@@ -334,6 +380,31 @@ class DocumentService
         }
 
         return false;
+    }
+
+    protected function getAthleteIdForUser(int $userId): ?int
+    {
+        $user = $this->users->find($userId);
+        if (!$user || empty($user['athlete_id'])) {
+            return null;
+        }
+
+        return (int) $user['athlete_id'];
+    }
+
+    protected function getGuardianIdForUser(int $userId): ?int
+    {
+        $user = $this->users->find($userId);
+        if (!$user || empty($user['email'])) {
+            return null;
+        }
+
+        $guardian = $this->guardians
+            ->where('deleted_at', null)
+            ->where('email', $user['email'])
+            ->first();
+
+        return $guardian ? (int) $guardian['id'] : null;
     }
 
     public function updateExpiredStatuses(): void

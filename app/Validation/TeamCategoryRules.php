@@ -44,6 +44,38 @@ class TeamCategoryRules
             ->countAllResults() === 1;
     }
 
+    public function athleteCpfUnique(string $str, ?string $fields = null, array $data = []): bool
+    {
+        $cpf = preg_replace('/\D+/', '', $str ?? '');
+        if ($cpf === '') {
+            return true;
+        }
+
+        $ignoreId = ($fields !== null && $fields !== '') ? (int) $fields : 0;
+
+        $athletes = db_connect()->table('athletes')
+            ->where('cpf', $cpf)
+            ->where('deleted_at', null);
+        if ($ignoreId > 0) {
+            $athletes->where('id !=', $ignoreId);
+        }
+        if ($athletes->countAllResults() > 0) {
+            return false;
+        }
+
+        $users = db_connect()->table('users')
+            ->select('id, athlete_id')
+            ->where('email', $cpf)
+            ->where('deleted_at', null);
+        if ($ignoreId > 0) {
+            $users->groupStart()
+                ->where('athlete_id IS NULL', null, false)
+                ->orWhere('athlete_id !=', $ignoreId)
+                ->groupEnd();
+        }
+        return $users->countAllResults() === 0;
+    }
+
     public function teamExists($str, ?string $fields = null, array $data = []): bool
     {
         $teamId = (int) $str;
@@ -158,7 +190,7 @@ class TeamCategoryRules
             ->get()
             ->getRowArray();
         if (!$session) {
-            $error = 'Sessão inválida';
+            $error = 'Sess?o inv?lida';
             return false;
         }
 
@@ -169,7 +201,7 @@ class TeamCategoryRules
             ->get()
             ->getRowArray();
         if (!$athlete) {
-            $error = 'Atleta inválido';
+            $error = 'Atleta inv?lido';
             return false;
         }
 

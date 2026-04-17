@@ -9,6 +9,9 @@ use App\Services\TeamService;
 use App\Services\CategoryService;
 use App\Services\AthleteService;
 use App\Services\EventRecipientService;
+use App\Services\MatchService;
+use App\Services\MatchReportService;
+use App\Models\MatchTacticalBoardModel;
 use App\Models\RoleModel;
 use Config\Services;
 
@@ -21,6 +24,9 @@ class Events extends BaseController
     protected CategoryService $categories;
     protected AthleteService $athletes;
     protected EventRecipientService $recipients;
+    protected MatchService $matches;
+    protected MatchReportService $reports;
+    protected MatchTacticalBoardModel $matchBoards;
 
     public function __construct()
     {
@@ -31,6 +37,9 @@ class Events extends BaseController
         $this->categories = new CategoryService();
         $this->athletes = new AthleteService();
         $this->recipients = new EventRecipientService();
+        $this->matches = new MatchService();
+        $this->reports = new MatchReportService();
+        $this->matchBoards = new MatchTacticalBoardModel();
     }
 
     public function index()
@@ -45,9 +54,6 @@ class Events extends BaseController
         ];
 
         $filters['team_id'] = $this->pickScopedTeamId((int) ($filters['team_id'] ?? 0));
-        if (empty($filters['type'])) {
-            $filters['exclude_types'] = ['TRAINING', 'MATCH'];
-        }
         $categoryId = (int) ($filters['category_id'] ?? 0);
         if ($categoryId > 0) {
             $filters['category_id'] = $this->pickScopedCategoryId($categoryId);
@@ -227,10 +233,31 @@ class Events extends BaseController
             return $response;
         }
 
+        $match = null;
+        $matchReport = null;
+        $linkedBoards = [];
+        if (($event['type'] ?? '') === 'MATCH') {
+            $match = $this->matches->findByEventId((int) $event['id']);
+            if ($match) {
+                $matchReport = $this->reports->findByMatch((int) $match['id']);
+                $linkedBoards = $this->matchBoards
+                    ->select('match_tactical_boards.tactical_board_id, tactical_boards.title AS board_title, teams.name AS team_name, categories.name AS category_name')
+                    ->join('tactical_boards', 'tactical_boards.id = match_tactical_boards.tactical_board_id', 'inner')
+                    ->join('teams', 'teams.id = tactical_boards.team_id', 'left')
+                    ->join('categories', 'categories.id = tactical_boards.category_id', 'left')
+                    ->where('match_tactical_boards.match_id', (int) $match['id'])
+                    ->orderBy('tactical_boards.updated_at', 'DESC')
+                    ->findAll();
+            }
+        }
+
         return view('events/show', [
             'title' => 'Detalhe do evento',
             'event' => $event,
             'types' => $this->eventTypes(),
+            'match' => $match,
+            'matchReport' => $matchReport,
+            'linkedBoards' => $linkedBoards,
         ]);
     }
 
@@ -571,8 +598,8 @@ class Events extends BaseController
         return [
             'TRAINING' => 'Treino',
             'MATCH' => 'Jogo',
-            'MEETING' => 'ReuniÃ£o',
-            'EVALUATION' => 'AvaliaÃ§Ã£o',
+            'MEETING' => 'Reuni?o',
+            'EVALUATION' => 'Avalia??o',
             'TRAVEL' => 'Viagem',
         ];
     }

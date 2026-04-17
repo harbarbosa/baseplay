@@ -6,17 +6,17 @@
 <form method="post" action="<?= base_url('login') ?>" autocomplete="off" class="bp-form">
     <?= csrf_field() ?>
     <div class="bp-form-group">
-        <label for="email">E-mail</label>
+        <label for="email">E-mail ou CPF</label>
         <input
             id="email"
             name="email"
-            type="email"
+            type="text"
             value="<?= esc(old('email')) ?>"
             autocomplete="new-password"
             autocapitalize="off"
             autocorrect="off"
             spellcheck="false"
-            inputmode="email"
+            inputmode="text"
             readonly
             required
             class="bp-input"

@@ -16,6 +16,7 @@ class AthleteModel extends Model
         'last_name',
         'birth_date',
         'document_id',
+        'cpf',
         'position',
         'dominant_foot',
         'height_cm',

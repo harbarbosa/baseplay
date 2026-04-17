@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/base') ?>
+﻿<?= $this->extend('layouts/base') ?>
 
 <?= $this->section('content') ?>
 <div class="card">
@@ -38,15 +38,15 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="title">TÃ­tulo</label>
+            <label for="title">TÃƒÂ­tulo</label>
             <input id="title" name="title" type="text" value="<?= esc(old('title') ?? $event['title']) ?>" required>
         </div>
         <div class="form-group">
-            <label for="description">DescriÃ§Ã£o</label>
+            <label for="description">DescriÃƒÂ§ÃƒÂ£o</label>
             <input id="description" name="description" type="text" value="<?= esc(old('description') ?? $event['description']) ?>">
         </div>
         <div class="form-group">
-            <label for="start_datetime">InÃ­cio</label>
+            <label for="start_datetime">InÃƒÂ­cio</label>
             <input id="start_datetime" name="start_datetime" type="datetime-local" value="<?= esc(old('start_datetime') ?? str_replace(' ', 'T', $event['start_datetime'])) ?>" required>
         </div>
         <div class="form-group">
@@ -58,12 +58,7 @@
             <input id="location" name="location" type="text" value="<?= esc(old('location') ?? $event['location']) ?>">
         </div>
         <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" name="status">
-                <option value="scheduled" <?= (old('status') ?? $event['status']) === 'scheduled' ? 'selected' : '' ?>>Agendado</option>
-                <option value="cancelled" <?= (old('status') ?? $event['status']) === 'cancelled' ? 'selected' : '' ?>>Cancelado</option>
-                <option value="completed" <?= (old('status') ?? $event['status']) === 'completed' ? 'selected' : '' ?>ConcluÃ­do</option>
-            </select>
+            <label for="status">Status</label>`r`n            <select id="status" name="status">`r`n                <option value="active" <?= (old('status') ?? $event['status']) === 'active' ? 'selected' : '' ?>>Ativo</option>`r`n                <option value="scheduled" <?= (old('status') ?? $event['status']) === 'scheduled' ? 'selected' : '' ?>>Agendado</option>`r`n                <option value="cancelled" <?= (old('status') ?? $event['status']) === 'cancelled' ? 'selected' : '' ?>>Cancelado</option>`r`n                <option value="completed" <?= (old('status') ?? $event['status']) === 'completed' ? 'selected' : '' ?>>Concluido</option>`r`n            </select>
         </div>
 
         <?php
@@ -84,10 +79,10 @@
                 <input type="checkbox" name="participants_all_team" value="1" <?= old('participants_all_team') ? 'checked' : '' ?>>
                 Selecionar todos da equipe
             </label>
-            <small style="color:var(--muted);">VocÃª pode usar os dois ou selecionar atletas especÃ­ficos.</small>
+            <small style="color:var(--muted);">VocÃƒÂª pode usar os dois ou selecionar atletas especÃƒÂ­ficos.</small>
         </div>
         <div class="form-group">
-            <label for="participant_athlete_ids">Selecionar atletas especÃ­ficos</label>
+            <label for="participant_athlete_ids">Selecionar atletas especÃƒÂ­ficos</label>
             <select id="participant_athlete_ids" name="participant_athlete_ids[]" multiple size="8">
                 <?php foreach ($athletes as $athlete): ?>
                     <?php $fullName = trim(($athlete['first_name'] ?? '') . ' ' . ($athlete['last_name'] ?? '')); ?>
@@ -99,7 +94,7 @@
                     </option>
                 <?php endforeach; ?>
             </select>
-            <small style="color:var(--muted);">Use Ctrl (Windows) ou Cmd (Mac) para selecionar mÃºltiplos.</small>
+            <small style="color:var(--muted);">Use Ctrl (Windows) ou Cmd (Mac) para selecionar mÃƒÂºltiplos.</small>
         </div>
         <div class="form-group">
             <label>Atletas da categoria selecionada</label>
@@ -107,20 +102,20 @@
         </div>
 
         <div class="form-group" style="margin-top:14px;">
-            <strong>ResponsÃ¡veis</strong>
+            <strong>ResponsÃƒÂ¡veis</strong>
         </div>
         <div class="form-group">
             <label style="display:flex; align-items:center; gap:8px;">
                 <input type="checkbox" name="participants_guardians_all_category" value="1" <?= old('participants_guardians_all_category') ? 'checked' : '' ?>>
-                Selecionar responsÃ¡veis da categoria
+                Selecionar responsÃƒÂ¡veis da categoria
             </label>
             <label style="display:flex; align-items:center; gap:8px; margin-top:8px;">
                 <input type="checkbox" name="participants_guardians_all_team" value="1" <?= old('participants_guardians_all_team') ? 'checked' : '' ?>>
-                Selecionar responsÃ¡veis da equipe
+                Selecionar responsÃƒÂ¡veis da equipe
             </label>
         </div>
         <div class="form-group">
-            <label for="participant_guardian_ids">Selecionar responsÃ¡veis especÃ­ficos</label>
+            <label for="participant_guardian_ids">Selecionar responsÃƒÂ¡veis especÃƒÂ­ficos</label>
             <select id="participant_guardian_ids" name="participant_guardian_ids[]" multiple size="6">
                 <?php foreach ($guardians as $guardian): ?>
                     <?php $guardianName = trim($guardian['full_name'] ?? ''); ?>
@@ -132,21 +127,21 @@
             </select>
         </div>
         <div class="form-group">
-            <label>ResponsÃ¡veis da categoria selecionada</label>
+            <label>ResponsÃƒÂ¡veis da categoria selecionada</label>
             <div id="guardian-preview" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
         </div>
 
         <div class="form-group" style="margin-top:14px;">
-            <strong>Equipe TÃ©cnica</strong>
+            <strong>Equipe TÃƒÂ©cnica</strong>
         </div>
         <div class="form-group">
             <label style="display:flex; align-items:center; gap:8px;">
                 <input type="checkbox" name="participants_staff_all_team" value="1" <?= old('participants_staff_all_team') ? 'checked' : '' ?>>
-                Selecionar equipe tÃ©cnica da equipe
+                Selecionar equipe tÃƒÂ©cnica da equipe
             </label>
         </div>
         <div class="form-group">
-            <label for="participant_staff_ids">Selecionar membros especÃ­ficos</label>
+            <label for="participant_staff_ids">Selecionar membros especÃƒÂ­ficos</label>
             <select id="participant_staff_ids" name="participant_staff_ids[]" multiple size="6">
                 <?php foreach ($staff as $staffMember): ?>
                     <?php $staffName = trim($staffMember['name'] ?? ''); ?>
@@ -158,7 +153,7 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Equipe tÃ©cnica da equipe selecionada</label>
+            <label>Equipe tÃƒÂ©cnica da equipe selecionada</label>
             <div id="staff-preview" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
         </div>
 
@@ -242,14 +237,14 @@
             document.getElementById('guardian-preview'),
             '',
             !!categoryId,
-            'Selecione uma categoria para listar os responsÃ¡veis.'
+            'Selecione uma categoria para listar os responsÃƒÂ¡veis.'
         );
         renderPreview(
             staffSelect,
             document.getElementById('staff-preview'),
             '',
             !!teamId,
-            'Selecione uma equipe para listar a equipe tÃ©cnica.'
+            'Selecione uma equipe para listar a equipe tÃƒÂ©cnica.'
         );
     };
 
@@ -259,3 +254,4 @@
 })();
 </script>
 <?= $this->endSection() ?>
+

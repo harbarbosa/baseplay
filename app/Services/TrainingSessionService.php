@@ -6,6 +6,7 @@ use App\Models\TrainingSessionModel;
 use App\Models\TrainingSessionAthleteModel;
 use App\Models\EventModel;
 use App\Services\EventService;
+use App\Services\EventParticipantService;
 use CodeIgniter\I18n\Time;
 
 class TrainingSessionService
@@ -14,6 +15,7 @@ class TrainingSessionService
     protected TrainingSessionAthleteModel $sessionAthletes;
     protected EventModel $events;
     protected EventService $eventService;
+    protected EventParticipantService $participants;
 
     public function __construct()
     {
@@ -21,6 +23,7 @@ class TrainingSessionService
         $this->sessionAthletes = new TrainingSessionAthleteModel();
         $this->events = new EventModel();
         $this->eventService = new EventService();
+        $this->participants = new EventParticipantService();
     }
 
     public function list(array $filters = [], int $perPage = 15, string $group = 'training_sessions'): array
@@ -101,8 +104,8 @@ class TrainingSessionService
             'general_notes' => $data['general_notes'] ?? null,
             'travel_required' => (int) ($data['travel_required'] ?? 0),
             'travel_event_id' => !empty($data['travel_event_id']) ? (int) $data['travel_event_id'] : null,
-            'travel_departure_datetime' => $this->normalizeDateTime($data['travel_departure_datetime'] ?? null),
-            'travel_return_datetime' => $this->normalizeDateTime($data['travel_return_datetime'] ?? null),
+            'travel_departure_datetime' => $this->normalizeDateTime($data['travel_departure_datetime'] ?? null, $data['session_date'] ?? null),
+            'travel_return_datetime' => $this->normalizeDateTime($data['travel_return_datetime'] ?? null, $data['session_date'] ?? null),
             'travel_location' => $data['travel_location'] ?? null,
             'travel_notes' => $data['travel_notes'] ?? null,
             'created_by' => $userId,
@@ -119,6 +122,7 @@ class TrainingSessionService
             $eventId = $this->createOrUpdateEventFromSession($payload, $userId);
             if ($eventId) {
                 $this->sessions->update($sessionId, ['event_id' => $eventId]);
+                $this->ensureTrainingParticipants($eventId, (int) ($payload['category_id'] ?? 0));
             }
         }
 
@@ -147,8 +151,8 @@ class TrainingSessionService
             'general_notes' => $data['general_notes'] ?? null,
             'travel_required' => (int) ($data['travel_required'] ?? 0),
             'travel_event_id' => !empty($data['travel_event_id']) ? (int) $data['travel_event_id'] : null,
-            'travel_departure_datetime' => $this->normalizeDateTime($data['travel_departure_datetime'] ?? null),
-            'travel_return_datetime' => $this->normalizeDateTime($data['travel_return_datetime'] ?? null),
+            'travel_departure_datetime' => $this->normalizeDateTime($data['travel_departure_datetime'] ?? null, $data['session_date'] ?? null),
+            'travel_return_datetime' => $this->normalizeDateTime($data['travel_return_datetime'] ?? null, $data['session_date'] ?? null),
             'travel_location' => $data['travel_location'] ?? null,
             'travel_notes' => $data['travel_notes'] ?? null,
             'updated_at' => Time::now()->toDateTimeString(),
@@ -159,10 +163,12 @@ class TrainingSessionService
             $eventId = $payload['event_id'] ?? null;
             if ($eventId) {
                 $this->createOrUpdateEventFromSession($payload, null, (int) $eventId);
+                $this->ensureTrainingParticipants((int) $eventId, (int) ($payload['category_id'] ?? 0));
             } else {
                 $newEventId = $this->createOrUpdateEventFromSession($payload, null);
                 if ($newEventId) {
                     $this->sessions->update($id, ['event_id' => $newEventId]);
+                    $this->ensureTrainingParticipants((int) $newEventId, (int) ($payload['category_id'] ?? 0));
                 }
             }
 
@@ -279,5 +285,19 @@ class TrainingSessionService
         }
 
         return null;
+    }
+
+    protected function ensureTrainingParticipants(int $eventId, int $categoryId): void
+    {
+        if ($eventId <= 0 || $categoryId <= 0) {
+            return;
+        }
+
+        $existing = $this->participants->listByEvent($eventId);
+        if ($existing !== []) {
+            return;
+        }
+
+        $this->participants->addFromCategory($eventId, $categoryId);
     }
 }

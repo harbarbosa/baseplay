@@ -14,7 +14,7 @@
             <input id="short_name" name="short_name" type="text" value="<?= esc(old('short_name') ?? $team['short_name']) ?>">
         </div>
         <div class="form-group">
-            <label for="description">DescriÃ§Ã£o</label>
+            <label for="description">Descrição</label>
             <input id="description" name="description" type="text" value="<?= esc(old('description') ?? $team['description']) ?>">
         </div>
         <div class="form-group">
@@ -25,11 +25,11 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="primary_color">Cor primÃ¡ria</label>
+            <label for="primary_color">Cor primária</label>
             <input id="primary_color" name="primary_color" type="color" class="bp-color-input" value="<?= esc(old('primary_color') ?? ($team['primary_color'] ?? '#7A1126')) ?>">
         </div>
         <div class="form-group">
-            <label for="secondary_color">Cor secundÃ¡ria</label>
+            <label for="secondary_color">Cor secundária</label>
             <input id="secondary_color" name="secondary_color" type="color" class="bp-color-input" value="<?= esc(old('secondary_color') ?? ($team['secondary_color'] ?? '#F4D6DB')) ?>">
         </div>
         <div class="form-group">
@@ -62,7 +62,7 @@
 
         <h3 style="margin-top:20px;">Dados adicionais</h3>
         <div class="form-group">
-            <label for="legal_name">RazÃ£o social</label>
+            <label for="legal_name">Razão social</label>
             <input id="legal_name" name="legal_name" type="text" value="<?= esc(old('legal_name') ?? $team['legal_name']) ?>">
         </div>
         <div class="form-group">
@@ -74,7 +74,7 @@
             <input id="cnpj" name="cnpj" type="text" value="<?= esc(old('cnpj') ?? $team['cnpj']) ?>">
         </div>
         <div class="form-group">
-            <label for="foundation_date">FundaÃ§Ã£o</label>
+            <label for="foundation_date">Fundação</label>
             <input id="foundation_date" name="foundation_date" type="date" value="<?= esc(old('foundation_date') ?? $team['foundation_date']) ?>">
         </div>
         <div class="form-group">
@@ -98,11 +98,11 @@
             <input id="website" name="website" type="text" value="<?= esc(old('website') ?? $team['website']) ?>">
         </div>
         <div class="form-group">
-            <label for="address_street">EndereÃ§o</label>
+            <label for="address_street">Endereço</label>
             <input id="address_street" name="address_street" type="text" value="<?= esc(old('address_street') ?? $team['address_street']) ?>">
         </div>
         <div class="form-group">
-            <label for="address_number">NÃºmero</label>
+            <label for="address_number">Número</label>
             <input id="address_number" name="address_number" type="text" value="<?= esc(old('address_number') ?? $team['address_number']) ?>">
         </div>
         <div class="form-group">
@@ -126,11 +126,11 @@
             <input id="address_zip" name="address_zip" type="text" value="<?= esc(old('address_zip') ?? $team['address_zip']) ?>">
         </div>
         <div class="form-group">
-            <label for="address_country">PaÃ­s</label>
+            <label for="address_country">País</label>
             <input id="address_country" name="address_country" type="text" value="<?= esc(old('address_country') ?? $team['address_country']) ?>">
         </div>
         <div class="form-group">
-            <label for="notes">ObservaÃ§Ãµes</label>
+            <label for="notes">Observações</label>
             <textarea id="notes" name="notes" rows="3"><?= esc(old('notes') ?? $team['notes']) ?></textarea>
         </div>
 

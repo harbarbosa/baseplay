@@ -24,13 +24,13 @@ class Validation extends BaseConfig
     ];
 
     public array $login = [
-        'email'    => 'required|valid_email',
+        'email'    => 'required',
         'password' => 'required|min_length[6]',
     ];
 
     public array $login_errors = [
         'email' => [
-            'required'    => 'Informe o e-mail.',
+            'required'    => 'Informe o e-mail ou CPF.',
             'valid_email' => 'E-mail invÃ¡lido.',
         ],
         'password' => [
@@ -40,7 +40,7 @@ class Validation extends BaseConfig
     ];
 
     public array $passwordRequest = [
-        'email' => 'required|valid_email',
+        'email'    => 'required|valid_email',
     ];
 
     public array $passwordRequest_errors = [
@@ -136,7 +136,7 @@ class Validation extends BaseConfig
         'first_name'    => 'required|min_length[2]|max_length[80]',
         'last_name'     => 'permit_empty|max_length[120]',
         'birth_date'    => 'required|valid_date[Y-m-d]',
-        'document_id'   => 'permit_empty|max_length[30]',
+        'cpf'           => 'required|numeric|exact_length[11]|athleteCpfUnique',
         'position'      => 'permit_empty|max_length[30]',
         'dominant_foot' => 'permit_empty|in_list[right,left,both]',
         'height_cm'     => 'permit_empty|integer',
@@ -160,6 +160,12 @@ class Validation extends BaseConfig
             'required'   => 'Informe a data de nascimento.',
             'valid_date' => 'Data de nascimento invÃ¡lida.',
         ],
+        'cpf' => [
+            'required' => 'Informe o CPF.',
+            'numeric' => 'CPF invÃ¡lido.',
+            'exact_length' => 'CPF deve conter 11 nÃºmeros.',
+            'athleteCpfUnique' => 'CPF jÃ¡ utilizado.',
+        ],
         'dominant_foot' => [
             'in_list' => 'PÃ© dominante invÃ¡lido.',
         ],
@@ -170,7 +176,7 @@ class Validation extends BaseConfig
         'first_name'    => 'required|min_length[2]|max_length[80]',
         'last_name'     => 'permit_empty|max_length[120]',
         'birth_date'    => 'required|valid_date[Y-m-d]',
-        'document_id'   => 'permit_empty|max_length[30]',
+        'cpf'           => 'required|numeric|exact_length[11]|athleteCpfUnique[{id}]',
         'position'      => 'permit_empty|max_length[30]',
         'dominant_foot' => 'permit_empty|in_list[right,left,both]',
         'height_cm'     => 'permit_empty|integer',
@@ -226,7 +232,7 @@ class Validation extends BaseConfig
         'start_datetime' => 'required|valid_date[Y-m-d H:i:s]',
         'end_datetime'   => 'permit_empty|valid_date[Y-m-d H:i:s]',
         'location'       => 'permit_empty|max_length[190]',
-        'status'         => 'permit_empty|in_list[scheduled,cancelled,completed]',
+        'status'         => 'permit_empty|in_list[active,scheduled,cancelled,completed]',
     ];
 
     public array $eventCreate_errors = [
@@ -260,7 +266,7 @@ class Validation extends BaseConfig
         'start_datetime' => 'required|valid_date[Y-m-d H:i:s]',
         'end_datetime'   => 'permit_empty|valid_date[Y-m-d H:i:s]',
         'location'       => 'permit_empty|max_length[190]',
-        'status'         => 'permit_empty|in_list[scheduled,cancelled,completed]',
+        'status'         => 'permit_empty|in_list[active,scheduled,cancelled,completed]',
     ];
 
     public array $eventParticipantCreate = [
@@ -477,7 +483,7 @@ class Validation extends BaseConfig
 
     public array $trainingSessionAthleteCreate_errors = [
         'athlete_id' => [
-            'trainingSessionAthleteValid' => 'Não foi possível validar o atleta nesta sessão. Verifique atleta e sessão.',
+            'trainingSessionAthleteValid' => 'NÃ£o foi possÃ­vel validar o atleta nesta sessÃ£o. Verifique atleta e sessÃ£o.',
         ],
         'rating' => [
             'ratingRangeValid' => 'Nota deve ser entre 1 e 10.',
@@ -515,4 +521,5 @@ class Validation extends BaseConfig
         ],
     ];
 }
+
 

@@ -81,6 +81,18 @@ class MatchService
         return $builder->get()->getRowArray() ?: null;
     }
 
+    public function findByEventId(int $eventId): ?array
+    {
+        $builder = $this->matches->builder();
+        $builder->select('matches.*, teams.name AS team_name, categories.name AS category_name');
+        $builder->join('teams', 'teams.id = matches.team_id', 'left');
+        $builder->join('categories', 'categories.id = matches.category_id', 'left');
+        $builder->where('matches.event_id', $eventId);
+        $builder->where('matches.deleted_at', null);
+
+        return $builder->get()->getRowArray() ?: null;
+    }
+
     public function create(array $data, int $userId): int
     {
         $payload = $this->payload($data, $userId);
@@ -137,6 +149,18 @@ class MatchService
 
     public function delete(int $id): bool
     {
+        $match = $this->matches->find($id);
+        if (!$match) {
+            return false;
+        }
+
+        if (!empty($match['event_id'])) {
+            $this->eventService->delete((int) $match['event_id']);
+        }
+        if (!empty($match['travel_event_id'])) {
+            $this->eventService->delete((int) $match['travel_event_id']);
+        }
+
         return $this->matches->delete($id);
     }
 
@@ -164,6 +188,13 @@ class MatchService
 
     protected function createOrUpdateEventFromMatch(array $payload, ?int $userId = null, ?int $eventId = null): ?int
     {
+        if ($eventId) {
+            $existing = $this->eventService->find($eventId);
+            if (!$existing || ($existing['type'] ?? '') !== 'MATCH') {
+                $eventId = null;
+            }
+        }
+
         $start = $this->buildMatchDateTime($payload['match_date'] ?? null, $payload['start_time'] ?? null);
 
         $eventPayload = [
@@ -175,7 +206,7 @@ class MatchService
             'start_datetime' => $start ?? Time::now()->toDateTimeString(),
             'end_datetime' => null,
             'location' => $payload['location'] ?? null,
-            'status' => 'scheduled',
+            'status' => $payload['status'] ?? 'scheduled',
         ];
 
         if ($eventId) {
@@ -263,7 +294,7 @@ class MatchService
         $title = 'Viagem';
         $opponent = trim((string) ($payload['opponent_name'] ?? ''));
         if ($opponent !== '') {
-            $title .= ' Ã¢â‚¬â€ Jogo vs ' . $opponent;
+            $title .= ' â€” Jogo vs ' . $opponent;
         }
 
         $eventPayload = [
@@ -275,7 +306,7 @@ class MatchService
             'start_datetime' => $start ?? Time::now()->toDateTimeString(),
             'end_datetime' => $end,
             'location' => $payload['travel_location'] ?? ($payload['location'] ?? null),
-            'status' => 'scheduled',
+            'status' => $payload['status'] ?? 'scheduled',
         ];
 
         if ($eventId) {

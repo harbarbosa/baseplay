@@ -45,7 +45,7 @@
         <h2>Dados</h2>
         <p>Status: <strong><?= esc(enum_label($athlete['status'], 'status')) ?></strong></p>
         <p>Nascimento: <?= esc(format_date_br($athlete['birth_date'])) ?></p>
-        <p>Documento: <?= esc($athlete['document_id'] ?? '-') ?></p>
+        <p>CPF: <?= esc($athlete['cpf'] ?? '-') ?></p>
         <p>Posição: <?= esc($athlete['position'] ?? '-') ?></p>
         <p>Pé dominante: <?= esc($athlete['dominant_foot'] ?? '-') ?></p>
         <p>Altura/Peso: <?= esc($athlete['height_cm'] ?? '-') ?> / <?= esc($athlete['weight_kg'] ?? '-') ?></p>

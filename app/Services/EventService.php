@@ -38,6 +38,34 @@ class EventService
                 $model = $model->whereIn('events.category_id', $ids);
             }
         }
+        if (!empty($filters['athlete_id'])) {
+            $athleteId = (int) $filters['athlete_id'];
+            $model = $model
+                ->join('event_participants', 'event_participants.event_id = events.id', 'left')
+                ->join('matches', 'matches.event_id = events.id', 'left')
+                ->join('match_callups', 'match_callups.match_id = matches.id', 'left')
+                ->groupStart()
+                ->where('event_participants.athlete_id', $athleteId)
+                ->orWhere('match_callups.athlete_id', $athleteId)
+                ->groupEnd()
+                ->groupBy('events.id');
+        }
+        if (!empty($filters['athlete_ids']) && is_array($filters['athlete_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['athlete_ids'])));
+            if ($ids !== []) {
+                $model = $model
+                    ->join('event_participants', 'event_participants.event_id = events.id', 'left')
+                    ->join('matches', 'matches.event_id = events.id', 'left')
+                    ->join('match_callups', 'match_callups.match_id = matches.id', 'left')
+                    ->groupStart()
+                    ->whereIn('event_participants.athlete_id', $ids)
+                    ->orWhereIn('match_callups.athlete_id', $ids)
+                    ->groupEnd()
+                    ->groupBy('events.id');
+            } else {
+                $model = $model->where('events.id', 0);
+            }
+        }
 
         if (!empty($filters['exclude_types']) && empty($filters['type']) && is_array($filters['exclude_types'])) {
             $exclude = array_values(array_filter($filters['exclude_types']));

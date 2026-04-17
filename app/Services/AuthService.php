@@ -31,7 +31,8 @@ class AuthService
 
     public function attemptLogin(string $email, string $password): bool
     {
-        $user = $this->users->findByEmail($email);
+        $login = $this->normalizeLogin($email);
+        $user = $this->users->findByEmail($login);
         if (!$user || $user['status'] !== 'active') {
             return false;
         }
@@ -50,9 +51,25 @@ class AuthService
             'user_id'    => $user['id'],
             'user_name'  => $user['name'],
             'user_email' => $user['email'],
+            'must_change_password' => (int) ($user['must_change_password'] ?? 0),
         ]);
 
         return true;
+    }
+
+    protected function normalizeLogin(string $value): string
+    {
+        $value = trim($value);
+        if (str_contains($value, '@')) {
+            return $value;
+        }
+
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+        if (strlen($digits) === 11) {
+            return $digits;
+        }
+
+        return $value;
     }
 
     public function logout(): void

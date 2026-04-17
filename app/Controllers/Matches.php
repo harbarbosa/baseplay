@@ -317,6 +317,13 @@ class Matches extends BaseController
             }
         }
 
+        if (empty($payload['event_id']) && !empty($match['event_id'])) {
+            $payload['event_id'] = $match['event_id'];
+        }
+        if (empty($payload['travel_event_id']) && !empty($match['travel_event_id'])) {
+            $payload['travel_event_id'] = $match['travel_event_id'];
+        }
+
         $this->matches->update($id, $payload);
         Services::audit()->log(session('user_id'), 'match_updated', ['match_id' => $id]);
 
@@ -613,5 +620,24 @@ class Matches extends BaseController
         }
 
         return $builder->orderBy('tactical_boards.updated_at', 'DESC')->findAll(200);
+    }
+
+    protected function resolveBoardIdsForUser(array $boardIds): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $boardIds), static fn ($id) => $id > 0)));
+        if ($ids === []) {
+            return [];
+        }
+
+        $builder = $this->boards->select('tactical_boards.id, tactical_boards.team_id')
+            ->whereIn('tactical_boards.id', $ids)
+            ->where('tactical_boards.deleted_at', null);
+
+        if ($this->scopedTeamIds !== []) {
+            $builder->whereIn('tactical_boards.team_id', $this->scopedTeamIds);
+        }
+
+        $rows = $builder->findAll();
+        return array_map('intval', array_column($rows, 'id'));
     }
 }

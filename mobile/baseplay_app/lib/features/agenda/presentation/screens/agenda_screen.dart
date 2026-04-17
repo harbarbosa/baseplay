@@ -178,12 +178,24 @@ class _TypeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final normalized = type.toUpperCase();
     final isMatch = normalized == 'MATCH';
-    final color = isMatch ? Colors.orange.shade100 : Colors.green.shade100;
-    final textColor = isMatch ? Colors.orange.shade900 : Colors.green.shade900;
+    final isTraining = normalized == 'TRAINING';
+    final isTravel = normalized == 'TRAVEL';
+    final color = isMatch
+        ? Colors.orange.shade100
+        : isTravel
+        ? Colors.blue.shade100
+        : Colors.green.shade100;
+    final textColor = isMatch
+        ? Colors.orange.shade900
+        : isTravel
+        ? Colors.blue.shade900
+        : Colors.green.shade900;
     final label = isMatch
         ? 'JOGO'
-        : normalized == 'TRAINING'
+        : isTraining
         ? 'TREINO'
+        : isTravel
+        ? 'VIAGEM'
         : normalized;
 
     return Container(

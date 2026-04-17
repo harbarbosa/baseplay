@@ -58,7 +58,7 @@ class DocumentsController extends BaseApiController
         ];
 
         if ($isGuardian) {
-            // ResponsÃ¡vel sÃ³ pode listar documentos prÃ³prios.
+            // Respons?vel s? pode listar documentos pr?prios.
             $filters['guardian_id'] = $guardianIdFromUser ?? -1;
             $filters['team_id'] = null;
         }
@@ -262,15 +262,22 @@ class DocumentsController extends BaseApiController
         }
 
         $guardianId = null;
+        $athleteId = null;
         if ($this->apiUserHasRole('responsavel', $user)) {
             $guardianId = $this->resolveGuardianIdFromApiUser($user);
+        } elseif ($this->apiUserHasRole('atleta', $user)) {
+            $dbUser = (new \App\Models\UserModel())->find($userId);
+            if ($dbUser && !empty($dbUser['athlete_id'])) {
+                $athleteId = (int) $dbUser['athlete_id'];
+            }
         }
 
         $items = $this->pending->missingRequiredDocumentsForApi(
             $teamIds,
             $teamId > 0 ? $teamId : null,
             $categoryId > 0 ? $categoryId : null,
-            $guardianId
+            $guardianId,
+            $athleteId
         );
 
         $total = count($items);

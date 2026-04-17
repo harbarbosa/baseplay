@@ -200,7 +200,13 @@ class PendingCenterService
         return $items;
     }
 
-    public function missingRequiredDocumentsForApi(array $teamIds = [], ?int $teamId = null, ?int $categoryId = null, ?int $guardianId = null): array
+    public function missingRequiredDocumentsForApi(
+        array $teamIds = [],
+        ?int $teamId = null,
+        ?int $categoryId = null,
+        ?int $guardianId = null,
+        ?int $athleteId = null
+    ): array
     {
         $db = db_connect();
         if (! $db->tableExists('category_required_documents')) {
@@ -240,6 +246,10 @@ class PendingCenterService
                 ->where('deleted_at', null)
                 ->where('status', 'active')
                 ->where('category_id', $catId);
+
+            if ($athleteId) {
+                $athletesBuilder->where('athletes.id', (int) $athleteId);
+            }
 
             if ($guardianId) {
                 $athletesBuilder->join('athlete_guardians ag', 'ag.athlete_id = athletes.id', 'inner');

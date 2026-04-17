@@ -19,6 +19,8 @@ class UserModel extends Model
         'api_token_hash',
         'api_token_expires_at',
         'last_login_at',
+        'athlete_id',
+        'must_change_password',
     ];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';

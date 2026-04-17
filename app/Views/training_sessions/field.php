@@ -16,7 +16,7 @@
                         <option value="<?= esc($status) ?>" <?= ($athlete['attendance_status'] ?? 'present') === $status ? 'selected'  : ''  ?>><?= esc(enum_label($status, 'attendance')) ?></option>
                     <?php endforeach; ?>
                 </select>
-                <input type="text" name="performance_note" placeholder="Observação" value="<?= esc($athlete['performance_note'] ?? '') ?>">
+                <input type="text" name="performance_note" placeholder="Avaliacao" aria-label="Avaliacao" value="<?= esc($athlete['performance_note'] ?? '') ?>">
                 <select name="rating">
                     <option value="">Nota</option>
                     <?php foreach (range(1, 10) as $rating): ?>

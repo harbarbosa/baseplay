@@ -100,7 +100,14 @@ class AthletesController extends BaseApiController
             return $this->fail('A data de nascimento não pode ser futura.', 422);
         }
 
-        $athleteId = $this->athletes->create($payload);
+        try {
+            $athleteId = $this->athletes->create($payload);
+        } catch (\RuntimeException $e) {
+            return $this->fail($e->getMessage(), 422);
+        }
+        if ($athleteId <= 0) {
+            return $this->fail('Falha ao criar o atleta.', 500);
+        }
         return $this->ok(['id' => $athleteId], 'Atleta criado.', 201);
     }
 
@@ -127,7 +134,11 @@ class AthletesController extends BaseApiController
             return $this->fail('A data de nascimento não pode ser futura.', 422);
         }
 
-        $this->athletes->update($id, $payload);
+        try {
+            $this->athletes->update($id, $payload);
+        } catch (\RuntimeException $e) {
+            return $this->fail($e->getMessage(), 422);
+        }
         return $this->ok(['id' => $id], 'Atleta atualizado.');
     }
 

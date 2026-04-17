@@ -215,6 +215,13 @@ class TrainingSessions extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
+        if (empty($payload['event_id']) && !empty($session['event_id'])) {
+            $payload['event_id'] = $session['event_id'];
+        }
+        if (empty($payload['travel_event_id']) && !empty($session['travel_event_id'])) {
+            $payload['travel_event_id'] = $session['travel_event_id'];
+        }
+
         $this->sessions->update($id, $payload);
         Services::audit()->log(session('user_id'), 'training_session_updated', ['training_session_id' => $id]);
 
@@ -272,9 +279,29 @@ class TrainingSessions extends BaseController
             return $response;
         }
 
-        $athletes = $this->sessions->listAthletes($id);
-        if (empty($athletes)) {
-            $athletes = $this->athletes->listByCategory((int) $session['category_id'], $this->scopedCategoryIds);
+        $savedAthletes = $this->sessions->listAthletes($id);
+        $categoryAthletes = $this->athletes->listByCategory((int) $session['category_id'], $this->scopedCategoryIds);
+
+        if ($categoryAthletes === []) {
+            $athletes = $savedAthletes;
+        } else {
+            $savedByAthleteId = [];
+            foreach ($savedAthletes as $savedAthlete) {
+                $savedByAthleteId[(int) ($savedAthlete['athlete_id'] ?? 0)] = $savedAthlete;
+            }
+
+            $athletes = [];
+            foreach ($categoryAthletes as $athlete) {
+                $athleteId = (int) ($athlete['id'] ?? 0);
+                $saved = $savedByAthleteId[$athleteId] ?? [];
+
+                $athletes[] = array_merge($athlete, $saved, [
+                    'id' => $athlete['id'] ?? null,
+                    'athlete_id' => $athleteId,
+                    'first_name' => $athlete['first_name'] ?? ($saved['first_name'] ?? ''),
+                    'last_name' => $athlete['last_name'] ?? ($saved['last_name'] ?? ''),
+                ]);
+            }
         }
 
         return view('training_sessions/field', [

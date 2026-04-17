@@ -44,8 +44,8 @@
             <input id="birth_date" name="birth_date" type="date" value="<?= esc(old('birth_date') ?? $athlete['birth_date']) ?>" required>
         </div>
         <div class="form-group">
-            <label for="document_id">Documento</label>
-            <input id="document_id" name="document_id" type="text" value="<?= esc(old('document_id') ?? $athlete['document_id']) ?>">
+            <label for="cpf">CPF</label>
+            <input id="cpf" name="cpf" type="text" inputmode="numeric" maxlength="11" value="<?= esc(old('cpf') ?? $athlete['cpf']) ?>" required>
         </div>
         <div class="form-group">
             <label for="position">Posição</label>

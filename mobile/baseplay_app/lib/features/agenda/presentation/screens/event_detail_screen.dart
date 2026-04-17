@@ -53,6 +53,14 @@ class EventDetailScreen extends ConsumerWidget {
               error: (error, _) => Text(error.toString()),
               data: _buildSummary,
             ),
+            eventAsync.maybeWhen(
+              data: (event) => _buildMatchDetails(context, event),
+              orElse: () => const SizedBox.shrink(),
+            ),
+            eventAsync.maybeWhen(
+              data: (event) => _buildTrainingDetails(context, event),
+              orElse: () => const SizedBox.shrink(),
+            ),
             const SizedBox(height: 16),
             Text('Convocados', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -172,6 +180,170 @@ class EventDetailScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildMatchDetails(BuildContext context, Event event) {
+    if (event.type.toUpperCase() != 'MATCH' || event.match == null) {
+      return const SizedBox.shrink();
+    }
+    final match = event.match!;
+    final report = [
+      if ((match.reportSummary ?? '').isNotEmpty) 'Resumo: ${match.reportSummary}',
+      if ((match.reportStrengths ?? '').isNotEmpty)
+        'Pontos fortes: ${match.reportStrengths}',
+      if ((match.coachNotes ?? '').isNotEmpty)
+        'Notas do treinador: ${match.coachNotes}',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text('Informações do jogo',
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if ((match.opponentName ?? '').isNotEmpty)
+                  Text('Adversário: ${match.opponentName}'),
+                if ((match.competitionName ?? '').isNotEmpty)
+                  Text('Competição: ${match.competitionName}'),
+                if ((match.roundName ?? '').isNotEmpty)
+                  Text('Rodada: ${match.roundName}'),
+                if ((match.location ?? '').isNotEmpty)
+                  Text('Local: ${match.location}'),
+                if ((match.status ?? '').isNotEmpty)
+                  Text('Status: ${match.status}'),
+                if (match.scoreFor != null || match.scoreAgainst != null)
+                  Text(
+                      'Placar: ${match.scoreFor ?? '-'} x ${match.scoreAgainst ?? '-'}'),
+              ],
+            ),
+          ),
+        ),
+        if (report.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text('Relatório',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: report.map((text) => Text(text)).toList(),
+              ),
+            ),
+          ),
+        ],
+        if (match.tacticalBoards.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text('Quadros táticos',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: match.tacticalBoards
+                  .map(
+                    (board) => ListTile(
+                      leading: const Icon(Icons.dashboard_outlined),
+                      title: Text(board.title),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTrainingDetails(BuildContext context, Event event) {
+    if (event.type.toUpperCase() != 'TRAINING' || event.training == null) {
+      return const SizedBox.shrink();
+    }
+    final training = event.training!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text('Informações do treino',
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if ((training.title ?? '').isNotEmpty)
+                  Text('Treino: ${training.title}'),
+                if ((training.planTitle ?? '').isNotEmpty)
+                  Text('Plano: ${training.planTitle}'),
+                if ((training.location ?? '').isNotEmpty)
+                  Text('Local: ${training.location}'),
+                if ((training.notes ?? '').isNotEmpty)
+                  Text('Observações: ${training.notes}'),
+              ],
+            ),
+          ),
+        ),
+        if (training.blocks.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text('Exercícios',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: training.blocks
+                  .map(
+                    (block) => ListTile(
+                      title: Text(
+                        block.exerciseTitle?.isNotEmpty == true
+                            ? block.exerciseTitle!
+                            : (block.title ?? 'Exercício'),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if ((block.blockType ?? '').isNotEmpty)
+                            Text('Tipo: ${block.blockType}'),
+                          if (block.durationMin != null)
+                            Text('Duração: ${block.durationMin} min'),
+                          if ((block.instructions ?? '').isNotEmpty)
+                            Text('Instruções: ${block.instructions}'),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
+        if (training.tacticalBoards.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text('Quadros táticos',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: training.tacticalBoards
+                  .map(
+                    (board) => ListTile(
+                      leading: const Icon(Icons.dashboard_outlined),
+                      title: Text(board.title),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) {
       return '--';
@@ -191,6 +363,8 @@ class EventDetailScreen extends ConsumerWidget {
         return 'Treino';
       case 'MATCH':
         return 'Jogo';
+      case 'TRAVEL':
+        return 'Viagem';
       default:
         return type;
     }
